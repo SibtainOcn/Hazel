@@ -22,7 +22,9 @@ object MediaOpener {
      * the choice of player is not narrowed by a codec detail the user does not care about.
      * When nothing on the device claims the type, the chooser is offered before giving up.
      */
-    fun play(context: Context, fileUri: String, isVideo: Boolean) {
+    fun play(context: Context, fileUri: String, isVideo: Boolean) = play(context, fileUri, mimeOf(isVideo))
+
+    fun play(context: Context, fileUri: String, mimeType: String) {
         if (fileUri.isBlank()) {
             Toast.makeText(
                 context,
@@ -33,7 +35,7 @@ object MediaOpener {
         }
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(Uri.parse(fileUri), if (isVideo) "video/*" else "audio/*")
+            setDataAndType(Uri.parse(fileUri), mimeType)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -72,20 +74,24 @@ object MediaOpener {
     }
 
     /** Always asks which app opens the file, rather than going to the default player. */
-    fun openWith(context: Context, fileUri: String, isVideo: Boolean) {
+    fun openWith(context: Context, fileUri: String, isVideo: Boolean) = openWith(context, fileUri, mimeOf(isVideo))
+
+    fun openWith(context: Context, fileUri: String, mimeType: String) {
         if (fileUri.isBlank()) return toast(context, R.string.media_open_unknown_location)
         val view = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(Uri.parse(fileUri), if (isVideo) "video/*" else "audio/*")
+            setDataAndType(Uri.parse(fileUri), mimeType)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         start(context, Intent.createChooser(view, context.getString(R.string.media_open_chooser)))
     }
 
     /** Sends the file itself to another app. */
-    fun share(context: Context, fileUri: String, isVideo: Boolean) {
+    fun share(context: Context, fileUri: String, isVideo: Boolean) = share(context, fileUri, mimeOf(isVideo))
+
+    fun share(context: Context, fileUri: String, mimeType: String) {
         if (fileUri.isBlank()) return toast(context, R.string.media_open_unknown_location)
         val send = Intent(Intent.ACTION_SEND).apply {
-            type = if (isVideo) "video/*" else "audio/*"
+            type = mimeType
             putExtra(Intent.EXTRA_STREAM, Uri.parse(fileUri))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -96,7 +102,7 @@ object MediaOpener {
      * Opens the folder holding the file: the folder inside a picked tree it was saved to, or
      * the app's own folder for its kind.
      */
-    fun showFile(context: Context, fileUri: String, isVideo: Boolean) {
+    fun showFile(context: Context, fileUri: String, isVideo: Boolean, isImage: Boolean = false) {
         val uri = runCatching { Uri.parse(fileUri) }.getOrNull()
         val folder = uri?.takeIf { MediaStoreHelper.isDocumentInTree(it.pathSegments) }?.let {
             runCatching {
@@ -105,7 +111,11 @@ object MediaOpener {
                     ?.let { id -> android.provider.DocumentsContract.buildDocumentUriUsingTree(it, id) }
             }.getOrNull()
         }
-        if (folder != null) FolderUtil.openTree(context, folder) else openLocation(context, "", isVideo)
+        when {
+            folder != null -> FolderUtil.openTree(context, folder)
+            isImage -> FolderUtil.open(context, java.io.File(StoragePaths.finalDownloads, "Gallery"))
+            else -> openLocation(context, "", isVideo)
+        }
     }
 
     private fun start(context: Context, intent: Intent) {
@@ -116,4 +126,5 @@ object MediaOpener {
     private fun toast(context: Context, id: Int) {
         Toast.makeText(context, context.getString(id), Toast.LENGTH_SHORT).show()
     }
+    private fun mimeOf(isVideo: Boolean) = if (isVideo) "video/*" else "audio/*"
 }

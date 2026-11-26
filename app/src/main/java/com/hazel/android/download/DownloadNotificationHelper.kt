@@ -109,11 +109,11 @@ object DownloadNotificationHelper {
      * Opens the finished file in the device's default handler for its type, falling back to
      * opening the app when no location is known.
      */
-    private fun openFileIntent(context: Context, fileUri: Uri?, isVideo: Boolean): PendingIntent {
+    private fun openFileIntent(context: Context, fileUri: Uri?, mimeType: String): PendingIntent {
         if (fileUri == null) return launchPendingIntent(context, ROUTE_HISTORY)
 
         val view = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(fileUri, if (isVideo) "video/*" else "audio/*")
+            setDataAndType(fileUri, mimeType)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -209,11 +209,12 @@ object DownloadNotificationHelper {
         statusLine: String = "",
         mediaTitle: String = "",
         doneBytes: Long = 0L,
-        totalBytes: Long = 0L
+        totalBytes: Long = 0L,
+        canPause: Boolean = true
     ) {
         createChannels(context)
 
-        val builder = progressBuilder(context, progress, statusLine, mediaTitle, doneBytes, totalBytes)
+        val builder = progressBuilder(context, progress, statusLine, mediaTitle, doneBytes, totalBytes, canPause)
 
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.notify(PROGRESS_NOTIFICATION_ID, builder.build())
@@ -225,11 +226,12 @@ object DownloadNotificationHelper {
         statusLine: String,
         mediaTitle: String,
         doneBytes: Long,
-        totalBytes: Long
+        totalBytes: Long,
+        canPause: Boolean = true
     ): NotificationCompat.Builder {
         val detail = progressLine(progress, statusLine, doneBytes, totalBytes)
 
-        return NotificationCompat.Builder(context, CHANNEL_PROGRESS)
+        val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
             .setContentText(detail)
@@ -251,16 +253,18 @@ object DownloadNotificationHelper {
             // A download the user walked away from is one they can only reach from the
             // shade, so the two things worth doing to it are offered there as well as on
             // the card: hold it, or give it up.
-            .addAction(
+        if (canPause) {
+            builder.addAction(
                 R.drawable.ic_notification_pause,
                 context.getString(R.string.notification_action_pause),
                 actionIntent(context, DownloadActionReceiver.ACTION_PAUSE, REQUEST_PAUSE)
             )
-            .addAction(
-                R.drawable.ic_notification_cancel,
-                context.getString(R.string.notification_action_cancel),
-                actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
-            )
+        }
+        return builder.addAction(
+            R.drawable.ic_notification_cancel,
+            context.getString(R.string.notification_action_cancel),
+            actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
+        )
     }
 
     /**
@@ -302,6 +306,8 @@ object DownloadNotificationHelper {
 
         if (totalBytes > 0) {
             parts += "${formatSize(doneBytes)} / ${formatSize(totalBytes)}"
+        } else if (doneBytes > 0) {
+            parts += formatSize(doneBytes)
         }
 
         ProgressText.rate(statusLine)?.let { parts += it }
@@ -408,7 +414,8 @@ object DownloadNotificationHelper {
         context: Context,
         title: String,
         isVideo: Boolean,
-        fileUri: Uri? = null
+        fileUri: Uri? = null,
+        mimeType: String? = null
     ) {
         cancelProgress(context)
 
@@ -423,7 +430,7 @@ object DownloadNotificationHelper {
             .setAutoCancel(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(openFileIntent(context, fileUri, isVideo))
+            .setContentIntent(openFileIntent(context, fileUri, mimeType ?: if (isVideo) "video/*" else "audio/*"))
             .setCategory(NotificationCompat.CATEGORY_STATUS)
 
         if (!inForeground) {

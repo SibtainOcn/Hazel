@@ -25,7 +25,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.InstallMobile
@@ -75,10 +78,11 @@ import com.hazel.android.update.UpdateSegmentedButton
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
 import com.hazel.android.update.UpdateWavyProgress
+import com.hazel.android.util.PermissionHelper
 import com.hazel.android.util.openInAppBrowser
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HazelUpdateScreen(
     onBack: () -> Unit,
@@ -139,7 +143,7 @@ fun HazelUpdateScreen(
             onDismissRequest = { showInstallPermissionDialog = false },
             title = {
                 Text(
-                    text = "Permission required",
+                    text = stringResource(R.string.upd_permission_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = UpdateTokens.OnSurface
@@ -147,7 +151,7 @@ fun HazelUpdateScreen(
             },
             text = {
                 Text(
-                    text = "Hazel requires permission to install unknown apps to complete this update. You will be redirected to Settings to allow this.",
+                    text = stringResource(R.string.upd_permission_text),
                     fontSize = 14.sp,
                     color = UpdateTokens.OnSurfaceVar,
                     lineHeight = 20.sp
@@ -172,7 +176,7 @@ fun HazelUpdateScreen(
                     }
                 ) {
                     Text(
-                        text = "Settings",
+                        text = stringResource(R.string.upd_permission_settings),
                         color = UpdateTokens.AccentStrong,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -183,7 +187,7 @@ fun HazelUpdateScreen(
                     onClick = { showInstallPermissionDialog = false }
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.upd_btn_cancel),
                         color = UpdateTokens.OnSurfaceDim
                     )
                 }
@@ -245,6 +249,15 @@ fun HazelUpdateScreen(
                     add((if (isFdroid) "F-Droid" else "GitHub") to stringResource(R.string.upd_tile_source))
                 }
             )
+            // Beta and nightly builds say which commit they are, for bug reports.
+            DebugInfo.buildStamp()?.let { (commit, date) ->
+                Text(
+                    stringResource(R.string.upd_build_line, commit, date),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
 
             UpdateActionRow(
                 listOf(
@@ -288,6 +301,47 @@ fun HazelUpdateScreen(
                 }
             }
 
+            val notifyNew by viewModel.notifyNew.collectAsState()
+            val autoDownload by viewModel.autoDownload.collectAsState()
+            val wifiOnly by viewModel.wifiOnly.collectAsState()
+            ToggleGroup(
+                R.string.upd_section_automatic,
+                buildList {
+                    add(
+                        ComponentToggle(
+                            Icons.Filled.NotificationsActive, MaterialShapes.Cookie9Sided.toShape(),
+                            stringResource(R.string.upd_notify_new_title),
+                            stringResource(R.string.upd_notify_new_summary),
+                            notifyNew
+                        ) { on ->
+                            if (on) PermissionHelper.ensureNotificationPermission(context)
+                            viewModel.setNotifyNew(on)
+                        }
+                    )
+                    // F-Droid installs are updated by F-Droid, so there is nothing to fetch here.
+                    if (!isFdroid) {
+                        add(
+                            ComponentToggle(
+                                Icons.Filled.CloudDownload, MaterialShapes.Cookie7Sided.toShape(),
+                                stringResource(R.string.upd_auto_download_title),
+                                stringResource(R.string.upd_auto_download_summary),
+                                autoDownload,
+                                viewModel::setAutoDownload
+                            )
+                        )
+                        add(
+                            ComponentToggle(
+                                Icons.Filled.Wifi, MaterialShapes.Cookie4Sided.toShape(),
+                                stringResource(R.string.upd_wifi_only_title),
+                                stringResource(R.string.upd_wifi_only_summary),
+                                wifiOnly,
+                                viewModel::setWifiOnly
+                            )
+                        )
+                    }
+                }
+            )
+
             ComponentGroup(
                 R.string.upd_section_source,
                 listOf(
@@ -324,14 +378,23 @@ internal fun HazelStatus(
     }
     val (title, line) = when (state) {
         is HazelUpdateViewModel.UiState.Idle ->
-            "Version $installedVersion" to stringResource(R.string.upd_status_ok, channel.label)
-        is HazelUpdateViewModel.UiState.Available -> "Version ${state.info.version}" to "Update available · you have $installedVersion"
-        is HazelUpdateViewModel.UiState.Downloading -> "Version ${state.info.version}" to "Downloading update…"
-        is HazelUpdateViewModel.UiState.ReadyToInstall -> "Version ${state.info.version}" to "Downloaded and ready to install"
-        is HazelUpdateViewModel.UiState.Checking ->
-            "Checking for updates…" to if (HazelUpdater.isFdroid()) "Connecting to F-Droid…" else "Connecting to GitHub…"
-        is HazelUpdateViewModel.UiState.FdroidManaged -> "Version $installedVersion" to "Up to date · managed by F-Droid"
-        is HazelUpdateViewModel.UiState.Error -> "Check couldn't finish" to state.message
+            stringResource(R.string.upd_version, installedVersion) to
+                if (HazelUpdater.waitsForChannel(channel, installedVersion)) stringResource(R.string.upd_status_waiting, channel.label)
+                else stringResource(R.string.upd_status_ok, channel.label)
+        is HazelUpdateViewModel.UiState.Available ->
+            stringResource(R.string.upd_version, state.info.version) to stringResource(R.string.upd_status_available, installedVersion)
+        is HazelUpdateViewModel.UiState.Downloading ->
+            stringResource(R.string.upd_version, state.info.version) to stringResource(R.string.upd_status_downloading)
+        is HazelUpdateViewModel.UiState.ReadyToInstall ->
+            stringResource(R.string.upd_version, state.info.version) to stringResource(R.string.upd_status_downloaded)
+        is HazelUpdateViewModel.UiState.Checking -> stringResource(R.string.upd_status_checking) to stringResource(
+            if (HazelUpdater.isFdroid()) R.string.upd_status_connecting_fdroid else R.string.upd_status_connecting_github
+        )
+        is HazelUpdateViewModel.UiState.FdroidManaged ->
+            stringResource(R.string.upd_version, installedVersion) to stringResource(R.string.upd_status_fdroid)
+        is HazelUpdateViewModel.UiState.Error -> stringResource(
+            if (state.info != null) R.string.upd_status_update_failed else R.string.upd_status_check_failed
+        ) to (state.failure?.let { stringResource(it.messageRes, *it.messageArgs) } ?: state.message)
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -357,7 +420,8 @@ internal fun HazelStatus(
                 UpdateWavyProgress(progress = if (state.totalBytes > 0) pct else null)
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val mb = 1024f * 1024f
-                    val speed = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", state.speedBps / mb) else "Connecting…"
+                    val speed = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", state.speedBps / mb)
+                        else stringResource(R.string.upd_speed_connecting)
                     Text(
                         String.format(Locale.US, "%.1f / %.1f MB · %s", state.progressBytes / mb, state.totalBytes / mb, speed),
                         style = MaterialTheme.typography.bodySmall,
@@ -374,26 +438,27 @@ internal fun HazelStatus(
         val buttons: List<Triple<String, Boolean, () -> Unit>> = when (state) {
             is HazelUpdateViewModel.UiState.Idle -> listOf(
                 Triple(stringResource(R.string.upd_action_changelog), false) { onViewChangelog(installedVersion) },
-                Triple("Check now", true, onCheckNow)
+                Triple(stringResource(R.string.upd_btn_check_now), true, onCheckNow)
             )
             is HazelUpdateViewModel.UiState.Available -> listOf(
-                Triple("What's new", false) { onReleaseNotes(state.info.version) },
-                if (HazelUpdater.isFdroid()) Triple("Open in F-Droid", true, onOpenFdroid) else Triple("Download update", true, onDownload)
+                Triple(stringResource(R.string.upd_btn_whats_new), false) { onReleaseNotes(state.info.version) },
+                if (HazelUpdater.isFdroid()) Triple(stringResource(R.string.upd_btn_open_fdroid), true, onOpenFdroid)
+                else Triple(stringResource(R.string.upd_btn_download), true, onDownload)
             )
-            is HazelUpdateViewModel.UiState.Downloading -> listOf(Triple("Cancel", false, onCancel))
+            is HazelUpdateViewModel.UiState.Downloading -> listOf(Triple(stringResource(R.string.upd_btn_cancel), false, onCancel))
             is HazelUpdateViewModel.UiState.ReadyToInstall -> listOf(
-                Triple("What's new", false) { onReleaseNotes(state.info.version) },
-                Triple("Install update", true, onInstall)
+                Triple(stringResource(R.string.upd_btn_whats_new), false) { onReleaseNotes(state.info.version) },
+                Triple(stringResource(R.string.upd_btn_install), true, onInstall)
             )
-            is HazelUpdateViewModel.UiState.FdroidManaged -> listOf(Triple("Open F-Droid", true, onOpenFdroid))
-            is HazelUpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, onCheckNow))
+            is HazelUpdateViewModel.UiState.FdroidManaged -> listOf(Triple(stringResource(R.string.upd_btn_open_fdroid), true, onOpenFdroid))
+            is HazelUpdateViewModel.UiState.Error -> listOf(Triple(stringResource(R.string.upd_btn_retry), true, onCheckNow))
             is HazelUpdateViewModel.UiState.Checking -> emptyList()
         }
         UpdateStateButtons(buttons, tone, onTone(state))
 
         if (state is HazelUpdateViewModel.UiState.Available && state.info.binarySize > 0) {
             Text(
-                String.format(Locale.US, "%.1f MB download", state.info.binarySize / (1024f * 1024f)),
+                stringResource(R.string.upd_download_size, String.format(Locale.getDefault(), "%.1f", state.info.binarySize / (1024f * 1024f))),
                 style = MaterialTheme.typography.bodySmall,
                 color = UpdateTokens.OnSurfaceDim,
                 modifier = Modifier.padding(horizontal = 8.dp)

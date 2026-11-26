@@ -87,14 +87,15 @@
 ---
 ## ✨ Зашто Hazel?
 
-Hazel је бесплатан преузимач отвореног кода за Android заснован на **yt-dlp**. Чувајте видео снимке, музику и плејлисте са **више од 1500 сајтова** без реклама, без праћења и без налога.
+Hazel је бесплатан преузимач отвореног кода за Android заснован на **yt-dlp** & **gallery-dl**. Чувајте видео снимке, музику и плејлисте са **више од 1500 сајтова** без реклама, без праћења и без налога.
 
 <table>
   <tr><th width="50%" align="left">📥 Преузимање</th><th width="50%" align="left">🔍 Претрага и пуштање</th></tr>
   <tr><td><b>1500+ сајтова:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud и <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">други</a>.</td><td><b>Претрага:</b> YouTube, YouTube Music, SoundCloud или Bandcamp, уз опционе предлоге.</td></tr>
   <tr><td><b>Групно:</b> један линк, више одједном или цела плејлиста / канал.</td><td><b>Прво пусти:</b> пустите било који резултат на његовој картици уз премотавање, двоструки додир за прескакање и цео екран.</td></tr>
-  <tr><td><b>Hazel Instant:</b> поделите линк из било које апликације и преузимање креће у сачуваном квалитету.</td><td><b>Исецање:</b> сачувајте само део који желите, изабран на прегледу уживо.</td></tr>
+  <tr><td><b>Hazel Instant:</b> поделите линк из било које апликације и преузимање креће у сачуваном квалитету.</td><td><b>Исецање:</b> сачувајте само део који желите, изабран на прегледу уживо. Брзо, прецизно или скраћивање после преузимања: цела датотека пуном брзином, исечена на телефону.</td></tr>
   <tr><td><b>Ваш формат:</b> изаберите квалитет, контејнер, аудио запис и измените наслов / метаподатке.</td><td><b>Преноси уживо:</b> снимајте од почетка или сачекајте премијеру.</td></tr>
+  <tr><td><b>Слике:</b> објаве, профили и претрага слика на Instagram, X, Pinterest, Reddit и другим сајтовима, са описима.</td><td><b>Пријава:</b> пријава једним додиром на Instagram, YouTube, X и друге, са стањем сваког налога.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Управљање F-Droid репозиторијумом
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Моћни мотор за преузимање иза Hazel-а
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - yt-dlp повезивање за Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Преузимање слика и галерија
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Брзи спискови, претрага и токови за пуштање
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Глатко пуштање у апликацији
 

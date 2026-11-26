@@ -16,7 +16,9 @@ import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
 import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
+import com.hazel.android.data.RecentFolders.with
 import kotlinx.coroutines.flow.map
+import java.util.Locale
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "hazel_settings",
@@ -131,6 +133,7 @@ object SettingsRepository {
         val preferredVideoCodec = stringPreferencesKey("${prefix}preferred_video_codec")
         val videoQuality = intPreferencesKey("${prefix}video_quality")
         val sheetOpensOnAudio = booleanPreferencesKey("${prefix}sheet_opens_on_audio")
+        val cutMode = stringPreferencesKey("${prefix}cut_mode")
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
@@ -159,7 +162,9 @@ object SettingsRepository {
             preferredAudioCodec = this[keys.preferredAudioCodec] ?: defaults.preferredAudioCodec,
             preferredVideoCodec = this[keys.preferredVideoCodec] ?: defaults.preferredVideoCodec,
             videoQuality = this[keys.videoQuality] ?: defaults.videoQuality,
-            sheetOpensOnAudio = this[keys.sheetOpensOnAudio] ?: defaults.sheetOpensOnAudio
+            sheetOpensOnAudio = this[keys.sheetOpensOnAudio] ?: defaults.sheetOpensOnAudio,
+            cutMode = com.hazel.android.download.CutMode.entries.firstOrNull { it.name == this[keys.cutMode] }
+                ?: defaults.cutMode
         )
     }
 
@@ -185,6 +190,7 @@ object SettingsRepository {
         this[keys.preferredVideoCodec] = options.preferredVideoCodec
         this[keys.videoQuality] = options.videoQuality
         this[keys.sheetOpensOnAudio] = options.sheetOpensOnAudio
+        this[keys.cutMode] = options.cutMode.name
     }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
@@ -332,6 +338,98 @@ object SettingsRepository {
     val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
     const val DEFAULT_PLAY_QUALITY = 720
 
+    private val IMAGE_SEARCH_KEY = booleanPreferencesKey("image_search")
+    private val GALLERY_SITE_KEY = stringPreferencesKey("gallery_search_site")
+    private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
+    private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
+    private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
+    private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
+
+    val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
+    const val DEFAULT_GALLERY_POSTS = 30
+
+    fun getImageSearch(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[IMAGE_SEARCH_KEY] ?: false }
+
+    suspend fun setImageSearch(context: Context, on: Boolean) {
+        context.dataStore.edit { prefs -> prefs[IMAGE_SEARCH_KEY] = on }
+    }
+
+    fun getGallerySearchSite(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GallerySearchSite.fromName(prefs[GALLERY_SITE_KEY]) }
+
+    suspend fun setGallerySearchSite(context: Context, site: com.hazel.android.gallery.GallerySearchSite) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_SITE_KEY] = site.name }
+    }
+
+    fun getGalleryPostsPerSearch(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_POSTS_KEY] ?: DEFAULT_GALLERY_POSTS }
+
+    suspend fun setGalleryPostsPerSearch(context: Context, count: Int) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_POSTS_KEY] = count }
+    }
+
+    fun getGalleryShow(context: Context): Flow<com.hazel.android.gallery.GalleryShow> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GalleryShow.fromName(prefs[GALLERY_SHOW_KEY]) }
+
+    suspend fun setGalleryShow(context: Context, show: com.hazel.android.gallery.GalleryShow) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_SHOW_KEY] = show.name }
+    }
+
+    fun getGallerySkipReposts(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_REPOSTS_KEY] ?: true }
+
+    suspend fun setGallerySkipReposts(context: Context, skip: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_REPOSTS_KEY] = skip }
+    }
+
+    fun getGalleryGroupByAuthor(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] ?: false }
+
+    suspend fun setGalleryGroupByAuthor(context: Context, group: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] = group }
+    }
+
+    private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")
+    private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
+    private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
+    private val GALLERY_METADATA_KEY = booleanPreferencesKey("gallery_write_metadata")
+    private val GALLERY_EMBED_CAPTION_KEY = booleanPreferencesKey("gallery_embed_caption")
+    private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
+    private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
+    private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
+    private val GALLERY_RETRIES_KEY = intPreferencesKey("gallery_retries")
+
+    /** The defaults every gallery download starts from. */
+    fun getGalleryOptions(context: Context): Flow<com.hazel.android.gallery.GalleryOptions> =
+        context.dataStore.data.map { prefs ->
+            com.hazel.android.gallery.GalleryOptions(
+                imageSize = com.hazel.android.gallery.GalleryImageSize.fromName(prefs[GALLERY_IMAGE_SIZE_KEY]),
+                videoMode = com.hazel.android.gallery.GalleryVideoMode.fromName(prefs[GALLERY_VIDEO_MODE_KEY]),
+                filenameTemplate = prefs[GALLERY_FILENAME_KEY].orEmpty(),
+                writeMetadata = prefs[GALLERY_METADATA_KEY] ?: false,
+                keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
+                packZip = prefs[GALLERY_ZIP_KEY] ?: false,
+                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false,
+                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false,
+                retries = prefs[GALLERY_RETRIES_KEY] ?: com.hazel.android.gallery.GalleryOptions.DEFAULT_RETRIES
+            )
+        }
+
+    suspend fun setGalleryOptions(context: Context, options: com.hazel.android.gallery.GalleryOptions) {
+        context.dataStore.edit { prefs ->
+            prefs[GALLERY_IMAGE_SIZE_KEY] = options.imageSize.name
+            prefs[GALLERY_VIDEO_MODE_KEY] = options.videoMode.name
+            prefs[GALLERY_FILENAME_KEY] = options.filenameTemplate
+            prefs[GALLERY_METADATA_KEY] = options.writeMetadata
+            prefs[GALLERY_POST_DATE_KEY] = options.keepPostDate
+            prefs[GALLERY_ZIP_KEY] = options.packZip
+            prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
+            prefs[GALLERY_EMBED_CAPTION_KEY] = options.embedCaption
+            prefs[GALLERY_RETRIES_KEY] = options.retries
+        }
+    }
+
     fun getSearchSource(context: Context): Flow<SearchSource> =
         context.dataStore.data.map { prefs -> SearchSource.fromName(prefs[SEARCH_SOURCE_KEY]) }
 
@@ -458,7 +556,10 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
         // In force at once, so a read finishing a moment later is not written to disk.
         com.hazel.android.download.ReadProfile.incognito = enabled
-        if (enabled) HomeResultsRepository.clear(context)
+        if (enabled) {
+            HomeResultsRepository.clear(context)
+            com.hazel.android.gallery.GalleryResultsStore.clear(context)
+        }
     }
 
     // ── Downloads list ──
@@ -619,30 +720,70 @@ object SettingsRepository {
     // Audio and video each have their own destination. Unset, a kind takes the single
     // folder older versions kept for both, so a folder picked before the split stays in use;
     // set to blank, it is the built-in Download/Hazel/Audio or Download/Hazel/Video.
-    private fun treeUriKey(isVideo: Boolean) =
-        stringPreferencesKey(if (isVideo) "download_tree_uri_video" else "download_tree_uri_audio")
+    // Gallery has no legacy folder. The download_tree_ prefix keeps these keys out of backups.
+    private fun treeUriKey(kind: SaveKind) =
+        stringPreferencesKey("download_tree_uri_" + kind.name.lowercase(Locale.ROOT))
 
-    private fun treeLabelKey(isVideo: Boolean) =
-        stringPreferencesKey(if (isVideo) "download_tree_label_video" else "download_tree_label_audio")
+    private fun treeLabelKey(kind: SaveKind) =
+        stringPreferencesKey("download_tree_label_" + kind.name.lowercase(Locale.ROOT))
 
-    private fun Preferences.saveDir(isVideo: Boolean): SaveDir {
-        val uri = this[treeUriKey(isVideo)]
-        return if (uri != null) SaveDir(uri, this[treeLabelKey(isVideo)].orEmpty())
-        else SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+    private fun Preferences.saveDir(kind: SaveKind): SaveDir {
+        val uri = this[treeUriKey(kind)]
+        return when {
+            uri != null -> SaveDir(uri, this[treeLabelKey(kind)].orEmpty())
+            kind == SaveKind.GALLERY -> SaveDir()
+            else -> SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+        }
     }
 
-    fun getSaveDirs(context: Context): Flow<SaveDirs> =
-        context.dataStore.data.map { prefs -> SaveDirs(audio = prefs.saveDir(false), video = prefs.saveDir(true)) }
+    internal fun saveDirsOf(prefs: Preferences) = SaveDirs(
+        audio = prefs.saveDir(SaveKind.AUDIO),
+        video = prefs.saveDir(SaveKind.VIDEO),
+        gallery = prefs.saveDir(SaveKind.GALLERY)
+    )
 
-    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) {
+    fun getSaveDirs(context: Context): Flow<SaveDirs> = context.dataStore.data.map(::saveDirsOf)
+
+    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) =
+        setSaveDir(context, SaveKind.of(isVideo), uri, label)
+
+    suspend fun setSaveDir(context: Context, kind: SaveKind, uri: String, label: String) {
         context.dataStore.edit { prefs ->
-            prefs[treeUriKey(isVideo)] = uri
-            prefs[treeLabelKey(isVideo)] = label
+            prefs[treeUriKey(kind)] = uri
+            prefs[treeLabelKey(kind)] = label
+            if (uri.isNotBlank()) prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).with(uri, label))
         }
     }
 
     /** Back to the built-in folder for that kind. */
     suspend fun resetSaveDir(context: Context, isVideo: Boolean) = setSaveDir(context, isVideo, "", "")
+
+    suspend fun resetSaveDir(context: Context, kind: SaveKind) = setSaveDir(context, kind, "", "")
+
+    // The last folders picked anywhere in the app (downloads of either kind, backups), newest
+    // first, so one can be chosen again without the document picker.
+    private val RECENT_FOLDERS_KEY = stringPreferencesKey("recent_folders")
+
+    fun getRecentFolders(context: Context): Flow<List<SaveDir>> =
+        context.dataStore.data.map { prefs -> RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]) }
+
+    suspend fun addRecentFolder(context: Context, uri: String, label: String) {
+        if (uri.isBlank()) return
+        context.dataStore.edit { prefs ->
+            prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).with(uri, label))
+        }
+    }
+
+    suspend fun removeRecentFolders(context: Context, uris: Set<String>) {
+        if (uris.isEmpty()) return
+        context.dataStore.edit { prefs ->
+            prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).filterNot { it.uri in uris })
+        }
+    }
+
+    suspend fun clearRecentFolders(context: Context) {
+        context.dataStore.edit { it.remove(RECENT_FOLDERS_KEY) }
+    }
 
     // yt-dlp update channel persistence ("Stable" / "Nightly" / "Master")
     private val YTDLP_CHANNEL_KEY = stringPreferencesKey("ytdlp_channel")
@@ -675,7 +816,8 @@ object SettingsRepository {
     }
 
     fun getHazelChannel(context: Context): Flow<String> {
-        return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
+        // Until picked, the channel this build came from.
+        return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: com.hazel.android.BuildConfig.HAZEL_CHANNEL }
     }
     suspend fun setHazelChannel(context: Context, channel: String) {
         context.dataStore.edit { prefs -> prefs[HAZEL_CHANNEL_KEY] = channel }
@@ -716,12 +858,41 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] = enabled }
     }
 
+    private val HAZEL_UPDATE_NOTIFY_KEY = booleanPreferencesKey("hazel_update_notify")
+    private val HAZEL_UPDATE_AUTO_DOWNLOAD_KEY = booleanPreferencesKey("hazel_update_auto_download")
+
+    /** Whether a new Hazel version is announced with a notification. Off until turned on. */
+    fun getHazelUpdateNotify(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_NOTIFY_KEY] ?: false }
+    suspend fun setHazelUpdateNotify(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAZEL_UPDATE_NOTIFY_KEY] = enabled }
+    }
+
+    /** Whether a new Hazel version is downloaded in the background, ready to install. Off until turned on. */
+    fun getHazelUpdateAutoDownload(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_AUTO_DOWNLOAD_KEY] ?: false }
+    suspend fun setHazelUpdateAutoDownload(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAZEL_UPDATE_AUTO_DOWNLOAD_KEY] = enabled }
+    }
+
+    private val HAZEL_UPDATE_WIFI_ONLY_KEY = booleanPreferencesKey("hazel_update_wifi_only")
+
+    /** Whether the background download of a Hazel update waits for Wi-Fi. Off, as for yt-dlp. */
+    fun getHazelUpdateWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_WIFI_ONLY_KEY] ?: false }
+    suspend fun setHazelUpdateWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAZEL_UPDATE_WIFI_ONLY_KEY] = enabled }
+    }
+
 
     // Dynamic update availability indicators for UI red dot badges
     private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
     private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
     private val HAZEL_UPDATE_VERSION_KEY = stringPreferencesKey("hazel_update_version")
     private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
+    private val GALLERY_DL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("gallery_dl_update_available")
+    private val GALLERY_DL_AUTO_UPDATE_KEY = booleanPreferencesKey("gallery_dl_auto_update")
+    private val GALLERY_DL_WIFI_ONLY_KEY = booleanPreferencesKey("gallery_dl_wifi_only")
 
     fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] ?: false }
@@ -742,8 +913,8 @@ object SettingsRepository {
             prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
             if (available && version != null) prefs[HAZEL_UPDATE_VERSION_KEY] = version
             else if (!available) prefs.remove(HAZEL_UPDATE_VERSION_KEY)
-            val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
         if (available) BackupRepository.autoBackupBeforeUpdate(context)
     }
@@ -754,9 +925,34 @@ object SettingsRepository {
     suspend fun setYtDlpUpdateAvailable(context: Context, available: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[YTDLP_UPDATE_AVAILABLE_KEY] = available
-            val hazelAvail = prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || hazelAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
+    }
+
+    fun getGalleryDlUpdateAvailable(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false }
+
+    suspend fun setGalleryDlUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] = available
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false)
+        }
+    }
+
+    fun getGalleryDlAutoUpdate(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] ?: true }
+
+    suspend fun setGalleryDlAutoUpdate(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] = enabled }
+    }
+
+    fun getGalleryDlWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] ?: false }
+
+    suspend fun setGalleryDlWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] = enabled }
     }
 }
 

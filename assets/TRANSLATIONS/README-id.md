@@ -87,14 +87,15 @@ Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Duk
 ---
 ## ✨ Mengapa memilih Hazel?
 
-Hazel adalah pengunduh gratis dan sumber terbuka untuk Android yang ditenagai **yt-dlp**. Simpan video, musik, dan playlist dari **1500+ situs** tanpa iklan, tanpa pelacakan, dan tanpa akun.
+Hazel adalah pengunduh gratis dan sumber terbuka untuk Android yang ditenagai **yt-dlp** & **gallery-dl**. Simpan video, musik, dan playlist dari **1500+ situs** tanpa iklan, tanpa pelacakan, dan tanpa akun.
 
 <table>
   <tr><th width="50%" align="left">📥 Mengunduh</th><th width="50%" align="left">🔍 Cari & Putar</th></tr>
   <tr><td><b>1500+ situs:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud, dan <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">lainnya</a>.</td><td><b>Pencarian:</b> YouTube, YouTube Music, SoundCloud, atau Bandcamp, dengan saran opsional.</td></tr>
   <tr><td><b>Massal:</b> satu tautan, banyak sekaligus, atau seluruh playlist / kanal.</td><td><b>Putar dulu:</b> putar hasil apa pun di kartunya dengan penggeser, ketuk dua kali untuk melompat, dan layar penuh.</td></tr>
-  <tr><td><b>Hazel Instant:</b> bagikan tautan dari aplikasi apa pun dan unduhan dimulai dengan kualitas tersimpan.</td><td><b>Potong:</b> simpan hanya bagian yang kamu mau, dipilih di pratinjau langsung.</td></tr>
+  <tr><td><b>Hazel Instant:</b> bagikan tautan dari aplikasi apa pun dan unduhan dimulai dengan kualitas tersimpan.</td><td><b>Potong:</b> simpan hanya bagian yang kamu mau, dipilih di pratinjau langsung. Cepat, presisi, atau potong setelah unduh: seluruh file dengan kecepatan penuh, dipotong di ponselmu.</td></tr>
   <tr><td><b>Format pilihanmu:</b> pilih kualitas, kontainer, trek audio, dan ubah judul / metadata.</td><td><b>Siaran langsung:</b> rekam dari awal, atau tunggu tayang perdana.</td></tr>
+  <tr><td><b>Gambar:</b> postingan, profil, dan pencarian gambar di Instagram, X, Pinterest, Reddit, dan lainnya, lengkap dengan keterangan.</td><td><b>Masuk:</b> masuk sekali ketuk ke Instagram, YouTube, X, dan lainnya, dengan status setiap akun.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ Kontribusi sangat diterima! Lihat [CONTRIBUTING.md](https://github.com/SibtainOc
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Pengelolaan repositori F-Droid
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Mesin unduhan andal di balik Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Integrasi yt-dlp untuk Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Unduhan gambar dan galeri
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Daftar, pencarian & stream pemutaran yang cepat
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Pemutaran mulus di dalam aplikasi
 

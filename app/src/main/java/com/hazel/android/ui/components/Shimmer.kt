@@ -7,6 +7,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,12 +37,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.ui.theme.SizeBadgeContainer
+import com.hazel.android.ui.theme.LocalDarkTheme
+import com.hazel.android.ui.theme.sheetRaisedColor
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -64,6 +71,9 @@ private const val SWEEP_DURATION_MS = 1000
 /** How visible the skeleton is between passes of the band. */
 private const val RESTING_ALPHA = 0.3f
 
+/** The same on a light surface, where grey at the dark theme's strength all but disappears. */
+private const val LIGHT_RESTING_ALPHA = 0.55f
+
 /** Lean of the band, in degrees off vertical. */
 private const val SWEEP_TILT_DEGREES = 20.0
 
@@ -75,11 +85,10 @@ private const val BAND_FADE_START = 0.25f
 private const val BAND_FADE_END = 0.75f
 
 /**
- * The quick pass, for skeletons that stand in for a list the user is waiting on with the
- * sheet already open: a shorter sweep and a narrow, hard-edged band, so it reads as a
- * crisp glint moving fast rather than a slow wash.
+ * The sharp pass, for skeletons that stand in for a list the user is waiting on with the
+ * sheet already open: a narrow, hard-edged band, so it reads as a crisp glint rather than a
+ * slow wash. It moves on the sheet's [loadingPhase].
  */
-private const val FAST_SWEEP_DURATION_MS = 650
 private const val SHARP_FADE_START = 0.42f
 private const val SHARP_FADE_END = 0.58f
 
@@ -110,19 +119,19 @@ fun ShimmerHost(
 ) {
     val fadeStart = if (fast) SHARP_FADE_START else BAND_FADE_START
     val fadeEnd = if (fast) SHARP_FADE_END else BAND_FADE_END
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val progress by transition.animateFloat(
+    // The sharp pass stands in for a sheet's list, so it moves with the sheet's other
+    // placeholders; the soft wash keeps its own pace on the screens it covers.
+    val sweep = if (fast) loadingPhase() else rememberInfiniteTransition(label = "shimmer").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (fast) FAST_SWEEP_DURATION_MS else SWEEP_DURATION_MS,
-                easing = LinearEasing
-            ),
+            animation = tween(durationMillis = SWEEP_DURATION_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmerSweep"
     )
+    val progress by sweep
+    val restingAlpha = if (LocalDarkTheme.current) RESTING_ALPHA else LIGHT_RESTING_ALPHA
 
     Box(
         modifier = modifier
@@ -145,7 +154,7 @@ fun ShimmerHost(
                 val start = Offset(offset, 0f)
                 val end = Offset(offset + span * axisX, span * axisY)
 
-                val resting = Color.Black.copy(alpha = RESTING_ALPHA)
+                val resting = Color.Black.copy(alpha = restingAlpha)
                 drawRect(
                     brush = Brush.linearGradient(
                         colorStops = arrayOf(
@@ -179,15 +188,13 @@ fun Modifier.shimmerBlock(
     .clip(shape)
     .background(color)
 
-/** How long the glint takes to run across a [GlintHost], and how bright it is at its core. */
-private const val GLINT_SWEEP_MS = 900
+/** How bright a [GlintHost]'s glint is at its core; it moves on the shared [loadingPhase]. */
 private const val GLINT_ALPHA = 0.14f
 
 /**
- * The sideways glint, for a single control rather than a column of them: quicker, and a
- * little brighter, since it crosses a short wide shape in one pass and has to read at once.
+ * The sideways glint, for a single control rather than a column of them: a little brighter,
+ * since it crosses a short wide shape in one pass and has to read at once.
  */
-private const val GLINT_ACROSS_SWEEP_MS = 850
 private const val GLINT_ACROSS_ALPHA = 0.22f
 
 /**
@@ -216,19 +223,7 @@ fun GlintHost(
         return
     }
 
-    val transition = rememberInfiniteTransition(label = "glint")
-    val progress = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (across) GLINT_ACROSS_SWEEP_MS else GLINT_SWEEP_MS,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "glintSweep"
-    )
+    val progress = loadingPhase()
     val glint = MaterialTheme.colorScheme.onSurface.copy(
         alpha = if (across) GLINT_ACROSS_ALPHA else GLINT_ALPHA
     )
@@ -446,6 +441,67 @@ fun FormatRowShimmer(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * The format list's side rail while its stops are being read. The stops sit as one quiet
+ * connected column in the rail's own raised colour, round at the outer ends and tight
+ * between, and only a short label and a count line inside each one shimmer, the way the
+ * rows beside it are drawn as small blocks rather than solid slabs. The first stop is
+ * tinted and its lines take the accent, as the chosen stop does.
+ */
+@Composable
+fun FormatRailShimmer(stops: Int, modifier: Modifier = Modifier) {
+    val accent = MaterialTheme.colorScheme.primary
+    val raised = sheetRaisedColor
+    val pickedTrack = accent.copy(alpha = RAIL_PICKED_TINT).compositeOver(raised)
+    Box(modifier = modifier) {
+        // The stops themselves stay still; only the lines on them catch the sweep.
+        Column(verticalArrangement = Arrangement.spacedBy(RAIL_GAP)) {
+            repeat(stops) { index ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(RAIL_STOP)
+                        .clip(railStopShape(index, stops))
+                        .background(if (index == 0) pickedTrack else raised)
+                )
+            }
+        }
+        ShimmerHost(modifier = Modifier.matchParentSize(), fast = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(RAIL_GAP)) {
+                repeat(stops) { index ->
+                    val line = if (index == 0) accent else BLOCK_GREY
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(RAIL_STOP),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(Modifier.width(34.dp).height(12.dp).shimmerBlock(RoundedCornerShape(6.dp), line))
+                        Spacer(Modifier.height(6.dp))
+                        Box(Modifier.width(16.dp).height(8.dp).shimmerBlock(RoundedCornerShape(4.dp), line))
+                    }
+                }
+            }
+        }
+    }
+}
+
+private val RAIL_STOP = 54.dp
+private val RAIL_GAP = 3.dp
+private const val RAIL_PICKED_TINT = 0.18f
+
+private fun railStopShape(index: Int, count: Int): Shape {
+    val round = RAIL_STOP / 2
+    val tight = 8.dp
+    return RoundedCornerShape(
+        topStart = if (index == 0) round else tight,
+        topEnd = if (index == 0) round else tight,
+        bottomStart = if (index == count - 1) round else tight,
+        bottomEnd = if (index == count - 1) round else tight
+    )
+}
+
 /** A stack of [FormatRowShimmer]s sharing one quick, sharp sweep. */
 @Composable
 fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
@@ -457,10 +513,9 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
 }
 
 /**
- * How long the band takes to cross a [ShimmerLabel], and how wide it is. Quick and narrow,
- * so a heading that is waiting reads as busy rather than idle.
+ * How wide the band crossing a [ShimmerLabel] is: narrow, so a waiting heading reads as busy
+ * rather than idle. It moves on the shared [loadingPhase].
  */
-private const val TEXT_SWEEP_MS = 1000
 private val TEXT_BAND_WIDTH = 90.dp
 
 /**
@@ -480,16 +535,7 @@ fun ShimmerLabel(
     modifier: Modifier = Modifier,
     fontWeight: FontWeight? = null
 ) {
-    val transition = rememberInfiniteTransition(label = "shimmerText")
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = TEXT_SWEEP_MS, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerTextSweep"
-    )
+    val progress by loadingPhase()
     val resting = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
     val lit = MaterialTheme.colorScheme.onSurface
 
@@ -524,4 +570,47 @@ fun ShimmerLabel(
 @Composable
 fun LineShimmer(width: Dp, height: Dp = 14.dp, modifier: Modifier = Modifier) {
     Box(modifier = modifier.width(width).height(height).shimmerBlock())
+}
+
+
+/** Gap between skeleton cards, the same as between the result cards they stand in for. */
+val SkeletonSpacing = 20.dp
+
+/** An upper bound on skeleton cards, for a screen taller than any phone's. */
+private const val MAX_VIEWPORT_SKELETONS = 8
+
+/** A row of [columns] skeleton cards, the width the real ones will take. */
+@Composable
+fun MediaCardShimmerRow(columns: Int) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SkeletonSpacing)) {
+        repeat(columns) { MediaCardShimmer(modifier = Modifier.weight(1f)) }
+    }
+}
+
+/**
+ * Skeleton cards filling the space under the search bar while a link or search is read: as
+ * many as fit at their real size, so the last runs off the bottom rather than being squeezed.
+ */
+@Composable
+fun ResultsSkeleton(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.padding(horizontal = 20.dp).clipToBounds()) {
+        Column {
+            Spacer(modifier = Modifier.height(16.dp))
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val columns = gridColumns(maxWidth)
+                val cardWidth = (maxWidth - SkeletonSpacing * (columns - 1)) / columns
+                val cardHeight = cardWidth * 9f / 16f + SkeletonSpacing
+                val count = (maxHeight / cardHeight).toInt().plus(1).coerceIn(1, MAX_VIEWPORT_SKELETONS)
+                ShimmerHost(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)) {
+                        repeat(count) { MediaCardShimmerRow(columns) }
+                    }
+                }
+            }
+        }
+    }
 }

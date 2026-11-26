@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 import com.hazel.android.ui.components.MenuTone
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
@@ -51,7 +53,7 @@ import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Search
@@ -107,6 +109,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
@@ -123,7 +126,7 @@ import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
@@ -177,7 +180,6 @@ fun BatchDownloadSheet(
     /** Where audio and video are saved; the set shows the one for its current kind. */
     saveDirs: SaveDirs,
     /** Each is given the kind in question: true for video. */
-    onOpenSaveDir: (isVideo: Boolean) -> Unit,
     onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
@@ -272,23 +274,12 @@ fun BatchDownloadSheet(
         sheetMaxWidth = if (twoPane) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
     ) {
         Box(
+            // A touch outside the search field ends the search: with nothing typed it
+            // closes, and with a query it only puts the keyboard away so the narrowed list
+            // can be used.
             modifier = Modifier
-                .onGloballyPositioned { bounds.sheet = it }
-                // A touch anywhere outside the search field ends the search: with nothing
-                // typed it closes, and with a query it only puts the keyboard away so the
-                // narrowed list can be used. Watched on the way down, before the touch
-                // reaches whatever it lands on, so a tap on a row still opens the row.
-                .pointerInput(searchOpen) {
-                    if (!searchOpen) return@pointerInput
-                    awaitEachGesture {
-                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                        val sheet = bounds.sheet ?: return@awaitEachGesture
-                        val field = bounds.field?.takeIf { it.isAttached } ?: return@awaitEachGesture
-                        val atRoot = sheet.localToRoot(down.position)
-                        if (!field.boundsInRoot().contains(atRoot)) {
-                            if (query.isBlank()) closeSearch() else focusManager.clearFocus()
-                        }
-                    }
+                .endsSearchOnTouchOutside(searchOpen, bounds) {
+                    if (query.isBlank()) closeSearch() else focusManager.clearFocus()
                 }
         ) {
         KeyboardOverSheet()
@@ -313,35 +304,7 @@ fun BatchDownloadSheet(
         }
 
         val downloadButton: @Composable (Modifier) -> Unit = { modifier ->
-            Surface(
-                onClick = { onDownload(plans) },
-                enabled = plans.isNotEmpty(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primary.copy(
-                    alpha = if (plans.isNotEmpty()) 0.15f else 0.06f
-                ),
-                modifier = modifier
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    // Centred when the button is given a width of its own, beside the list.
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Filled.Download, null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        stringResource(R.string.batch_download_action),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+            BatchDownloadButton(enabled = plans.isNotEmpty(), onClick = { onDownload(plans) }, modifier = modifier)
         }
 
         // ── What the list holds, and the controls that act on the list itself ──
@@ -523,7 +486,7 @@ fun BatchDownloadSheet(
                     BatchDownloadCard(
                         info = info,
                         formatLabel = format?.shortLabel.orEmpty(),
-                        sizeLabel = format?.sizeLabel.orEmpty(),
+                        sizeLabel = format?.sizeLabelWith(info.mergeAudioFor(state.languageOf(info))).orEmpty(),
                         isVideo = state.isVideo(info),
                         isAdjusted = state.isAdjusted(info),
                         selectionMode = state.selectionMode,
@@ -588,6 +551,7 @@ fun BatchDownloadSheet(
             Box(modifier = Modifier.padding(horizontal = SIDE)) {
                 SheetSection(
                     icon = Icons.Outlined.Tune,
+                    iconPill = true,
                     title = if (isVideo) stringResource(R.string.format_sheet_adjust_video)
                     else stringResource(R.string.format_sheet_adjust_audio),
                     summary = listOfNotNull(
@@ -646,7 +610,7 @@ fun BatchDownloadSheet(
                             OptionChip(
                                 label = bitrateLabel,
                                 compact = true,
-                                icon = Icons.Filled.HighQuality,
+                                icon = Icons.Filled.GraphicEq,
                                 active = bitrateOn,
                                 onClick = { openSheet = BatchSheet.BITRATE }
                             )
@@ -771,13 +735,9 @@ fun BatchDownloadSheet(
             }
         } else {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = SIDE),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    titleBlock(Modifier.weight(1f))
+                // The button moves under the heading only where a word of it would otherwise break.
+                SheetHeaderLayout(modifier = Modifier.padding(horizontal = SIDE)) {
+                    titleBlock(Modifier)
                     downloadButton(Modifier.height(44.dp))
                 }
 
@@ -885,7 +845,6 @@ fun BatchDownloadSheet(
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
-            onOpenSaveDir = onOpenSaveDir,
             onPickSaveDir = onPickSaveDir,
             onResetSaveDir = onResetSaveDir,
             onDownload = { format, audioLanguage, title, author, _ ->
@@ -896,6 +855,7 @@ fun BatchDownloadSheet(
         )
     }
 
+    val appContext = LocalContext.current.applicationContext
     when (openSheet) {
         BatchSheet.NONE -> Unit
 
@@ -996,7 +956,7 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.CONTAINER -> BatchContainerSheet(
+        BatchSheet.CONTAINER -> ContainerDialog(
             isVideo = state.videoTab,
             current = if (state.videoTab) options.videoContainer else options.audioContainer,
             onSelect = { choice ->
@@ -1016,14 +976,10 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.SAVE_DIR -> SaveDirDialog(
+        BatchSheet.SAVE_DIR -> SaveLocationScreen(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
             label = saveDirs.labelOf(state.videoTab),
-            onOpen = {
-                openSheet = BatchSheet.NONE
-                onOpenSaveDir(state.videoTab)
-            },
             onPick = { card ->
                 openSheet = BatchSheet.NONE
                 onPickSaveDir(state.videoTab, card)
@@ -1032,6 +988,7 @@ fun BatchDownloadSheet(
                 openSheet = BatchSheet.NONE
                 onResetSaveDir(state.videoTab)
             },
+            onUseRecent = { SettingsRepository.setSaveDir(appContext, state.videoTab, it.uri, it.label) },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
@@ -1081,11 +1038,12 @@ fun BatchDownloadSheet(
  * close button that clears it and puts the count back. It takes the keyboard as it opens.
  */
 @Composable
-private fun LinkSearchField(
+internal fun LinkSearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hint: String = stringResource(R.string.batch_search_hint)
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -1110,7 +1068,7 @@ private fun LinkSearchField(
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (query.isEmpty()) {
                     Text(
-                        stringResource(R.string.batch_search_hint),
+                        hint,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1151,7 +1109,7 @@ private fun LinkSearchField(
  * listeners are removed when the sheet goes.
  */
 @Composable
-private fun KeyboardOverSheet() {
+internal fun KeyboardOverSheet() {
     val view = LocalView.current
     DisposableEffect(view) {
         val host = view.parent as? View ?: return@DisposableEffect onDispose { }
@@ -1179,6 +1137,51 @@ private fun KeyboardOverSheet() {
     }
 }
 
+/**
+ * A touch anywhere outside the search field ends the search through [onOutside]. Watched on
+ * the way down, before the touch reaches whatever it lands on, so a tap on a row still opens
+ * the row. Where the field and the sheet are is read only when a touch lands.
+ */
+internal fun Modifier.endsSearchOnTouchOutside(searchOpen: Boolean, bounds: SearchBounds, onOutside: () -> Unit): Modifier =
+    onGloballyPositioned { bounds.sheet = it }
+        .pointerInput(searchOpen) {
+            if (!searchOpen) return@pointerInput
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                val sheet = bounds.sheet ?: return@awaitEachGesture
+                val field = bounds.field?.takeIf { it.isAttached } ?: return@awaitEachGesture
+                if (!field.boundsInRoot().contains(sheet.localToRoot(down.position))) onOutside()
+            }
+        }
+
+/** The set's Download: a tonal accent button, quieter than the single sheet's pill. */
+@Composable
+internal fun BatchDownloadButton(enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.15f else 0.06f),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            // Centred when the button is given a width of its own, beside the list.
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Filled.Download, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.batch_download_action),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
 /** Whether a link's title, channel or address holds [query], ignoring case. */
 private fun MediaInfo.matches(query: String): Boolean =
     title.contains(query, ignoreCase = true) ||
@@ -1186,22 +1189,23 @@ private fun MediaInfo.matches(query: String): Boolean =
         url.contains(query, ignoreCase = true)
 
 /** Where the sheet and its search field were last laid out, read when a touch lands. */
-private class SearchBounds {
+internal class SearchBounds {
     var sheet: LayoutCoordinates? = null
     var field: LayoutCoordinates? = null
 }
 
 /** How far the sheet's content sits from its sides: close to the edge, so the list gets the width. */
-private val SIDE = 12.dp
+internal val BATCH_SIDE = 12.dp
+private val SIDE = BATCH_SIDE
 
 /**
  * A window at least this wide and under [TWO_PANE_MAX_HEIGHT_DP] tall is a phone on its
  * side, where the sheet splits into two panes. Each pane is then about as wide as an
  * upright phone, so its rows lay out as they do there.
  */
-private const val TWO_PANE_MIN_WIDTH_DP = 600
+internal const val TWO_PANE_MIN_WIDTH_DP = 600
 internal const val BATCH_LINK_LIST_TAG = "batch_link_list"
-private const val TWO_PANE_MAX_HEIGHT_DP = 480
+internal const val TWO_PANE_MAX_HEIGHT_DP = 480
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
 private class BatchFeedback(val message: String)

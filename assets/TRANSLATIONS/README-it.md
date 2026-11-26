@@ -87,14 +87,15 @@ Se Hazel ti è stato utile, valuta di sostenerne lo sviluppo. Il tuo supporto mi
 ---
 ## ✨ Perché scegliere Hazel?
 
-Hazel è un downloader gratuito e open source per Android basato su **yt-dlp**. Salva video, musica e playlist da **oltre 1500 siti** senza pubblicità, senza tracciamento e senza account.
+Hazel è un downloader gratuito e open source per Android basato su **yt-dlp** & **gallery-dl**. Salva video, musica e playlist da **oltre 1500 siti** senza pubblicità, senza tracciamento e senza account.
 
 <table>
   <tr><th width="50%" align="left">📥 Download</th><th width="50%" align="left">🔍 Cerca e riproduci</th></tr>
   <tr><td><b>Oltre 1500 siti:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud e <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">altri</a>.</td><td><b>Ricerca:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con suggerimenti facoltativi.</td></tr>
   <tr><td><b>In blocco:</b> un link, molti insieme o un'intera playlist / canale.</td><td><b>Prima riproduci:</b> guarda qualsiasi risultato sulla sua scheda con barra di avanzamento, doppio tocco per saltare e schermo intero.</td></tr>
-  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo.</td></tr>
+  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo. Veloce, preciso o taglia dopo il download: l'intero file alla massima velocità, tagliato sul telefono.</td></tr>
   <tr><td><b>Il tuo formato:</b> scegli qualità, contenitore, traccia audio e modifica titolo / metadati.</td><td><b>Dirette:</b> registra dall'inizio o attendi una premiere.</td></tr>
+  <tr><td><b>Immagini:</b> post, profili e ricerca di immagini su Instagram, X, Pinterest, Reddit e altri, con le didascalie.</td><td><b>Accesso:</b> accesso con un tocco a Instagram, YouTube, X e altri, con lo stato di ogni account.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ I contributi sono benvenuti! Consulta il nostro [CONTRIBUTING.md](https://github
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Gestione del repository F-Droid
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Il potente motore di download dietro Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Integrazione di yt-dlp per Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Download di immagini e gallerie
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Elenchi, ricerca e stream di riproduzione veloci
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Riproduzione fluida nell'app
 

@@ -34,6 +34,7 @@ object MediaStoreHelper {
      * @param tempDir    The temp directory (e.g., StoragePaths.tempDownloads or a subfolder)
      * @param relativePath  MediaStore relative path (e.g., "Download/Hazel" or "Download/Hazel/PlaylistName")
      * @param isMusic    true for audio files (uses MediaStore.Audio), false for downloads
+     * @param keepFolders also publish subfolders of [tempDir]; off for the converter and backup
      * @return the final public directory where files were moved
      */
     fun moveToPublicStorage(
@@ -41,13 +42,25 @@ object MediaStoreHelper {
         tempDir: File,
         relativePath: String,
         isMusic: Boolean = false,
+        keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): File {
-        val files = tempDir.listFiles()?.filter { it.isFile } ?: return tempDir
+        if (!tempDir.isDirectory) return tempDir
+        // With keepFolders, a file in tempDir/a/b is published under relativePath/a/b.
+        var skipped = false
+        val files = StagedFiles.list(
+            tempDir,
+            maxDepth = if (keepFolders) StagedFiles.MAX_DEPTH else 0,
+            onSkipped = { skipped = true; Log.w(TAG, "Not published, it is a link: ${it.name}") }
+        )
 
-        var leftBehind = false
-        for (file in files) {
-            val moved = movedUri(context, file, relativePath, isMusic)
+        // A skipped link stays in the work folder, so the run is not clean.
+        var leftBehind = skipped
+        for (staged in files) {
+            val file = staged.file
+            val sub = StagedFiles.publishSubPath(staged.subPath)
+            val target = if (sub.isEmpty()) relativePath else "$relativePath/$sub"
+            val moved = movedUri(context, file, target, isMusic)
             if (moved != null) {
                 onMoved(moved)
                 continue
@@ -250,17 +263,32 @@ object MediaStoreHelper {
         context: Context,
         tempDir: File,
         treeUri: Uri,
+        keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): Boolean {
-        val files = tempDir.listFiles()?.filter { it.isFile } ?: return true
+        if (!tempDir.isDirectory) return true
+        var skipped = false
+        val files = StagedFiles.list(
+            tempDir,
+            maxDepth = if (keepFolders) StagedFiles.MAX_DEPTH else 0,
+            onSkipped = { skipped = true; Log.w(TAG, "Not published, it is a link: ${it.name}") }
+        )
         val resolver = context.contentResolver
         val parent = folderDocument(treeUri)
+        // Folders found or made in this run, by path below the picked folder.
+        val folders = HashMap<String, Uri>()
 
-        var allMoved = true
-        for (file in files) {
+        // A skipped link stays in the work folder: not every file was moved.
+        var allMoved = !skipped
+        val published = ArrayList<File>(files.size)
+        for (staged in files) {
+            val file = staged.file
             try {
+                val folder = treeFolder(
+                    resolver, treeUri, parent, StagedFiles.publishSubPath(staged.subPath), folders
+                )
                 val target = DocumentsContract.createDocument(
-                    resolver, parent, getMimeType(file), file.name
+                    resolver, folder, getMimeType(file), file.name
                 ) ?: throw Exception("Provider refused to create ${file.name}")
 
                 resolver.openOutputStream(target)?.use { os ->
@@ -269,14 +297,113 @@ object MediaStoreHelper {
 
                 file.delete()
                 onMoved(target)
+                treeFilePath(target)?.let(published::add)
                 Log.d(TAG, "Moved ${file.name} to $treeUri")
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to move ${file.name} to picked folder: ${e.message}")
                 allMoved = false
             }
         }
+        // A file written through a document provider is not indexed by itself, so galleries would not list it.
+        if (published.isNotEmpty()) {
+            runCatching {
+                MediaScannerConnection.scanFile(
+                    context,
+                    published.map { it.absolutePath }.toTypedArray(),
+                    published.map { getMimeType(it) }.toTypedArray(),
+                    null
+                )
+            }.onFailure { Log.w(TAG, "Media scan of picked folder failed: ${it.message}") }
+        }
         return allMoved
     }
+
+    /** The file path of a document made in a picked tree, or null when its provider has none to give. */
+    private fun treeFilePath(document: Uri): File? = runCatching {
+        if (document.authority !in PATH_AUTHORITIES) return@runCatching null
+        documentIdPath(
+            DocumentsContract.getDocumentId(document),
+            Environment.getExternalStorageDirectory().absolutePath
+        )?.let(::File)
+    }.getOrNull()
+
+    private val PATH_AUTHORITIES = setOf(
+        "com.android.externalstorage.documents",
+        "com.android.providers.downloads.documents"
+    )
+
+    private val CARD_VOLUME = Regex("[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}")
+
+    /**
+     * A storage document id as a path: `primary:a/b` under [primaryRoot], `1234-ABCD:a/b` on that card,
+     * `raw:/storage/...` as written. Null for ids that are not paths (`msf:12`, `home:`).
+     */
+    internal fun documentIdPath(id: String, primaryRoot: String): String? {
+        val volume = id.substringBefore(':', "")
+        val path = id.substringAfter(':', "").trimStart('/')
+        return when {
+            volume == "raw" -> id.substringAfter(':').takeIf { it.startsWith("/") }
+            path.isEmpty() -> null
+            volume == "primary" -> "${primaryRoot.trimEnd('/')}/$path"
+            CARD_VOLUME.matches(volume) -> "/storage/$volume/$path"
+            else -> null
+        }
+    }
+
+    /** The folder [subPath] (`a/b`) names inside [root]: reused if it exists, else made. Throws if the provider refuses. */
+    private fun treeFolder(
+        resolver: android.content.ContentResolver,
+        treeUri: Uri,
+        root: Uri,
+        subPath: String,
+        known: MutableMap<String, Uri>
+    ): Uri {
+        if (subPath.isEmpty()) return root
+        var current = root
+        var path = ""
+        for (name in subPath.split('/')) {
+            path = if (path.isEmpty()) name else "$path/$name"
+            current = known[path] ?: (
+                findTreeFolder(resolver, treeUri, current, name)
+                    ?: DocumentsContract.createDocument(
+                        resolver, current, DocumentsContract.Document.MIME_TYPE_DIR, name
+                    )
+                    ?: throw Exception("Provider refused to create folder $name")
+                ).also { known[path] = it }
+        }
+        return current
+    }
+
+    /** The folder called [name] in [parent], or null. A case-only match counts, as FAT/exFAT cards don't tell `Foo` from `foo`. */
+    private fun findTreeFolder(
+        resolver: android.content.ContentResolver,
+        treeUri: Uri,
+        parent: Uri,
+        name: String
+    ): Uri? = runCatching {
+        val children = DocumentsContract.buildChildDocumentsUriUsingTree(
+            treeUri, DocumentsContract.getDocumentId(parent)
+        )
+        val columns = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
+        )
+        var sameIgnoringCase: String? = null
+        resolver.query(children, columns, null, null, null)?.use { cursor ->
+            while (cursor.moveToNext()) {
+                if (cursor.getString(2) != DocumentsContract.Document.MIME_TYPE_DIR) continue
+                val display = cursor.getString(1) ?: continue
+                if (display == name) {
+                    return@runCatching DocumentsContract.buildDocumentUriUsingTree(treeUri, cursor.getString(0))
+                }
+                if (sameIgnoringCase == null && display.equals(name, ignoreCase = true)) {
+                    sameIgnoringCase = cursor.getString(0)
+                }
+            }
+        }
+        sameIgnoringCase?.let { DocumentsContract.buildDocumentUriUsingTree(treeUri, it) }
+    }.onFailure { Log.w(TAG, "Could not list folders to find $name: ${it.message}") }.getOrNull()
 
     /**
      * Human-readable name for a picked tree, e.g. "Movies/Clips" on primary storage.
@@ -300,10 +427,29 @@ object MediaStoreHelper {
         val path = id.substringAfter(':', "")
         return when {
             path.isBlank() && volume.isBlank() -> id
+            // The Downloads provider names a picked folder by its path, as "raw:/storage/emulated/0/Download/x".
+            volume == "raw" -> describeRawPath(path, cardName)
             volume == "primary" -> path.ifBlank { "Internal storage" }
             path.isBlank() -> cardName(volume) ?: volume
             else -> "${cardName(volume) ?: volume}/$path"
         }
+    }
+
+    private val USER_STORAGE = Regex("""^/storage/emulated/\d+/?""")
+    private val CARD_STORAGE = Regex("^/storage/([^/]+)/?")
+
+    /** A `raw:` path as [describeDocumentId] shows other ids: relative on internal storage, card name in front on a card. */
+    private fun describeRawPath(path: String, cardName: (String) -> String?): String {
+        USER_STORAGE.find(path)?.let { m ->
+            return path.substring(m.range.last + 1).trimEnd('/').ifBlank { "Internal storage" }
+        }
+        CARD_STORAGE.find(path)?.let { m ->
+            val volume = m.groupValues[1]
+            val rest = path.substring(m.range.last + 1).trimEnd('/')
+            val card = cardName(volume) ?: volume
+            return if (rest.isBlank()) card else "$card/$rest"
+        }
+        return path
     }
 
     /**
@@ -326,18 +472,16 @@ object MediaStoreHelper {
     fun isDocumentInTree(segments: List<String>): Boolean =
         segments.size >= 4 && segments[0] == "tree" && segments[2] == "document"
 
-    /**
-     * Scan files with MediaScanner so they appear in gallery/music apps.
-     */
-    fun scanFiles(context: Context, dir: File) {
-        val files = dir.listFiles()?.filter { it.isFile } ?: return
-        val paths = files.map { it.absolutePath }.toTypedArray()
-        val mimeTypes = files.map { getMimeType(it) }.toTypedArray()
-        MediaScannerConnection.scanFile(context, paths, mimeTypes, null)
-    }
 
-    private fun getMimeType(file: File): String {
-        return when (file.extension.lowercase()) {
+    /**
+     * The type a file is saved under. It must match the extension: storage treats the name of
+     * an untyped file as having no extension, so a second "a.png" became "a.png (1)".
+     */
+    private fun getMimeType(file: File): String = mimeTypeOf(file.name)
+
+    internal fun mimeTypeOf(name: String): String {
+        val extension = name.substringAfterLast('.', "").lowercase()
+        return when (extension) {
             "mp3" -> "audio/mpeg"
             "m4a" -> "audio/mp4"
             "flac" -> "audio/flac"
@@ -349,7 +493,17 @@ object MediaStoreHelper {
             "webm" -> "video/webm"
             "3gp" -> "video/3gpp"
             "json" -> "application/json"
-            else -> "application/octet-stream"
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "gif" -> "image/gif"
+            "webp" -> "image/webp"
+            "heic" -> "image/heic"
+            "avif" -> "image/avif"
+            "bmp" -> "image/bmp"
+            "mov" -> "video/quicktime"
+            "txt" -> "text/plain"
+            else -> android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                ?: "application/octet-stream"
         }
     }
 }

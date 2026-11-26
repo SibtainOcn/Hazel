@@ -272,6 +272,25 @@ data class MediaFormat(
         }
 
     val bitrateLabel: String get() = formatBitrate(bitrateKbps)
+
+    /** True when this stream is muxed with a separate audio track to make the file. */
+    val needsAudio: Boolean get() = hasVideo && !hasAudio && !isGeneric
+
+    /** Bytes the download of this transfers: a video-only stream plus the [audio] muxed into it. */
+    fun bytesWith(audio: MediaFormat?): Long =
+        if (fileSizeBytes <= 0L) 0L
+        else fileSizeBytes + (audio?.takeIf { needsAudio }?.fileSizeBytes?.coerceAtLeast(0L) ?: 0L)
+
+    /**
+     * [sizeLabel] for the whole file, counting the [audio] a video-only stream is muxed with.
+     * An audio track with no reported size leaves the figure short, so it is marked as an estimate.
+     */
+    fun sizeLabelWith(audio: MediaFormat?): String {
+        val muxed = audio?.takeIf { needsAudio } ?: return sizeLabel
+        return formatFileSize(bytesWith(muxed)).let {
+            if (it.isNotBlank() && (isEstimatedSize || muxed.isEstimatedSize || muxed.fileSizeBytes <= 0L)) "~ $it" else it
+        }
+    }
 }
 
 /** The quality ceiling that asks for the smallest video a source has rather than a height. */

@@ -12,6 +12,15 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -213,4 +222,21 @@ fun ProcessingTracker(
                 }
             }
     )
+}
+
+/** Indeterminate line for a cut not yet reported on, over the same artwork shade as [ProcessingTracker]. */
+@Composable
+fun LiveProgressLine(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.background(Color.Black.copy(alpha = 0.45f))) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp)
+                .height(3.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = Color.White.copy(alpha = 0.25f)
+        )
+    }
 }

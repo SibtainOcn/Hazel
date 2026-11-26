@@ -13,11 +13,13 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,12 +27,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.gallery.GalleryDlPayload
 import com.hazel.android.update.DebugInfo
+import com.hazel.android.update.GalleryDlUpdater
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.util.openInAppBrowser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * The update hub, laid out like a download's properties: the versions at a glance, actions,
@@ -41,6 +47,7 @@ fun SoftwareUpdateScreen(
     onBack: () -> Unit,
     onNavigateToHazelUpdate: () -> Unit,
     onNavigateToYtDlpUpdate: () -> Unit,
+    onNavigateToGalleryDlUpdate: () -> Unit,
     onOpenWhatsNew: (version: String) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -50,6 +57,10 @@ fun SoftwareUpdateScreen(
 
     val hazelFresh by remember(context) { SettingsRepository.getHazelUpdateAvailable(context) }.collectAsState(initial = false)
     val ytDlpFresh by remember(context) { SettingsRepository.getYtDlpUpdateAvailable(context) }.collectAsState(initial = false)
+    val galleryDlFresh by remember(context) { SettingsRepository.getGalleryDlUpdateAvailable(context) }.collectAsState(initial = false)
+    val galleryDlVersion by produceState(GalleryDlPayload.BUNDLED_VERSION) {
+        value = withContext(Dispatchers.IO) { GalleryDlUpdater.installedVersion(context) }
+    }
 
     Scaffold(
         topBar = { UpdateTopBar(title = stringResource(R.string.upd_software_title), onBack = onBack) },
@@ -67,9 +78,7 @@ fun SoftwareUpdateScreen(
             JoinedTiles(
                 listOf(
                     hazelVersion to stringResource(R.string.upd_tile_hazel),
-                    ytdlpVersion to "yt-dlp",
-                    DebugInfo.primaryAbi().substringBefore('-') to stringResource(R.string.upd_tile_cpu),
-                    "API ${android.os.Build.VERSION.SDK_INT}" to stringResource(R.string.upd_tile_android)
+                    ytdlpVersion to "yt-dlp"
                 )
             )
 
@@ -111,6 +120,12 @@ fun SoftwareUpdateScreen(
                         stringResource(if (ytDlpFresh) R.string.upd_status_ready else R.string.upd_status_current, ytdlpVersion),
                         fresh = ytDlpFresh,
                         onClick = onNavigateToYtDlpUpdate
+                    ),
+                    ComponentLink(
+                        Icons.Filled.PhotoLibrary, "gallery-dl",
+                        stringResource(if (galleryDlFresh) R.string.upd_status_ready else R.string.upd_status_current, galleryDlVersion),
+                        fresh = galleryDlFresh,
+                        onClick = onNavigateToGalleryDlUpdate
                     )
                 )
             )

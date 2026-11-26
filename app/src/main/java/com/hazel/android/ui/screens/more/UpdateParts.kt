@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ContentCopy
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -132,6 +135,53 @@ internal fun ComponentGroup(@StringRes title: Int, links: List<ComponentLink>) {
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+        }
+    }
+}
+
+/** A setting switched on or off, drawn like a [ComponentLink] row. */
+internal class ComponentToggle(
+    val icon: ImageVector,
+    val shape: Shape,
+    val title: String,
+    val line: String,
+    val checked: Boolean,
+    val onChange: (Boolean) -> Unit
+)
+
+@Composable
+internal fun ToggleGroup(@StringRes title: Int, toggles: List<ComponentToggle>) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        SectionLabel(title)
+        toggles.forEachIndexed { index, toggle ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
+                    .clip(rowShape(index, toggles.size))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .toggleable(value = toggle.checked, role = Role.Switch, onValueChange = toggle.onChange)
+                    .padding(start = 12.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ShapedIcon(toggle.icon, toggle.shape)
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        toggle.title,
+                        style = MaterialTheme.typography.bodyLarge.copy(hyphens = Hyphens.Auto),
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        toggle.line,
+                        style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(checked = toggle.checked, onCheckedChange = null)
             }
         }
     }

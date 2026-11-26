@@ -26,6 +26,7 @@ import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.hazel.android.util.LinkKey
@@ -105,6 +108,10 @@ data class DownloadState(
      */
     val active: MediaInfo? = null,
     val progress: Float = 0f,
+    /** A cut still waiting for ffmpeg's first report: shown as a moving line plus [liveBytes]. */
+    val unmeasured: Boolean = false,
+    /** Bytes written so far, counted while [unmeasured]. */
+    val liveBytes: Long = 0L,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
     /**
@@ -290,7 +297,7 @@ class DownloadViewModel : ViewModel() {
      * total is an estimate it refines upward as it goes, so a figure read off the output
      * climbs for the whole download and ends nowhere near where it started. The sheet
      * already showed the user a size, so that size is what the progress is measured
-     * against and it does not move.
+     * against and it does not move. A cut scales it to the kept part.
      */
     @Volatile private var expectedTotalBytes: Long = 0L
 
@@ -308,6 +315,16 @@ class DownloadViewModel : ViewModel() {
      * runs, and the readout never falls below what those bytes are worth.
      */
     @Volatile private var progressFloor = 0f
+
+    /** The run keeps only a part of the link: see [CutProgress]. */
+    @Volatile private var cutRun = false
+
+    /** A cut not yet reported on by ffmpeg, followed by its size on disk. */
+    @Volatile private var liveRun = false
+
+    @Volatile private var cutSeconds = 0.0
+    @Volatile private var cutFraction = 0f
+    @Volatile private var cutSpeed = 0.0
 
     /** When the temp directory was last measured, so the floor is not re-read every line. */
     @Volatile private var lastFloorCheckAt = 0L
@@ -1172,6 +1189,21 @@ class DownloadViewModel : ViewModel() {
         if (claimed) startFormatRead(info, fresh, source)
     }
 
+    /**
+     * [url]'s whole format list for a sheet opened on a link already queued, from the cache
+     * where it holds one and otherwise read again. Null when the read fails.
+     */
+    suspend fun formatsFor(url: String): MediaInfo? = withContext(Dispatchers.IO) {
+        try {
+            formatReads.withPermit { readFormats(url, fresh = false, source = null) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Hazel", "Format read failed for a queued link: ${sanitizeError(e.message.orEmpty())}")
+            null
+        }
+    }
+
     /** Runs one read of [info]'s formats; the caller holds its claim in [_formatsReading]. */
     private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -1206,6 +1238,11 @@ class DownloadViewModel : ViewModel() {
             // The artwork the full read found is preferred, since a listing often carries
             // only a small preview; the listing's title is kept, as the card already shows it.
             val merged = resolved.copy(
+                // The link keeps the address it was listed under. A read answers with the
+                // site's own form of it (a youtu.be or Shorts link comes back as a watch
+                // page), and the sheets hold each link's picks by that address: a new one
+                // dropped a quality picked while the link was still being read.
+                url = info.url,
                 title = info.title.ifBlank { resolved.title },
                 thumbnail = resolved.thumbnail ?: info.thumbnail,
                 // A running time the listing gave is kept when the full read has none,
@@ -1576,6 +1613,8 @@ class DownloadViewModel : ViewModel() {
             // Asks the system to leave the process alone for the length of the run. Started
             // before the first link rather than per link, so a set of ten is one service for
             // the whole set instead of ten in a row.
+            // One download at a time across engines: a gallery job in progress finishes first.
+            DownloadTurn.acquire(token)
             DownloadService.start(app, firstTitle)
 
             val limits = TransferLimits(
@@ -1617,9 +1656,22 @@ class DownloadViewModel : ViewModel() {
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
-                expectedTotalBytes = expectedTotalFor(plan)
+                // Trim after download is an ordinary download until its Trim stage.
+                cutRun = options.cutsWhileDownloading
+                liveRun = cutRun
+                cutSeconds = if (cutRun) {
+                    CutProgress.keptSeconds(
+                        plan.info.durationSeconds, options.sectionStart, options.sectionEnd
+                    )
+                } else 0.0
+                cutFraction = 0f
+                cutSpeed = 0.0
+                LocalTrim.arm()
+                // ffmpeg never continues a cut, so a part file left by a pause is not progress.
+                if (cutRun) purgeFragments()
+                expectedTotalBytes = expectedTotalFor(plan, options)
                 lastFloorCheckAt = 0L
-                progressFloor = fractionOnDisk()
+                progressFloor = if (cutRun) 0f else fractionOnDisk()
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
                 // Only [DownloadState.active] follows the run. [DownloadState.info] is the
@@ -1632,7 +1684,9 @@ class DownloadViewModel : ViewModel() {
                     isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,
-                    totalBytes = expectedTotalBytes,
+                    unmeasured = liveRun,
+                    liveBytes = 0L,
+                    totalBytes = if (liveRun) 0L else expectedTotalBytes,
                     eta = "",
                     status = opening,
                     isProcessing = false,
@@ -1641,7 +1695,10 @@ class DownloadViewModel : ViewModel() {
                     processingStep = 0
                 ) }
                 DownloadNotificationHelper.showProgress(
-                    app, (progressFloor * 100f).toInt(), opening, plan.title
+                    app,
+                    if (liveRun) -1 else (progressFloor * 100f).toInt(),
+                    opening,
+                    plan.title
                 )
 
                 try {
@@ -1683,6 +1740,16 @@ class DownloadViewModel : ViewModel() {
                         // figure nothing on disk backs any more.
                         progressFloor = 0f
                         lastFloorCheckAt = 0L
+                        // The cut starts over, so its figures do too.
+                        if (cutRun) {
+                            cutFraction = 0f
+                            cutSpeed = 0.0
+                            liveRun = true
+                            _state.update { it.copy(
+                                unmeasured = true, liveBytes = 0L, progress = 0f,
+                                totalBytes = 0L, eta = ""
+                            ) }
+                        }
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
@@ -1720,6 +1787,7 @@ class DownloadViewModel : ViewModel() {
                         continue
                     }
 
+                    if (options.trimsAfterDownload) trimLocally(app, plan, options)
                     finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.DONE)
                     downloadScope.launch {
@@ -1863,10 +1931,12 @@ class DownloadViewModel : ViewModel() {
                 if (runOwner === token) runOwner = null
                 more
             }
+            DownloadTurn.release(token)
             if (more) runQueue(app, resumed = false)
         }
         job.invokeOnCompletion {
             synchronized(queue) { if (runOwner === token) runOwner = null }
+            DownloadTurn.release(token)
         }
         downloadJob = job
     }
@@ -1879,25 +1949,35 @@ class DownloadViewModel : ViewModel() {
      * Downloads folder and write it into the history as though it had finished.
      */
     private fun holdForResume(item: QueuedDownload) {
+        // Resume restarts a cut, so its part file is dead weight. A finished cut file is kept.
+        val cut = item.options.cutsWhileDownloading
+        if (cut) purgeFragments()
         // A link queued as a generic "best" has no size on its record. The engine reported
         // one while it ran, and it is kept with the pause, so the card can say how much is
         // in hand once another download is running, and the resume measures against it.
         // The engine reports its total one stream at a time, the video's and then the
         // audio's, so the streams already finished on disk are added to it.
         val reported = _state.value.totalBytes
-        val held = if (item.fileSizeBytes <= 0L && item.mergeAudioSizeBytes <= 0L && reported > 0L) {
+        val held = if (!cut && item.fileSizeBytes <= 0L && item.mergeAudioSizeBytes <= 0L && reported > 0L) {
             item.copy(paused = true, fileSizeBytes = pausedTotal(downloadDir, reported))
         } else item.copy(paused = true)
         synchronized(queue) { queue.addFirst(held) }
         markBatch(item.url, BatchState.PAUSED)
-        _state.update { s -> s.copy(status = "Paused", isProcessing = false, eta = "") }
+        _state.update { s -> s.copy(
+            status = "Paused",
+            isProcessing = false,
+            eta = "",
+            progress = if (cut) 0f else s.progress,
+            unmeasured = if (cut) false else s.unmeasured,
+            liveBytes = if (cut) 0L else s.liveBytes
+        ) }
 
         // The shade is told the same thing the card is, off the same figures. A download
         // held while the app is off screen otherwise loses its notification along with the
         // service, leaving nothing anywhere to say it is waiting or to start it again.
         val app = HazelApp.instance
         val fraction = _state.value.progress.coerceIn(0f, 1f)
-        val total = _state.value.totalBytes
+        val total = if (cut) 0L else _state.value.totalBytes
         DownloadNotificationHelper.showPaused(
             context = app,
             progress = (fraction * 100f).toInt(),
@@ -2059,7 +2139,7 @@ class DownloadViewModel : ViewModel() {
             isCancelled = true
             viewModelScope.launch(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* process may already be done */ }
             }
         } else {
@@ -2125,7 +2205,7 @@ class DownloadViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2147,7 +2227,7 @@ class DownloadViewModel : ViewModel() {
         isPaused = true
         downloadScope.launch {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2235,7 +2315,14 @@ class DownloadViewModel : ViewModel() {
         val current = synchronized(queue) { queue.firstOrNull { it.url == url } } ?: saved
             ?: return QueueAdjust.GONE
         val wanted = plan.toQueued(options, treeUri).copy(paused = current.paused)
-        if (wanted == current) return QueueAdjust.UNCHANGED
+        // A list read again can report the same streams with other sizes or names; that alone
+        // is no change, and must not start a running link over.
+        val sameChoice = wanted.copy(
+            fileSizeBytes = current.fileSizeBytes,
+            mergeAudioSizeBytes = current.mergeAudioSizeBytes,
+            formatLabel = current.formatLabel
+        ) == current
+        if (sameChoice) return QueueAdjust.UNCHANGED
 
         val streamsChange = wanted.selector != current.selector || wanted.sort != current.sort ||
             wanted.mergeAudioSelector != current.mergeAudioSelector ||
@@ -2256,7 +2343,7 @@ class DownloadViewModel : ViewModel() {
             restartUrl = url
             withContext(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* finished meanwhile: it is taken again all the same */ }
             }
         } else {
@@ -2427,6 +2514,10 @@ class DownloadViewModel : ViewModel() {
      * same way left nothing on the list.
      */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
+            viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
+            return
+        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
@@ -2442,7 +2533,11 @@ class DownloadViewModel : ViewModel() {
      * choice and folder, so each is downloaded as it was asked for and the queue is written
      * once per batch rather than once per link. The rest are read again, a few at a time.
      */
-    fun retryAllFailed(context: Context, failed: List<com.hazel.android.data.FailedDownload>) {
+    fun retryAllFailed(context: Context, all: List<com.hazel.android.data.FailedDownload>) {
+        val (gallery, failed) = all.partition {
+            com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload)
+        }
+        gallery.forEach { retryFailed(context, it) }
         val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
             .distinctBy { it.url }
         queued.groupBy { it.options to it.treeUri }.forEach { (key, items) ->
@@ -2503,7 +2598,20 @@ class DownloadViewModel : ViewModel() {
         val isVideo = format.hasVideo
         val container = (if (isVideo) options.videoContainer else options.audioContainer).trim()
 
-        addOption("-o", "${downloadDir.absolutePath}/${outputTemplate(options, title, author)}")
+        val settings = AdvancedSettingsStore.ready()
+        val outputPath = resolveOutputPath(options, title, author, settings)
+        addOption("-o", "${downloadDir.absolutePath}/${outputPath.template}")
+        // Keeps a dots-only field (uploader "..") from writing above the work folder; names get the older ASCII look.
+        // One --compat-options for the user's and the app's values.
+        settings
+            .compatOptions(if (outputPath.folders.isNotEmpty()) listOf("filename-sanitization") else emptyList())
+            .takeIf { it.isNotEmpty() }
+            ?.let { addOption("--compat-options", it.joinToString(",")) }
+        // yt-dlp keeps ".." in id fields too, so a dots-only id used as a folder becomes "_".
+        // Three words, so they go through addCommands.
+        outputPath.idKeys.takeIf { it.isNotEmpty() }?.let { keys ->
+            addCommands(listOf("--replace-in-metadata", keys.joinToString(","), "^\\.+$", "_"))
+        }
         addOption("--no-playlist")
         addOption("--no-mtime")
         // A card is usually FAT or exFAT, which refuses names with characters such as : or ?
@@ -2653,7 +2761,7 @@ class DownloadViewModel : ViewModel() {
             }
         }
 
-        applyChapters(options, isVideo)
+        applyChapters(options, isVideo, outputPath.folderPrefix)
         applySponsorBlock(options, isVideo)
         applyOneOff(options)
         if (isVideo) applySubtitles(options)
@@ -2667,7 +2775,8 @@ class DownloadViewModel : ViewModel() {
         // The stages this request sets in motion, in the order yt-dlp runs them.
         plannedSteps = buildList {
             add(ProcessingStep.FETCH)
-            if (isVideo && needsMerge) add(ProcessingStep.MERGE)
+            // A cut is fetched and joined by ffmpeg in one go, so yt-dlp announces no merge.
+            if (isVideo && needsMerge && !options.cutsWhileDownloading) add(ProcessingStep.MERGE)
             if (!isVideo) add(ProcessingStep.EXTRACT)
             if (isVideo && wantsCover) add(ProcessingStep.REMUX)
             if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
@@ -2677,18 +2786,23 @@ class DownloadViewModel : ViewModel() {
             }
             if (wantsCover) add(ProcessingStep.COVER)
             if (options.splitByChapters) add(ProcessingStep.SPLIT)
+            if (options.trimsAfterDownload) add(ProcessingStep.TRIM)
             add(ProcessingStep.SAVE)
         }
 
         // Last, so an extra argument from the advanced settings can change what was set above.
-        applyExtraDownloadArguments()
+        applyExtraDownloadArguments(settings)
     }
 
     /**
      * Chapter handling. Marking with SponsorBlock is paired with embedding, since the marks
      * are written as chapters and are invisible without it.
      */
-    private fun YoutubeDLRequest.applyChapters(options: DownloadOptions, isVideo: Boolean) {
+    private fun YoutubeDLRequest.applyChapters(
+        options: DownloadOptions,
+        isVideo: Boolean,
+        folderPrefix: String = ""
+    ) {
         if (isVideo && options.addChapters) {
             // The source's own chapters are embedded either way. SponsorBlock's segments
             // are added as chapters of their own only while SponsorBlock is in use, since
@@ -2704,7 +2818,7 @@ class DownloadViewModel : ViewModel() {
             // videos' "01 Intro" from overwriting each other.
             addOption(
                 "-o",
-                "chapter:${downloadDir.absolutePath}/" +
+                "chapter:${downloadDir.absolutePath}/$folderPrefix" +
                     limitNameFields("%(title)s - %(section_number)02d %(section_title)s.%(ext)s")
             )
         }
@@ -2739,12 +2853,13 @@ class DownloadViewModel : ViewModel() {
      * and the parts around the cut points are encoded again, which takes longer.
      */
     private fun YoutubeDLRequest.applyOneOff(options: DownloadOptions) {
-        if (options.hasSection) {
+        if (options.cutsWhileDownloading) {
             addOption(
                 "--download-sections",
                 "*%.3f-%.3f".format(java.util.Locale.ROOT, options.sectionStart, options.sectionEnd)
             )
             if (options.preciseCuts) addOption("--force-keyframes-at-cuts")
+            addOption("--downloader-args", CutProgress.FFMPEG_PROGRESS_ARGS)
         }
         if (options.liveFromStart) addOption("--live-from-start")
         // Checked again every minute at first and then less often, up to every ten, so a
@@ -2787,25 +2902,48 @@ class DownloadViewModel : ViewModel() {
      * The user can edit both, so the fields they edited are substituted as literal text
      * rather than left for yt-dlp to fill from the source. Characters a filesystem rejects
      * are replaced first, and a substituted value is never allowed to be empty.
+     *
+     * A `-o` in the extra download arguments replaces the file name setting, folders included.
      */
-    private fun outputTemplate(options: DownloadOptions, title: String, author: String): String {
-        var template = FilenameTemplate.normalize(options.filenameTemplate)
+    private fun resolveOutputPath(
+        options: DownloadOptions,
+        title: String,
+        author: String,
+        settings: AdvancedSettings
+    ): OutputPath {
+        val custom = settings.outputPathOverride()
+        if (custom == null && settings.outputTemplateText() != null) {
+            Log.w("Hazel", "Ignored the -o in the extra download arguments: not a safe folder and name template")
+        }
+        val base = custom ?: OutputPath(emptyList(), FilenameTemplate.normalize(options.filenameTemplate))
         val info = _state.value.active ?: _state.value.info
 
-        if (title.isNotBlank() && title != info?.title) {
-            template = template.replace("%(title)s", sanitizeForFilename(title))
+        fun fill(part: String, folder: Boolean = false): String {
+            var template = part
+            if (title.isNotBlank() && title != info?.title) {
+                template = template.replace("%(title)s", sanitizeForFilename(title))
+            }
+            if (author.isNotBlank() && author != info?.uploader) {
+                val safe = sanitizeForFilename(author, NAME_FIELD_BYTES.getValue("uploader"))
+                template = template
+                    .replace("%(uploader)s", safe)
+                    .replace("%(channel)s", safe)
+            }
+            // yt-dlp does not shorten the site's text, so byte limits keep each name and folder under 255 bytes.
+            return if (folder) {
+                FilenameTemplate.limitFolderBytes(
+                    template, NAME_FIELD_BYTES, FOLDER_FIELD_BYTES, FOLDER_ID_BYTES
+                )
+            } else {
+                limitNameFields(template)
+            }
         }
-        if (author.isNotBlank() && author != info?.uploader) {
-            val safe = sanitizeForFilename(author, NAME_FIELD_BYTES.getValue("uploader"))
-            template = template
-                .replace("%(uploader)s", safe)
-                .replace("%(channel)s", safe)
-        }
-        // yt-dlp fills these with the text as the site gave it and does not shorten it, so a
-        // post whose caption is its title failed with "File name too long". Its byte limit
-        // on a field keeps the name inside the 255 bytes a file name may have, whatever the
-        // script.
-        return limitNameFields(template)
+
+        // App text in a folder name is not cleaned by yt-dlp; see FilenameTemplate.containFolder.
+        return OutputPath(
+            base.folders.map { FilenameTemplate.containFolder(fill(it, folder = true)) },
+            fill(base.fileTemplate)
+        )
     }
 
     /**
@@ -2842,6 +2980,17 @@ class DownloadViewModel : ViewModel() {
     }
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
+        // An ffmpeg left by an earlier stop would compete with this run.
+        if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()
+        val watcher = if (liveRun) startCutWatcher() else null
+        try {
+            runYtDlp(request)
+        } finally {
+            watcher?.cancel()
+        }
+    }
+
+    private fun runYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
         val steps = plannedSteps
         // Whether this run has moved on from transferring to working on the file. Held here
@@ -2850,6 +2999,8 @@ class DownloadViewModel : ViewModel() {
         // this one, otherwise stuck the card on the stage track while bytes were still
         // arriving.
         var postProcessing = false
+        var shownProcessing = false
+        var lastShownAt = 0L
         _state.update { s -> s.copy(
             processingSteps = steps,
             processingStep = 0,
@@ -2857,8 +3008,13 @@ class DownloadViewModel : ViewModel() {
             eta = ""
         ) }
         YtDlpEngine.execute(request, processId) { progress, _, line ->
-            refreshFloorFromDisk()
-            val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
+            if (cutRun && CutProgress.isProgressLine(line)) {
+                onCutReport(line)
+                return@execute
+            }
+            if (!cutRun) refreshFloorFromDisk()
+            val percent = if (cutRun) cutFraction * 100f
+            else progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
             when {
                 isPostProcessing(line) -> postProcessing = true
@@ -2870,35 +3026,69 @@ class DownloadViewModel : ViewModel() {
             // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
-            _state.update { current -> current.copy(
-                progress = percent / 100f,
-                totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
-                else parseTotalBytes(line) ?: current.totalBytes,
-                eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
-                status = status,
-                isProcessing = postProcessing,
-                processingStep = maxOf(current.processingStep, announced, fetched)
-            ) }
+            val unmeasured = liveRun
+            // yt-dlp writes many lines a second; each state change redraws every screen
+            // watching it, so plain progress is passed on a few times a second and a stage
+            // change at once.
+            val now = System.currentTimeMillis()
+            val stageMoved = announced > _state.value.processingStep || postProcessing != shownProcessing
+            if (stageMoved || now - lastShownAt >= UI_INTERVAL_MS) {
+                lastShownAt = now
+                shownProcessing = postProcessing
+                _state.update { current -> current.copy(
+                    progress = if (unmeasured) 0f else percent / 100f,
+                    unmeasured = unmeasured,
+                    totalBytes = if (unmeasured) 0L
+                    else if (expectedTotalBytes > 0) expectedTotalBytes
+                    else parseTotalBytes(line) ?: current.totalBytes,
+                    eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
+                    status = status,
+                    isProcessing = postProcessing && !unmeasured,
+                    processingStep = maxOf(current.processingStep, announced, fetched)
+                ) }
+            }
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
             // the same percentage for seconds at a time on a large transfer while the speed
             // and ETA behind it keep moving, so pacing on the percentage left the
             // notification showing figures that were already out of date.
-            val now = System.currentTimeMillis()
             if (now - lastNotifiedAt >= NOTIFICATION_INTERVAL_MS) {
                 lastNotifiedAt = now
                 downloadContext?.let {
                     val total = _state.value.totalBytes
                     DownloadNotificationHelper.showProgress(
                         context = it,
-                        progress = percent.toInt(),
+                        progress = if (unmeasured) -1 else percent.toInt(),
                         statusLine = status,
                         mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
-                        doneBytes = (total * percent / 100f).toLong(),
+                        doneBytes = if (unmeasured) _state.value.liveBytes else (total * percent / 100f).toLong(),
                         totalBytes = total
                     )
                 }
             }
+        }
+    }
+
+    private fun enterStage(app: Context, step: ProcessingStep, status: String, title: String) {
+        val index = _state.value.processingSteps.indexOf(step)
+        _state.update { s -> s.copy(
+            status = status,
+            isProcessing = true,
+            unmeasured = false,
+            eta = "",
+            processingStep = if (index >= 0) maxOf(s.processingStep, index) else s.processingStep
+        ) }
+        DownloadNotificationHelper.showProgress(app, -1, status, title)
+    }
+
+    /** Throws [CancellationException] when stopped, so the loop's pause/cancel handling applies. */
+    private fun trimLocally(app: Context, plan: DownloadPlan, options: DownloadOptions) {
+        enterStage(app, ProcessingStep.TRIM, "Trimming", plan.title)
+        val result = LocalTrim.trim(app, downloadDir, options.sectionStart, options.sectionEnd)
+        if (result.stopped) throw CancellationException("Trim stopped")
+        if (!result.ok) {
+            val raw = "Trim failed" + result.message.trim().takeIf { it.isNotEmpty() }?.let { ": $it" }.orEmpty()
+            throw IllegalStateException(raw + "\nERROR: " + sanitizeError(raw))
         }
     }
 
@@ -2916,10 +3106,20 @@ class DownloadViewModel : ViewModel() {
         // Purge fragments first: the move publishes every file it finds, so a leftover
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
+        // A title starting with "." gives a hidden file that galleries and file managers skip.
+        com.hazel.android.util.StagedFiles.unhideFiles(downloadDir) {
+            Log.w("Hazel", "Could not rename a file starting with a dot")
+        }
 
-        val latestFile = downloadDir.listFiles()?.filter { it.isFile }
-            ?.maxByOrNull { it.lastModified() }
+        val latest = com.hazel.android.util.StagedFiles.list(
+            downloadDir,
+            onSkipped = { Log.w("Hazel", "Not saved, it is a link: ${it.name}") }
+        ).maxByOrNull { it.file.lastModified() }
+        val latestFile = latest?.file
         val fileName = latestFile?.name ?: "File saved"
+        // Folders from the output template, as the save names them, so "Saved to" points at the file's own folder.
+        val subFolders = latest?.subPath?.let(com.hazel.android.util.StagedFiles::publishSubPath).orEmpty()
+        fun withSubFolders(base: String) = if (subFolders.isEmpty()) base else "$base/$subFolders"
 
         // Measured off the finished file rather than taken from the transfer figures. Those
         // count one stream at a time, so a video muxed from separate video and audio streams
@@ -2942,7 +3142,7 @@ class DownloadViewModel : ViewModel() {
         var savedUri: android.net.Uri? = null
 
         val movedToTree = tree != null && try {
-            com.hazel.android.util.MediaStoreHelper.moveToTree(context, downloadDir, tree) {
+            com.hazel.android.util.MediaStoreHelper.moveToTree(context, downloadDir, tree, keepFolders = true) {
                 savedUri = it
             }
         } catch (_: Exception) {
@@ -2954,19 +3154,19 @@ class DownloadViewModel : ViewModel() {
         val finalDir: File
 
         if (tree != null && movedToTree) {
-            savedPath = com.hazel.android.util.MediaStoreHelper.describeTree(tree)
+            savedPath = withSubFolders(com.hazel.android.util.MediaStoreHelper.describeTree(tree))
             finalDir = downloadDir
         } else {
             finalDir = try {
                 com.hazel.android.util.MediaStoreHelper.moveToPublicStorage(
                     context, downloadDir, StoragePaths.downloadRelativePath(isAudio = isMusic),
-                    isMusic = isMusic
+                    isMusic = isMusic, keepFolders = true
                 ) { savedUri = it }
             } catch (_: Exception) {
                 // MediaStore move failed; the files stay in app storage and remain accessible.
                 downloadDir
             }
-            savedPath = StoragePaths.downloadsDisplay(isAudio = isMusic)
+            savedPath = withSubFolders(StoragePaths.downloadsDisplay(isAudio = isMusic))
 
             // The picked folder refused the file. It was kept rather than lost, and the
             // user is told where, once per run however many downloads it happened to.
@@ -2980,10 +3180,13 @@ class DownloadViewModel : ViewModel() {
             }
         }
 
-        com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
         // The download's own folder is empty once its file has moved, and goes. A file the
         // move could not publish stays in it, and a folder with anything in it is not deleted.
-        runCatching { downloadDir.delete() }
+        // Empty folders from the output template go first.
+        runCatching {
+            com.hazel.android.util.StagedFiles.pruneEmptyFolders(downloadDir)
+            downloadDir.delete()
+        }
 
         _state.update { s -> s.copy(
             progress = 1f,
@@ -3036,7 +3239,10 @@ class DownloadViewModel : ViewModel() {
                     title = info.title,
                     author = info.uploader,
                     thumbnail = info.thumbnail,
-                    durationSeconds = info.durationSeconds,
+                    durationSeconds = if (options.hasSection) {
+                        CutProgress.keptSeconds(info.durationSeconds, options.sectionStart, options.sectionEnd)
+                            .roundToInt().coerceAtLeast(1)
+                    } else info.durationSeconds,
                     fileName = fileName,
                     fileUri = savedUri?.toString().orEmpty(),
                     savedPath = savedPath,
@@ -3093,6 +3299,79 @@ class DownloadViewModel : ViewModel() {
         return (onDisk.toFloat() / expectedTotalBytes).coerceIn(0f, 0.99f)
     }
 
+    /** Follows a cut by its file size each second, until ffmpeg's first report or the run ends. */
+    private fun startCutWatcher(): Job = downloadScope.launch {
+        while (isActive && liveRun) {
+            delay(CUT_POLL_INTERVAL_MS)
+            try {
+                publishCutProgress()
+            } catch (e: Exception) {
+                Log.w("Hazel", "Cut progress read failed: ${e.message}")
+            }
+        }
+    }
+
+    private fun publishCutProgress() {
+        val current = _state.value
+        if (!current.isDownloading || !current.unmeasured) return
+
+        // Forward only: the part file is renamed and replaced as the run goes on.
+        val bytes = maxOf(CutProgress.mediaBytesIn(downloadDir), current.liveBytes)
+        if (bytes != current.liveBytes) _state.update { it.copy(liveBytes = bytes) }
+
+        val now = System.currentTimeMillis()
+        if (now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
+        lastNotifiedAt = now
+        downloadContext?.let {
+            val state = _state.value
+            DownloadNotificationHelper.showProgress(
+                context = it,
+                progress = -1,
+                statusLine = state.status,
+                mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
+                doneBytes = state.liveBytes,
+                totalBytes = 0L
+            )
+        }
+    }
+
+    /** One `-progress` line: the first with a time switches the card from size to percentage. */
+    private fun onCutReport(line: String) {
+        CutProgress.speedFactor(line)?.let { cutSpeed = it }
+        val written = CutProgress.outTimeSeconds(line) ?: return
+        val kept = cutSeconds
+        if (kept <= 0.0) return
+
+        val fraction = maxOf(cutFraction, CutProgress.fraction(written, kept))
+        val switching = liveRun
+        if (!switching && fraction == cutFraction) return
+        cutFraction = fraction
+        liveRun = false
+
+        val eta = CutProgress.etaSeconds(written, kept, cutSpeed)?.let(CutProgress::clock)
+        _state.update { current -> current.copy(
+            progress = fraction,
+            unmeasured = false,
+            totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes else current.totalBytes,
+            eta = eta ?: current.eta
+        ) }
+
+        val now = System.currentTimeMillis()
+        if (!switching && now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
+        lastNotifiedAt = now
+        downloadContext?.let {
+            val state = _state.value
+            DownloadNotificationHelper.showProgress(
+                context = it,
+                progress = (fraction * 100f).toInt(),
+                statusLine = state.status,
+                mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
+                doneBytes = (state.totalBytes * fraction).toLong(),
+                totalBytes = state.totalBytes
+            )
+        }
+    }
+
     /**
      * Re-measures the temp directory, at most once a second.
      *
@@ -3112,12 +3391,8 @@ class DownloadViewModel : ViewModel() {
 
     private fun purgeFragments() {
         try {
-            downloadDir.listFiles()?.forEach { f ->
-                if (f.isFile && (f.name.endsWith(".part") || f.name.endsWith(".ytdl")
-                            || f.name.endsWith(".temp") || f.name.startsWith("."))
-                ) {
-                    f.delete()
-                }
+            com.hazel.android.util.StagedFiles.list(downloadDir).forEach { staged ->
+                if (isWorkLeftover(staged.file.name)) staged.file.delete()
             }
         } catch (_: Exception) { /* best-effort cleanup */ }
     }
@@ -3206,15 +3481,15 @@ class DownloadViewModel : ViewModel() {
      * format that reported no size at all leaves this at 0, and the progress line's own
      * figure is used instead, which is the best there is in that case.
      */
-    private fun expectedTotalFor(plan: DownloadPlan): Long {
-        val format = plan.format
-        if (format.fileSizeBytes <= 0L) return 0L
+    private fun expectedTotalFor(plan: DownloadPlan, options: DownloadOptions): Long {
+        // The track for the soundtrack that was picked, the same one the command asks for.
+        val whole = plan.format.bytesWith(plan.info.mergeAudioFor(plan.audioLanguage))
+        if (whole <= 0L) return 0L
+        if (!options.cutsWhileDownloading) return whole
 
-        val mergedAudio = if (format.hasVideo && !format.hasAudio) {
-            plan.info.mergeAudio?.fileSizeBytes ?: 0L
-        } else 0L
-
-        return format.fileSizeBytes + mergedAudio
+        return CutProgress.expectedBytes(
+            whole, plan.info.durationSeconds, options.sectionStart, options.sectionEnd
+        )
     }
 
     private fun parseTotalBytes(line: String): Long? {
@@ -3273,6 +3548,12 @@ class DownloadViewModel : ViewModel() {
     private fun sanitizeError(raw: String): String {
         val lower = raw.lowercase()
         return when {
+            "no space left" in lower
+                -> "Not enough storage space"
+
+            lower.startsWith("trim failed")
+                -> "Trimming failed. Try again, or turn off Trim after download"
+
             "is not a valid url" in lower || "unsupported url" in lower ||
                     "no suitable infoextractor" in lower
                 -> "Invalid or unsupported URL"
@@ -3336,6 +3617,10 @@ class DownloadViewModel : ViewModel() {
         /** The most a title may take of a file name, in UTF-8 bytes; 255 is the limit. */
         const val MAX_NAME_BYTES = 120
 
+        /** Byte limit for folder fields [NAME_FIELD_BYTES] does not list, and for ids. */
+        const val FOLDER_FIELD_BYTES = 60
+        const val FOLDER_ID_BYTES = 120
+
         /**
          * Template fields that carry whatever text the site gave, with the bytes each may
          * take. A title and a name together, plus the extension and the suffixes yt-dlp adds
@@ -3369,9 +3654,12 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the progress notification is redrawn while a transfer runs. */
         const val NOTIFICATION_INTERVAL_MS = 600L
+        const val UI_INTERVAL_MS = 250L
 
         /** How often the temp directory is weighed while a transfer runs. */
         const val FLOOR_INTERVAL_MS = 1000L
+
+        const val CUT_POLL_INTERVAL_MS = 1000L
 
         /** Stages that run once the transfer itself has finished. */
         val POST_PROCESS_MARKERS = listOf(
@@ -3552,14 +3840,23 @@ internal data class RunCounts(val total: Int, val done: Int, val failed: Int, va
 }
 
 /**
+ * True for a file a run leaves behind: yt-dlp's part, fragment, state and temp files and the
+ * trim's done marker. A finished file is never matched by its name alone, so a title starting
+ * with "." is kept.
+ */
+internal fun isWorkLeftover(name: String): Boolean =
+    name.endsWith(".part") || ".part-Frag" in name || name.endsWith(".ytdl") ||
+        name.endsWith(".temp") || name == LocalTrim.DONE_MARKER
+
+/**
  * The bytes a download's work folder holds, its engine bookkeeping aside. Zero for a folder
  * that is missing or cannot be read: a figure for a progress readout, never a reason to fail.
  */
 internal fun bytesIn(dir: File): Long = try {
-    dir.listFiles()
-        ?.filter { it.isFile && !it.name.endsWith(".ytdl") }
-        ?.sumOf { it.length() }
-        ?: 0L
+    // Runs about once a second, so it skips the per-entry link checks.
+    com.hazel.android.util.StagedFiles.list(dir, checkLinks = false)
+        .filter { !it.file.name.endsWith(".ytdl") }
+        .sumOf { it.file.length() }
 } catch (_: Exception) {
     0L
 }
@@ -3569,8 +3866,11 @@ internal fun bytesIn(dir: File): Long = try {
  * run behind it to say: one paused by an earlier session, or paused while another runs.
  * Capped short of whole, as the run's own floor is. Zero when the size is not known. Reads
  * the disk, so it is called off the main thread.
+ *
+ * Always zero for a cut, which resumes from the beginning.
  */
 internal fun pausedFraction(item: QueuedDownload): Float {
+    if (item.options.cutsWhileDownloading) return 0f
     val expected = item.fileSizeBytes + item.mergeAudioSizeBytes
     if (expected <= 0L) return 0f
     val onDisk = workDirsFor(item.url).sumOf { bytesIn(it) }
@@ -3619,10 +3919,10 @@ internal object PausedShares {
  */
 internal fun pausedTotal(dir: File, reported: Long): Long {
     val finished = try {
-        dir.listFiles()
-            ?.filter { it.isFile && ".part" !in it.name && !it.name.endsWith(".ytdl") }
-            ?.sumOf { it.length() }
-            ?: 0L
+        // Includes files in output-template folders.
+        com.hazel.android.util.StagedFiles.list(dir, checkLinks = false)
+            .filter { ".part" !in it.file.name && !it.file.name.endsWith(".ytdl") }
+            .sumOf { it.file.length() }
     } catch (_: Exception) {
         0L
     }

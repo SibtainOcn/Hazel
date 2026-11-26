@@ -6,6 +6,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Gallery tab powered by gallery-dl: save photos, videos and captions from posts, profiles and galleries on Instagram, X, Reddit, Pinterest, Tumblr and many more sites.
+- Image search on Pinterest, X, Bluesky, Tumblr, DeviantArt, Instagram and Pixiv, with an optional Group by author.
+- Gallery results as cards and swipeable carousels, a fullscreen viewer with zoom and a thumbnail strip, and Download all for posts with several files.
+- Image sheet: size and video quality, save folder, file name, metadata, post date, cookies, and editable title and author.
+- Captions: view, copy, save as text, or write them into saved JPEG and PNG files.
+- Image downloads share the Queue, notifications, History (Images filter), Failed tab with logs, retry and sign-in.
+- Share targets Hazel Images and Instant Images; the video targets are now Hazel Video and Instant Video.
+- Image settings: defaults for downloads and search, retries, captions in files, and a separate Gallery save folder.
+- gallery-dl updates from PyPI on its own screen under Software update, with a built-in fallback.
+- Gallery tab keeps its results until cleared, like Home; nothing is kept in incognito.
+- Release channels: Stable, Beta and Nightly builds of Hazel, with a daily nightly and in-place switching.
+- Hazel updates: optional new-version notification and background download, with a Wi-Fi only switch.
+- Cut: three modes, Quick cut, Precise cuts and Trim after download, which saves the whole file at full speed and cuts it on the phone.
+- Save location screen with the last five folders used; hold one to open it in a file manager.
+- Cookies: one-tap sign-in for Instagram, YouTube, X, Facebook, TikTok and Reddit, account cards with Active, Expired and Signed out states, and an account sheet.
+- Download sheet: a cookie dialog showing the site's sign-in state, and an Extra arguments chip.
+- Downloads screen: a live card for the download in progress.
+- Accents: Blush, Powder, Sage and Peach.
+- Getting started: refreshed steps, one share card for all four targets, and an update preferences step.
+
+### Changed
+- Home and Queue use a calm empty state in place of the drifting stars.
+- Settings, the download sheet and the search options group their rows as connected M3 lists, with section icons on M3 shapes.
+- Format sheet: the quality rail is one connected group, the panes keep their height while formats load, and codec and id badges are crimson.
+- Home long-press card: a full-width Play button above connected Download, Open and Properties tiles.
+- Fullscreen player: Download, Minimize and Close as one connected button group.
+- Queue tabs, the Downloads rows and header buttons, and the bottom bar follow the accent's tonal colours.
+- Support Hazel screen follows the accent and theme, with a redesigned developer card.
+- Audio options use a waveform icon; Play in the download sheet is a tilted accent gem.
+- Glass: Mono is listed first, and dialogs, sheets, menus and toasts have no edge line.
+- Storage cleanup lists saved thumbnails as Downloads artwork.
+- Software update: the header shows the Hazel and yt-dlp versions; device details stay in the Device group.
+- Faster Home with large restored results, faster first opens of every screen, and less redrawing while downloading.
+
+### Fixed
+- The mini player keeps playing on every tab and screen instead of stopping when Home is left.
+- Instagram sign-in page no longer greys out or stays blank; desktop sites fit the screen and "open in app" links are ignored. (#156, #182)
+- Multi-link sheet keeps a quality picked while a link is still being read. (#157)
+- Cut downloads show real progress instead of staying at 0%. (#161)
+- Extra arguments: `-o` sets the file name and folders again, and files keep those folders. (#165)
+- yt-dlp updates work on older, low-memory and nearly full phones and resume after a dropped connection; failures say why and Retry repeats the install. (#166)
+- A download whose title starts with "." is saved instead of deleted. (#168)
+- Downloads list keeps each item's artwork after its source link expires. (#187)
+- Switching the play engine no longer breaks playback of results already on screen.
+- The player's quality change takes effect again.
+- Video sizes include the audio track, and the download card counts the picked audio language.
+- A queued, paused or running link's sheet lists every quality again.
+- Hazel updates never pick an F-Droid APK on a GitHub install, and x86 phones get the x86 APK.
+- Stopping a download no longer stops a Converter job running at the same time.
+- The notification for a download with no known size shows the size so far.
+- Files saved to a picked folder are listed by gallery and music apps, Show file opens built-in folders by path, and Properties shows the real folder.
+- Saving a download no longer rescans the whole Hazel folder.
+- Format sheet rows no longer overlap when switching quality stops.
+- Repeat downloads of the same file keep their extension, so they open normally.
 
 ## [1.1.17] - 2026-10-29
 ### Added

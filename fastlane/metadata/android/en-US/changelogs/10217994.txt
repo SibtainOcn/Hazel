@@ -1,0 +1,7 @@
+* New Gallery tab: save photos, videos and captions from Instagram, X, Reddit, Pinterest and more via gallery-dl
+* Image search with Group by author, and a fullscreen viewer
+* Trim after download: full-speed download, cut on the phone
+* Stable, Beta and Nightly update channels
+* Account cards and one-tap sign-in for six sites
+* Mini player keeps playing on every screen
+* Fixed Instagram sign-in, cut progress, -o folders and yt-dlp updates on low-memory phones

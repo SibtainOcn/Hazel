@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HighQuality
@@ -33,6 +34,7 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.AudioCodec
+import com.hazel.android.download.CutMode
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.SponsorBlock
 import com.hazel.android.download.VIDEO_CONTAINERS
@@ -138,6 +140,14 @@ fun ProcessingScreen(onBack: () -> Unit) {
                         value = options.sponsorBlockApiUrl.ifBlank { SponsorBlock.API_URL },
                         enabled = options.useSponsorBlock,
                         onClick = { dialog = ProcessingDialog.SPONSORBLOCK_SERVER }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.ContentCut,
+                        title = stringResource(R.string.options_cut_mode),
+                        value = stringResource(cutModeLabel(options.cutMode)),
+                        onClick = { dialog = ProcessingDialog.CUT_MODE }
                     )
                 }
             )
@@ -326,6 +336,30 @@ fun ProcessingScreen(onBack: () -> Unit) {
             onDismiss = close
         )
 
+        ProcessingDialog.CUT_MODE -> {
+            val afterAvailable = options.canTrimAfterDownload
+            SingleChoiceDialog(
+                title = stringResource(R.string.options_cut_mode),
+                choices = CutMode.entries.map { it to stringResource(cutModeLabel(it)) },
+                selected = options.cutMode,
+                onSelect = { mode ->
+                    update { it.copy(cutMode = mode) }
+                    close()
+                },
+                onDismiss = close,
+                describe = { mode ->
+                    stringResource(
+                        when (mode) {
+                            CutMode.QUICK -> R.string.options_cut_quick_summary
+                            CutMode.PRECISE -> R.string.options_cut_precise_summary
+                            CutMode.AFTER -> if (afterAvailable) R.string.options_cut_local_summary
+                                else R.string.options_cut_local_unavailable
+                        }
+                    )
+                }
+            )
+        }
+
         ProcessingDialog.SPONSORBLOCK -> SponsorBlockDialog(
             options = options,
             onConfirm = { changed ->
@@ -452,8 +486,14 @@ fun ProcessingScreen(onBack: () -> Unit) {
     }
 }
 
+private fun cutModeLabel(mode: CutMode): Int = when (mode) {
+    CutMode.QUICK -> R.string.options_cut_quick
+    CutMode.PRECISE -> R.string.options_cut_precise
+    CutMode.AFTER -> R.string.options_cut_local
+}
+
 private enum class ProcessingDialog {
-    NONE, INSTANT_SAVE_AS, SHEET_OPENS_ON, SPONSORBLOCK, SPONSORBLOCK_SERVER, BITRATE,
+    NONE, INSTANT_SAVE_AS, SHEET_OPENS_ON, SPONSORBLOCK, SPONSORBLOCK_SERVER, CUT_MODE, BITRATE,
     AUDIO_LANGUAGE, AUDIO_CODEC, AUDIO_FORMAT,
     SUBTITLE_LANGUAGES, VIDEO_FORMAT, VIDEO_CODEC, VIDEO_QUALITY, RESET
 }

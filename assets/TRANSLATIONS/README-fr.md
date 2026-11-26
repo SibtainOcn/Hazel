@@ -87,14 +87,15 @@ Si Hazel vous a été utile, pensez à soutenir son développement. Votre soutie
 ---
 ## ✨ Pourquoi choisir Hazel ?
 
-Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dlp**. Enregistrez vidéos, musique et playlists depuis **plus de 1500 sites**, sans publicité, sans pistage et sans compte.
+Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dlp** & **gallery-dl**. Enregistrez vidéos, musique et playlists depuis **plus de 1500 sites**, sans publicité, sans pistage et sans compte.
 
 <table>
   <tr><th width="50%" align="left">📥 Téléchargement</th><th width="50%" align="left">🔍 Recherche et lecture</th></tr>
   <tr><td><b>Plus de 1500 sites :</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud et <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">plus</a>.</td><td><b>Recherche :</b> YouTube, YouTube Music, SoundCloud ou Bandcamp, avec suggestions facultatives.</td></tr>
   <tr><td><b>Par lots :</b> un lien, plusieurs à la fois, ou une playlist / chaîne entière.</td><td><b>Lire d'abord :</b> lisez n'importe quel résultat sur sa carte avec barre de progression, double appui pour sauter et plein écran.</td></tr>
-  <tr><td><b>Hazel Instant :</b> partagez un lien depuis n'importe quelle app et le téléchargement démarre à votre qualité enregistrée.</td><td><b>Découper :</b> enregistrez seulement la partie voulue, choisie sur un aperçu en direct.</td></tr>
+  <tr><td><b>Hazel Instant :</b> partagez un lien depuis n'importe quelle app et le téléchargement démarre à votre qualité enregistrée.</td><td><b>Découper :</b> enregistrez seulement la partie voulue, choisie sur un aperçu en direct. Rapide, précis, ou couper après le téléchargement : le fichier entier à pleine vitesse, coupé sur votre téléphone.</td></tr>
   <tr><td><b>Votre format :</b> choisissez qualité, conteneur, piste audio, et modifiez titre / métadonnées.</td><td><b>Directs :</b> enregistrez depuis le début, ou attendez une première.</td></tr>
+  <tr><td><b>Images :</b> publications, profils et recherche d’images sur Instagram, X, Pinterest, Reddit et plus, avec les légendes.</td><td><b>Connexion :</b> connexion en un geste à Instagram, YouTube, X et plus, avec l’état de chaque compte.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ Les contributions sont les bienvenues ! Consultez notre [CONTRIBUTING.md](https:
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Gestion du dépôt F-Droid
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Le puissant moteur de téléchargement derrière Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Intégration de yt-dlp pour Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Téléchargement d’images et de galeries
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Listes, recherche et flux de lecture rapides
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Lecture fluide dans l'app
 

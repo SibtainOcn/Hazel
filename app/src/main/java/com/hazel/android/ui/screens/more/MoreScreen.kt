@@ -34,10 +34,8 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -90,6 +88,7 @@ fun MoreScreen(
     onNavigateToAppearance: () -> Unit = {},
     onNavigateToConverter: () -> Unit = {},
     onNavigateToStorageLocations: () -> Unit = {},
+    onNavigateToGallerySettings: () -> Unit = {},
     onNavigateToCookies: () -> Unit = {},
     onNavigateToFetchSettings: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
@@ -272,12 +271,7 @@ fun MoreScreen(
             }
         }
 
-        // ── Main options card ──
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
+        // ── Main options, one connected group ──
           // A name too long for its row at a large font breaks at a syllable with a hyphen,
           // rather than leaving its last letter alone on the next line.
           androidx.compose.material3.ProvideTextStyle(
@@ -286,279 +280,241 @@ fun MoreScreen(
                   lineBreak = androidx.compose.ui.text.style.LineBreak.Paragraph
               )
           ) {
-            // Appearance: theme and accent colour
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_appearance)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
+            ConnectedRows(listOf(
+                {
+                // Appearance: theme and accent colour
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_appearance)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToAppearance() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToAppearance() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Processing: what every download starts from
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_processing)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Tune, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_image_settings)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.PhotoLibrary, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToGallerySettings() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToProcessing() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Advanced: engine options for difficult sources
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_advanced)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Build, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                // Processing: what every download starts from
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_processing)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Tune, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToProcessing() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToAdvanced() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_backup)) },
-                leadingContent = {
-                    Icon(Icons.Filled.SettingsBackupRestore, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                // Advanced: engine options for difficult sources
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_advanced)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Build, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToAdvanced() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToBackup() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Download location, read-only
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_downloads)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_backup)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.SettingsBackupRestore, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToBackup() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToStorageLocations() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Language, with the current choice under it. On the right, a long language name
-            // at a large font squeezed the row's own name until it broke apart.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_language)) },
-                supportingContent = {
-                    Text(
-                        languageLabel,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                    )
+                {
+                // Download location, read-only
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_downloads)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToStorageLocations() }
+                )
                 },
-                leadingContent = {
-                    Icon(Icons.Filled.Language, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                // Language, with the current choice under it. On the right, a long language name
+                // at a large font squeezed the row's own name until it broke apart.
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_language)) },
+                    supportingContent = {
+                        Text(
+                            languageLabel,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                        )
+                    },
+                    leadingContent = {
+                        Icon(Icons.Filled.Language, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { languageDialogOpen = true }
+                )
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { languageDialogOpen = true }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Cookies: saved sign-ins that let the downloader reach gated media
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_cookies)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Cookie, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                // Cookies: saved sign-ins that let the downloader reach gated media
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_cookies)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Cookie, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToCookies() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToCookies() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Link reading: network bounds used while resolving a pasted link
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_link_reading)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
+                {
+                // Link reading: network bounds used while resolving a pasted link
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_link_reading)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToFetchSettings() }
+                )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToFetchSettings() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Working files the app holds, with the running total under the name so it is
-            // visible without opening the screen, and leaves the name room at a large font.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_temporary_files)) },
-                supportingContent = {
-                    Text(
-                        formatFileSize(tempBytes).ifBlank { "0 KB" },
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Filled.DeleteSweep, null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToStorageCleanup() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // The one tool the app has, reached directly. It used to sit behind a Tools
-            // screen that held nothing else, which is a tap and a screen to say one word.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_converter)) },
-                leadingContent = {
-                    Icon(
-                        painterResource(R.drawable.music), null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToConverter() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Software update screen (Hazel app & yt-dlp engine)
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_software_update)) },
-                leadingContent = {
-                    Box(modifier = Modifier.size(24.dp)) {
+                {
+                // Working files the app holds, with the running total under the name so it is
+                // visible without opening the screen, and leaves the name room at a large font.
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_temporary_files)) },
+                    supportingContent = {
+                        Text(
+                            formatFileSize(tempBytes).ifBlank { "0 KB" },
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    leadingContent = {
                         Icon(
-                            painter = painterResource(R.drawable.ic_software_update),
-                            contentDescription = null,
+                            Icons.Filled.DeleteSweep, null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToStorageCleanup() }
+                )
+                },
+                {
+                // The one tool the app has, reached directly. It used to sit behind a Tools
+                // screen that held nothing else, which is a tap and a screen to say one word.
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_converter)) },
+                    leadingContent = {
+                        Icon(
+                            painterResource(R.drawable.music), null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
-                        if (hasUpdateAvailable) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .align(Alignment.TopEnd)
-                                    .background(Color(0xFFFF3B30), CircleShape)
-                            )
-                        }
-                    }
-                },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToUpdate() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Above the two lines that leave the app, since this one is a screen of its
-            // own and the ones under it are addresses.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_support)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Favorite, null, tint = MaterialTheme.colorScheme.primary)
-                },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToSponsor() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // The source is offered on the Support screen above, where it sits among the
-            // other ways of helping that cost nothing. It was here as well, so the same
-            // address was reachable by two routes that behaved differently, and the one
-            // that stayed is the one with something to say about why anyone would follow it.
-
-            // The first-launch carousel again, for anyone who skipped it or installed before
-            // it said what it says now.
-            var guideOpen by remember { mutableStateOf(false) }
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_getting_started)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
-                },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { guideOpen = true }
-            )
-            if (guideOpen) {
-                com.hazel.android.ui.screens.download.GettingStartedDialog(
-                    onOpenBatterySettings = onOpenBatterySettings,
-                    onDismiss = { guideOpen = false }
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToConverter() }
                 )
-            }
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // The guide, FAQ, what's new and the licence, read in the app. Each page has a
-            // button to open it in the browser, for saving or sharing it.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_documentation)) },
-                leadingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.MenuBook, null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
                 },
-                trailingContent = { MoreChevron() },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToDocumentation() }
-            )
+                {
+                // Software update screen (Hazel app & yt-dlp engine)
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_software_update)) },
+                    leadingContent = {
+                        Box(modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_software_update),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            if (hasUpdateAvailable) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .align(Alignment.TopEnd)
+                                        .background(Color(0xFFFF3B30), CircleShape)
+                                )
+                            }
+                        }
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToUpdate() }
+                )
+                },
+                {
+                // Above the two lines that leave the app, since this one is a screen of its
+                // own and the ones under it are addresses.
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_support)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Favorite, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToSponsor() }
+                )
+                },
+                {
+                // The source is offered on the Support screen above, where it sits among the
+                // other ways of helping that cost nothing. It was here as well, so the same
+                // address was reachable by two routes that behaved differently, and the one
+                // that stayed is the one with something to say about why anyone would follow it.
+
+                // The first-launch carousel again, for anyone who skipped it or installed before
+                // it said what it says now.
+                var guideOpen by rememberSaveable { mutableStateOf(false) }
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_getting_started)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { guideOpen = true }
+                )
+                if (guideOpen) {
+                    com.hazel.android.ui.screens.download.GettingStartedDialog(
+                        onOpenBatterySettings = onOpenBatterySettings,
+                        onDismiss = { guideOpen = false }
+                    )
+                }
+                },
+                {
+                // The guide, FAQ, what's new and the licence, read in the app. Each page has a
+                // button to open it in the browser, for saving or sharing it.
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_documentation)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook, null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToDocumentation() }
+                )
+                }
+            ))
           }
-        }
         }
     }
 }

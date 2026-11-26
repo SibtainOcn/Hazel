@@ -3,10 +3,14 @@ package com.hazel.android.download
 import android.util.Log
 import com.hazel.android.HazelApp
 import com.hazel.android.update.YtDlpUpdater
+import com.hazel.android.util.SdCards
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLException
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.YoutubeDLResponse
+import android.system.Os
+import android.system.OsConstants
+import java.io.File
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
@@ -70,6 +74,47 @@ object YtDlpEngine {
     }
 
     /**
+     * Stops the run under [processId] and its ffmpeg. The library never finds Python's
+     * children, so a cut's ffmpeg kept the output pipe open and the stopped run never returned.
+     */
+    fun stop(processId: String): Boolean {
+        LocalTrim.stop()
+        val stopped = try {
+            YoutubeDL.getInstance().destroyProcessById(processId)
+        } catch (_: Exception) {
+            false
+        }
+        killStrayFfmpeg()
+        return stopped
+    }
+
+    /** Kills ffmpeg working under a download root only, so a Converter job survives. */
+    fun killStrayFfmpeg() {
+        try {
+            val roots = SdCards.workRoots()
+                .map { it.absolutePath.trimEnd('/') + "/" }
+                .filter { it.length > 1 }
+            if (roots.isEmpty()) return
+            val self = android.os.Process.myPid()
+            File("/proc").listFiles()?.forEach { dir ->
+                val pid = dir.name.toIntOrNull() ?: return@forEach
+                if (pid == self) return@forEach
+                val args = try {
+                    File(dir, "cmdline").readText().split('\u0000')
+                } catch (_: Exception) {
+                    return@forEach
+                }
+                if (!args.first().endsWith("libffmpeg.so")) return@forEach
+                // Paths arrive as `file:<path>`.
+                if (args.none { arg -> roots.any { root -> root in arg } }) return@forEach
+                try {
+                    Os.kill(pid, OsConstants.SIGKILL)
+                } catch (_: Exception) { /* already gone */ }
+            }
+        } catch (_: Exception) { /* best effort */ }
+    }
+
+    /**
      * Runs [block] only if no yt-dlp run is in flight, holding every new run back until it
      * returns. Returns null without waiting when the engine is busy.
      */
@@ -82,7 +127,7 @@ object YtDlpEngine {
         }
     }
 
-    private fun <T> shared(block: () -> T): T {
+    internal fun <T> shared(block: () -> T): T {
         lock.readLock().lock()
         Log.d("Hazel", "yt-dlp run started (${lock.readLockCount} running)")
         try {

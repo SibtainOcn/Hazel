@@ -87,14 +87,15 @@
 ---
 ## ✨ Hazel क्यों चुनें?
 
-Hazel Android के लिए **yt-dlp** द्वारा संचालित एक मुफ़्त और ओपन-सोर्स डाउनलोडर है। बिना किसी विज्ञापन, बिना ट्रैकिंग और बिना अकाउंट के **1500+ साइटों** से वीडियो, संगीत और प्लेलिस्ट सहेजें।
+Hazel Android के लिए **yt-dlp** & **gallery-dl** द्वारा संचालित एक मुफ़्त और ओपन-सोर्स डाउनलोडर है। बिना किसी विज्ञापन, बिना ट्रैकिंग और बिना अकाउंट के **1500+ साइटों** से वीडियो, संगीत और प्लेलिस्ट सहेजें।
 
 <table>
   <tr><th width="50%" align="left">📥 डाउनलोड</th><th width="50%" align="left">🔍 खोजें और चलाएं</th></tr>
   <tr><td><b>1500+ साइटें:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud और <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">अन्य</a>।</td><td><b>खोज:</b> वैकल्पिक सुझावों के साथ YouTube, YouTube Music, SoundCloud, या Bandcamp।</td></tr>
   <tr><td><b>बैच:</b> एक लिंक, एक साथ कई, या पूरी प्लेलिस्ट / चैनल।</td><td><b>पहले चलाएं:</b> प्रगति बार, स्किप करने के लिए डबल-टैप और फ़ुलस्क्रीन के साथ इसके कार्ड पर कोई भी परिणाम चलाएं।</td></tr>
-  <tr><td><b>Hazel Instant:</b> किसी भी ऐप से लिंक शेयर करें और अपनी सहेजी गई गुणवत्ता में डाउनलोड शुरू करें।</td><td><b>ट्रिम:</b> लाइव पूर्वावलोकन पर अपनी पसंद का केवल वही हिस्सा सहेजें जो आप चाहते हैं।</td></tr>
+  <tr><td><b>Hazel Instant:</b> किसी भी ऐप से लिंक शेयर करें और अपनी सहेजी गई गुणवत्ता में डाउनलोड शुरू करें।</td><td><b>ट्रिम:</b> लाइव पूर्वावलोकन पर अपनी पसंद का केवल वही हिस्सा सहेजें जो आप चाहते हैं। तेज़, सटीक, या डाउनलोड के बाद ट्रिम: पूरी फ़ाइल पूरी रफ़्तार से, फिर आपके फ़ोन पर काटी जाती है।</td></tr>
   <tr><td><b>आपका फ़ॉर्मेट:</b> गुणवत्ता, कंटेनर, ऑडियो ट्रैक चुनें और शीर्षक / मेटाडेटा संपादित करें।</td><td><b>लाइव स्ट्रीम:</b> शुरुआत से रिकॉर्ड करें या प्रीमियर का इंतज़ार करें।</td></tr>
+  <tr><td><b>इमेज:</b> Instagram, X, Pinterest, Reddit और अन्य पर पोस्ट, प्रोफ़ाइल और इमेज सर्च, कैप्शन के साथ।</td><td><b>साइन-इन:</b> Instagram, YouTube, X और अन्य में एक टैप से साइन-इन, हर अकाउंट की स्थिति के साथ।</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid रिपॉजिटरी प्रबंधन
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Hazel के पीछे शक्तिशाली डाउनलोड इंजन
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Android के लिए yt-dlp एकीकरण
+* [gallery-dl](https://github.com/mikf/gallery-dl) - इमेज और गैलरी डाउनलोड
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - तेज़ लिस्टिंग, खोज और प्लेबैक स्ट्रीम
 * [Media3 ExoPlayer](https://github.com/androidx/media) - ऐप के भीतर निर्बाध प्लेबैक
 

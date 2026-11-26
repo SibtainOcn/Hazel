@@ -9,6 +9,12 @@ import com.hazel.android.R
  * These are the knobs yt-dlp is given on top of the chosen format. They persist between
  * downloads, so the sheet always reopens on the settings that were last used.
  */
+/**
+ * How a cut is made: [QUICK] has yt-dlp fetch only the part, cut at keyframes; [PRECISE] also
+ * re-encodes the ends; [AFTER] downloads the whole file and trims it on the phone.
+ */
+enum class CutMode { QUICK, PRECISE, AFTER }
+
 data class DownloadOptions(
     /** Output container. Blank means "Default": whatever the source already provides. */
     val videoContainer: String = "",
@@ -58,6 +64,8 @@ data class DownloadOptions(
     val videoQuality: Int = 0,
     /** The download sheet opens on its Audio tab rather than Video, where the link has audio. */
     val sheetOpensOnAudio: Boolean = false,
+    /** How a cut is made, the same choice in the Cut sheet and in Processing. */
+    val cutMode: CutMode = CutMode.QUICK,
 
     // ── For one download only. Set from the sheet as the download starts, carried with it
     // in the queue, and never saved as a setting, so the next download does not inherit a
@@ -69,6 +77,7 @@ data class DownloadOptions(
     val sectionEnd: Double = -1.0,
     /** `--force-keyframes-at-cuts`: exact cut points, at the cost of re-encoding around them. */
     val preciseCuts: Boolean = false,
+    val trimAfterDownload: Boolean = false,
     /** `--live-from-start`: a stream already live is taken from its beginning, not from now. */
     val liveFromStart: Boolean = false,
     /** `--wait-for-video`: a stream not started yet is waited for, then downloaded. */
@@ -77,6 +86,21 @@ data class DownloadOptions(
     /** True when only part of the media is to be downloaded. */
     val hasSection: Boolean
         get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+
+    /**
+     * Whether the whole file may be downloaded and cut afterwards. Not when SponsorBlock removes
+     * segments (the timeline shifts), chapters are split, or a live stream is taken from its start.
+     */
+    val canTrimAfterDownload: Boolean
+        get() = !splitByChapters && !liveFromStart &&
+            !(useSponsorBlock && sponsorBlockFilters.any { it.isNotBlank() })
+
+    /** The whole file is downloaded, then cut by [LocalTrim]; otherwise yt-dlp cuts while downloading. */
+    val trimsAfterDownload: Boolean
+        get() = hasSection && trimAfterDownload && !preciseCuts && canTrimAfterDownload
+
+    val cutsWhileDownloading: Boolean
+        get() = hasSection && !trimsAfterDownload
 
     val audioCodecPreference: AudioCodec?
         get() = AudioCodec.entries.firstOrNull { it.name == preferredAudioCodec }
@@ -111,7 +135,8 @@ data class DownloadOptions(
     fun with(oneOff: OneOffOptions): DownloadOptions = copy(
         sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
         sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
-        preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
+        preciseCuts = oneOff.hasSection && cutMode == CutMode.PRECISE,
+        trimAfterDownload = oneOff.hasSection && cutMode == CutMode.AFTER,
         liveFromStart = oneOff.liveFromStart,
         waitForVideo = oneOff.waitForVideo
     )
@@ -138,7 +163,6 @@ data class DownloadOptions(
 data class OneOffOptions(
     val sectionStart: Double = -1.0,
     val sectionEnd: Double = -1.0,
-    val preciseCuts: Boolean = false,
     val liveFromStart: Boolean = false,
     val waitForVideo: Boolean = false
 ) {

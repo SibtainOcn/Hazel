@@ -8,6 +8,7 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,6 +55,8 @@ object MediaProbe {
         val attempts = signInAttempts(url, access)
 
         attempts.forEachIndexed { index, attempt ->
+            // A stopped read surfaces as the engine's own error; no fallback read follows it.
+            ensureActive()
             try {
                 return@withContext readOne(
                     url, cacheDir, attempt, fetchMode, forceIpv4, processId,
@@ -167,6 +170,7 @@ object MediaProbe {
         val attempts = signInAttempts(url, access)
 
         attempts.forEachIndexed { index, attempt ->
+            ensureActive()
             try {
                 return@withContext listOne(
                     url, cacheDir, attempt, fetchMode, forceIpv4, processId,

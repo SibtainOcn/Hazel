@@ -7,14 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Icon
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
-import com.hazel.android.ui.components.ShapeIconButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -23,14 +19,17 @@ import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import com.hazel.android.ui.components.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,29 +37,37 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.ui.theme.sheetBlackColor
+import com.hazel.android.gallery.GallerySearchSite
+import com.hazel.android.gallery.GalleryShow
+import com.hazel.android.ui.components.BetaTag
+import com.hazel.android.ui.components.ModalBottomSheet
+import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
-import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
+import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SwitchSettingRow
-import com.hazel.android.ui.screens.more.engineSummary
 import com.hazel.android.ui.screens.more.ValueSettingRow
+import com.hazel.android.ui.screens.more.engineSummary
+import com.hazel.android.ui.theme.sheetBlackColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * The search overflow, opened from the home bar and from the search screen alike, so the two
@@ -78,6 +85,7 @@ import kotlinx.coroutines.launch
 fun SearchOptionsSheet(
     onClearResults: () -> Unit,
     onDismiss: () -> Unit,
+    imagesFirst: Boolean = false,
     /** Told how a clear went, after the sheet has slid away, so the screen can say so. */
     onCleared: (message: String, ok: Boolean) -> Unit = { _, _ -> }
 ) {
@@ -113,10 +121,22 @@ fun SearchOptionsSheet(
             ::SearchPrefs
         )
     }.collectAsState(initial = null)
+    val galleryPrefs by remember(context) {
+        combine(
+            SettingsRepository.getGallerySearchSite(context),
+            SettingsRepository.getGalleryPostsPerSearch(context),
+            SettingsRepository.getGalleryShow(context),
+            SettingsRepository.getGallerySkipReposts(context),
+            SettingsRepository.getGalleryGroupByAuthor(context),
+            ::GalleryPrefs
+        )
+    }.collectAsState(initial = null)
+    var imagesTab by remember { mutableStateOf(imagesFirst) }
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
     val current = prefs ?: return
+    val gallery = galleryPrefs ?: return
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -160,6 +180,76 @@ fun SearchOptionsSheet(
                     filled = true,
                     onClick = { if (!finishing) open = SearchChoice.CLEAR_RESULTS }
                 )
+            }
+
+            Row(
+                modifier = Modifier.offset(x = -SHEET_TAB_PADDING).padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                SheetTab(
+                    label = stringResource(R.string.search_options_tab_videos),
+                    selected = !imagesTab,
+                    enabled = true,
+                    onClick = { imagesTab = false }
+                )
+                SheetTab(
+                    label = stringResource(R.string.search_source_images),
+                    selected = imagesTab,
+                    enabled = true,
+                    trailing = { BetaTag(small = true) },
+                    onClick = { imagesTab = true }
+                )
+            }
+
+            if (imagesTab) {
+                SettingsSection(
+                    title = stringResource(R.string.search_source_images),
+                    rows = listOf(
+                        {
+                            ValueSettingRow(
+                                icon = Icons.Filled.TravelExplore,
+                                title = stringResource(R.string.fetch_settings_search_on),
+                                value = gallery.site.label,
+                                onClick = { open = SearchChoice.GALLERY_SITE }
+                            )
+                        },
+                        {
+                            ValueSettingRow(
+                                icon = Icons.Filled.FormatListNumbered,
+                                title = stringResource(R.string.gallery_posts_per_search),
+                                value = gallery.posts.toString(),
+                                onClick = { open = SearchChoice.GALLERY_POSTS }
+                            )
+                        },
+                        {
+                            ValueSettingRow(
+                                icon = Icons.Filled.PhotoLibrary,
+                                title = stringResource(R.string.gallery_show),
+                                value = stringResource(showLabel(gallery.show)),
+                                onClick = { open = SearchChoice.GALLERY_SHOW }
+                            )
+                        },
+                        {
+                            SwitchSettingRow(
+                                icon = Icons.Filled.Repeat,
+                                title = stringResource(R.string.gallery_skip_reposts),
+                                checked = gallery.skipReposts,
+                                onCheckedChange = { on -> scope.launch { SettingsRepository.setGallerySkipReposts(context, on) } }
+                            )
+                        },
+                        {
+                            SwitchSettingRow(
+                                icon = Icons.Filled.ViewCarousel,
+                                title = stringResource(R.string.gallery_group_by_author),
+                                summary = stringResource(R.string.gallery_group_by_author_summary),
+                                checked = gallery.groupByAuthor,
+                                onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryGroupByAuthor(context, on) } }
+                            )
+                        }
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                return@Column
             }
 
             SettingsSection(
@@ -248,6 +338,27 @@ fun SearchOptionsSheet(
             onDismiss = close,
             describe = { engineSummary(it) }
         )
+        SearchChoice.GALLERY_SITE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_search_on),
+            choices = GallerySearchSite.entries.map { it to it.label },
+            selected = gallery.site,
+            onSelect = { scope.launch { SettingsRepository.setGallerySearchSite(context, it) }; close() },
+            onDismiss = close
+        )
+        SearchChoice.GALLERY_POSTS -> SingleChoiceDialog(
+            title = stringResource(R.string.gallery_posts_per_search),
+            choices = SettingsRepository.GALLERY_POST_COUNTS.map { it to it.toString() },
+            selected = gallery.posts,
+            onSelect = { scope.launch { SettingsRepository.setGalleryPostsPerSearch(context, it) }; close() },
+            onDismiss = close
+        )
+        SearchChoice.GALLERY_SHOW -> SingleChoiceDialog(
+            title = stringResource(R.string.gallery_show),
+            choices = GalleryShow.entries.map { it to stringResource(showLabel(it)) },
+            selected = gallery.show,
+            onSelect = { scope.launch { SettingsRepository.setGalleryShow(context, it) }; close() },
+            onDismiss = close
+        )
         SearchChoice.SUGGESTIONS -> SuggestionsConsentDialog(
             onConfirm = { scope.launch { SettingsRepository.setSearchSuggestions(context, true) }; close() },
             onDismiss = close
@@ -297,7 +408,24 @@ private data class SearchPrefs(
     val playEngine: ListingSource
 )
 
-private enum class SearchChoice { NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY }
+private data class GalleryPrefs(
+    val site: GallerySearchSite,
+    val posts: Int,
+    val show: GalleryShow,
+    val skipReposts: Boolean,
+    val groupByAuthor: Boolean
+)
+
+private fun showLabel(show: GalleryShow): Int = when (show) {
+    GalleryShow.ALL -> R.string.gallery_show_all
+    GalleryShow.IMAGES -> R.string.gallery_show_images
+    GalleryShow.VIDEOS -> R.string.gallery_show_videos
+}
+
+private enum class SearchChoice {
+    NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY,
+    GALLERY_SITE, GALLERY_POSTS, GALLERY_SHOW
+}
 
 /** A clear action on a six-sided cookie, named in a small line under it. */
 @Composable

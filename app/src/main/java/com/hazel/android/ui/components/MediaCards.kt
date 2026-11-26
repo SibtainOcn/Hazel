@@ -110,15 +110,20 @@ fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float = 0f,
+    unmeasured: Boolean = false,
+    liveBytes: Long = 0L,
     totalBytes: Long = 0L,
     eta: String = "",
+    /** A figure of its own, such as how many files a gallery job has fetched. */
+    note: String = "",
     isComplete: Boolean = false,
     batchItem: BatchItem? = null,
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit = {},
     onCancel: () -> Unit = {},
-    onPause: () -> Unit = {},
+    /** Null for a download that cannot be paused, which then offers no Pause. */
+    onPause: (() -> Unit)? = {},
     onResume: () -> Unit = {},
     onDetails: (() -> Unit)? = null
 ) {
@@ -211,7 +216,9 @@ fun MediaCard(
             // The stage track goes under the title and the readouts, so its shade dims the
             // artwork and not the words laid over it. Fetch is the stage until the transfer is
             // over, and its line fills with it.
-            if (isDownloading && processingSteps.isNotEmpty()) {
+            if (isDownloading && unmeasured) {
+                LiveProgressLine(modifier = Modifier.fillMaxSize())
+            } else if (isDownloading && processingSteps.isNotEmpty()) {
                 ProcessingTracker(
                     steps = processingSteps,
                     current = if (isProcessing) processingStep else 0,
@@ -288,7 +295,7 @@ fun MediaCard(
                                     onResume()
                                 }
                             )
-                        } else if (isDownloading) {
+                        } else if (isDownloading && onPause != null) {
                             // Nothing is left to hold once the file is being worked on.
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_pause)) },
@@ -336,13 +343,16 @@ fun MediaCard(
                         val percent = (progress * 100f).toInt().coerceIn(0, 99)
                         if (percent >= 1) add(stringResource(R.string.download_percent_downloaded, percent))
                     }
-                    if (totalBytes > 0) {
+                    if (unmeasured) {
+                        if (liveBytes > 0) add(formatFileSize(liveBytes))
+                    } else if (totalBytes > 0) {
                         // A paused figure stands still, so it is shown as it is rather than
                         // counted up to each time the card is drawn again.
                         val shown = if (isPaused) progress else animatedProgress
                         val done = (totalBytes * shown).toLong().coerceAtLeast(1L)
                         add("${formatFileSize(done)} / ${formatFileSize(totalBytes)}")
                     }
+                    if (note.isNotBlank()) add(note)
                     if (transferring && eta.isNotBlank()) add(stringResource(R.string.queue_header_eta, eta))
                 }
                 if (figures.isNotEmpty()) {

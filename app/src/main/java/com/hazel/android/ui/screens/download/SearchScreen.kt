@@ -1,16 +1,15 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.ui.theme.glassScreen
-import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,30 +26,35 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import com.hazel.android.ui.components.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -62,48 +66,52 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
-import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.semantics.semantics
-import com.hazel.android.ui.components.pressScale
+import com.hazel.android.gallery.GalleryRequest
+import com.hazel.android.gallery.GallerySearchSite
+import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.components.AlertDialog
 import com.hazel.android.ui.components.pressCorner
-import androidx.compose.ui.semantics.selected
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material.icons.filled.PlayArrow
+import com.hazel.android.ui.components.pressScale
+import com.hazel.android.ui.screens.gallery.GallerySiteRow
 import com.hazel.android.ui.screens.more.groupShape
+import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
+import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.net.URI
 
 /**
  * Full screen search and link entry.
@@ -122,6 +130,8 @@ fun SearchScreen(
     onSearch: (List<String>) -> Unit,
     onSearchWords: (String, SearchSource) -> Unit,
     onClearResults: () -> Unit = {},
+    imagesFirst: Boolean = false,
+    onSearchImages: (GalleryRequest) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -157,6 +167,16 @@ fun SearchScreen(
 
     val source by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
     val suggestionsOn by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
+    val imageSearchSaved by remember(context) { SettingsRepository.getImageSearch(context) }.collectAsState(initial = imagesFirst)
+    var imagesChosen by remember { mutableStateOf(if (imagesFirst) true else null) }
+    val images = imagesChosen ?: imageSearchSaved
+    val gallerySite by remember(context) { SettingsRepository.getGallerySearchSite(context) }
+        .collectAsState(initial = GallerySearchSite.DEFAULT)
+
+    fun chooseImages(on: Boolean) {
+        imagesChosen = on
+        scope.launch { SettingsRepository.setImageSearch(context, on) }
+    }
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -220,7 +240,22 @@ fun SearchScreen(
         onSearchWords(words.trim(), source)
     }
 
+    fun submitImages() {
+        keyboard?.hide()
+        if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
+            onSearchImages(GalleryRequest.Search(text.trim(), gallerySite))
+            return
+        }
+        val links = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
+        if (links.isEmpty()) return
+        onSearchImages(GalleryRequest.Links(links))
+    }
+
     fun submit() {
+        if (images) {
+            submitImages()
+            return
+        }
         if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
             searchWords(text)
             return
@@ -513,12 +548,30 @@ fun SearchScreen(
                 SearchSource.entries.forEach { option ->
                     SourceChip(
                         label = stringResource(option.labelRes),
-                        selected = option == source,
+                        selected = !images && option == source,
                         onClick = {
+                            if (images) chooseImages(false)
                             scope.launch { SettingsRepository.setSearchSource(context, option) }
                         }
                     )
+                    if (option == SearchSource.YOUTUBE) {
+                        SourceChip(
+                            label = stringResource(R.string.search_source_images),
+                            selected = images,
+                            icon = Icons.Filled.Image,
+                            onClick = { if (!images) chooseImages(true) }
+                        )
+                    }
                 }
+            }
+
+            // Links go to gallery-dl as they are: a site to search on only applies to words.
+            AnimatedVisibility(visible = images && queued.isEmpty() && !isLinks(text)) {
+                GallerySiteRow(
+                    selected = gallerySite,
+                    onSelect = { site -> scope.launch { SettingsRepository.setGallerySearchSite(context, site) } },
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -787,14 +840,14 @@ private fun HistoryRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)),
+                .background(accentTint()),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Filled.History,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                tint = accentInk()
             )
         }
         Spacer(modifier = Modifier.width(14.dp))
@@ -819,7 +872,7 @@ private fun FillArrow(onFill: () -> Unit) {
             modifier = Modifier
                 .size(22.dp)
                 .rotate(-90f),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            tint = accentInk()
         )
     }
 }
@@ -888,7 +941,12 @@ private val WHITESPACE = Regex("""\s+""")
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun SourceChip(
+    label: String,
+    selected: Boolean,
+    icon: ImageVector = Icons.Filled.PlayArrow,
+    onClick: () -> Unit
+) {
     val accent = MaterialTheme.colorScheme.primary
     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     // Pressed, the corners tighten and the chip squeezes; choosing one morphs pill to tab.
@@ -917,7 +975,7 @@ private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
                         .background(MaterialTheme.colorScheme.onPrimary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }

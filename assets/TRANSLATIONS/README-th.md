@@ -87,14 +87,15 @@
 ---
 ## ✨ ทำไมต้อง Hazel?
 
-Hazel คือโปรแกรมดาวน์โหลดฟรีและโอเพนซอร์สสำหรับ Android ที่ขับเคลื่อนด้วย **yt-dlp** บันทึกวิดีโอ เพลง และเพลย์ลิสต์จาก **กว่า 1500 เว็บไซต์** ไม่มีโฆษณา ไม่มีการติดตาม และไม่ต้องมีบัญชี
+Hazel คือโปรแกรมดาวน์โหลดฟรีและโอเพนซอร์สสำหรับ Android ที่ขับเคลื่อนด้วย **yt-dlp** & **gallery-dl** บันทึกวิดีโอ เพลง และเพลย์ลิสต์จาก **กว่า 1500 เว็บไซต์** ไม่มีโฆษณา ไม่มีการติดตาม และไม่ต้องมีบัญชี
 
 <table>
   <tr><th width="50%" align="left">📥 การดาวน์โหลด</th><th width="50%" align="left">🔍 ค้นหาและเล่น</th></tr>
   <tr><td><b>กว่า 1500 เว็บไซต์:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud และ<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">อื่น ๆ</a></td><td><b>ค้นหา:</b> YouTube, YouTube Music, SoundCloud หรือ Bandcamp พร้อมคำแนะนำ (ไม่บังคับ)</td></tr>
   <tr><td><b>แบบกลุ่ม:</b> ลิงก์เดียว หลายลิงก์พร้อมกัน หรือทั้งเพลย์ลิสต์ / ช่อง</td><td><b>เล่นก่อน:</b> เล่นผลลัพธ์ใดก็ได้บนการ์ด พร้อมเลื่อนเวลา แตะสองครั้งเพื่อข้าม และเต็มจอ</td></tr>
-  <tr><td><b>Hazel Instant:</b> แชร์ลิงก์จากแอปใดก็ได้ แล้วเริ่มดาวน์โหลดตามคุณภาพที่บันทึกไว้</td><td><b>ตัด:</b> บันทึกเฉพาะส่วนที่ต้องการ โดยเลือกจากตัวอย่างสด</td></tr>
+  <tr><td><b>Hazel Instant:</b> แชร์ลิงก์จากแอปใดก็ได้ แล้วเริ่มดาวน์โหลดตามคุณภาพที่บันทึกไว้</td><td><b>ตัด:</b> บันทึกเฉพาะส่วนที่ต้องการ โดยเลือกจากตัวอย่างสด แบบเร็ว แบบแม่นยำ หรือตัดหลังดาวน์โหลด: ดาวน์โหลดทั้งไฟล์ด้วยความเร็วเต็มที่ แล้วตัดบนโทรศัพท์ของคุณ</td></tr>
   <tr><td><b>รูปแบบของคุณ:</b> เลือกคุณภาพ คอนเทนเนอร์ แทร็กเสียง และแก้ไขชื่อ / เมทาดาทา</td><td><b>ไลฟ์สด:</b> บันทึกตั้งแต่ต้น หรือรอรอบปฐมทัศน์</td></tr>
+  <tr><td><b>รูปภาพ:</b> โพสต์ โปรไฟล์ และการค้นหารูปภาพบน Instagram, X, Pinterest, Reddit และอื่น ๆ พร้อมคำบรรยาย</td><td><b>การลงชื่อเข้าใช้:</b> ลงชื่อเข้าใช้ Instagram, YouTube, X และอื่น ๆ ได้ในแตะเดียว พร้อมสถานะของแต่ละบัญชี</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - ดูแลคลัง F-Droid
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - เอนจินดาวน์โหลดทรงพลังเบื้องหลัง Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - การเชื่อมต่อ yt-dlp สำหรับ Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - ดาวน์โหลดรูปภาพและแกลเลอรี
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - รายการ การค้นหา และสตรีมการเล่นที่รวดเร็ว
 * [Media3 ExoPlayer](https://github.com/androidx/media) - การเล่นในแอปที่ลื่นไหล
 

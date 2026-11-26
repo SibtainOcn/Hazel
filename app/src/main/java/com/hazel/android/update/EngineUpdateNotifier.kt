@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.hazel.android.R
@@ -17,18 +18,42 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/** Posts yt-dlp update notices, each behind its toggle on the yt-dlp update screen. */
-object YtDlpUpdateNotifier {
+/** Posts engine update notices (yt-dlp, gallery-dl), each behind its toggle on the update screens. */
+object EngineUpdateNotifier {
 
     enum class Event { AVAILABLE, INSTALLED, FAILED }
 
+    enum class Engine(
+        val notificationId: Int,
+        /** yt-dlp keeps the plain event names it was stored under before gallery-dl existed. */
+        val postedKeyPrefix: String,
+        @param:StringRes val availableTitle: Int,
+        @param:StringRes val availableText: Int,
+        @param:StringRes val installedTitle: Int,
+        @param:StringRes val installedText: Int,
+        @param:StringRes val failedTitle: Int,
+        @param:StringRes val failedText: Int
+    ) {
+        YT_DLP(
+            1101, "",
+            R.string.ytdlp_update_available_title, R.string.ytdlp_update_available_text,
+            R.string.ytdlp_update_installed_title, R.string.ytdlp_update_installed_text,
+            R.string.ytdlp_update_failed_title, R.string.ytdlp_update_failed_text
+        ),
+        GALLERY_DL(
+            1102, "gallery_dl_",
+            R.string.gallery_dl_update_available_title, R.string.gallery_dl_update_available_text,
+            R.string.gallery_dl_update_installed_title, R.string.gallery_dl_update_installed_text,
+            R.string.gallery_dl_update_failed_title, R.string.gallery_dl_update_failed_text
+        )
+    }
+
     private const val CHANNEL_ID = "ytdlp_updates"
-    private const val NOTIFICATION_ID = 1101
     private const val PREFS = "ytdlp_update_notifier"
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun post(context: Context, event: Event, version: String) {
+    fun post(context: Context, engine: Engine, event: Event, version: String) {
         val app = context.applicationContext
         scope.launch {
             val enabled = when (event) {
@@ -36,21 +61,22 @@ object YtDlpUpdateNotifier {
                 Event.INSTALLED -> SettingsRepository.getUpdateNotifyComplete(app)
                 Event.FAILED -> SettingsRepository.getUpdateNotifyFailed(app)
             }.first()
-            if (!enabled || alreadyPosted(app, event, version)) return@launch
-            runCatching { show(app, event, version) }
+            if (!enabled || alreadyPosted(app, engine, event, version)) return@launch
+            runCatching { show(app, engine, event, version) }
         }
     }
 
     /** Available and failed notices are posted once per release, not on every launch. */
-    private fun alreadyPosted(context: Context, event: Event, version: String): Boolean {
+    private fun alreadyPosted(context: Context, engine: Engine, event: Event, version: String): Boolean {
         if (event == Event.INSTALLED) return false
+        val key = engine.postedKeyPrefix + event.name
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getString(event.name, null) == version) return true
-        prefs.edit().putString(event.name, version).apply()
+        if (prefs.getString(key, null) == version) return true
+        prefs.edit().putString(key, version).apply()
         return false
     }
 
-    private fun show(context: Context, event: Event, version: String) {
+    private fun show(context: Context, engine: Engine, event: Event, version: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
@@ -68,9 +94,9 @@ object YtDlpUpdateNotifier {
         }
 
         val (title, text) = when (event) {
-            Event.AVAILABLE -> R.string.ytdlp_update_available_title to R.string.ytdlp_update_available_text
-            Event.INSTALLED -> R.string.ytdlp_update_installed_title to R.string.ytdlp_update_installed_text
-            Event.FAILED -> R.string.ytdlp_update_failed_title to R.string.ytdlp_update_failed_text
+            Event.AVAILABLE -> engine.availableTitle to engine.availableText
+            Event.INSTALLED -> engine.installedTitle to engine.installedText
+            Event.FAILED -> engine.failedTitle to engine.failedText
         }
         val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -82,11 +108,11 @@ object YtDlpUpdateNotifier {
         if (launch != null) {
             builder.setContentIntent(
                 PendingIntent.getActivity(
-                    context, NOTIFICATION_ID, launch,
+                    context, engine.notificationId, launch,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             )
         }
-        mgr.notify(NOTIFICATION_ID, builder.build())
+        mgr.notify(engine.notificationId, builder.build())
     }
 }

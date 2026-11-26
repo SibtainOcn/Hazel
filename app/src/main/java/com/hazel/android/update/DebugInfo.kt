@@ -22,7 +22,13 @@ object DebugInfo {
     fun primaryAbi(): String = Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"
 
     fun build(): String =
-        "${if (HazelUpdater.isFdroid()) "F-Droid" else "GitHub"} · ${BuildConfig.BUILD_TYPE} · v${BuildConfig.VERSION_NAME}"
+        "${if (HazelUpdater.isFdroid()) "F-Droid" else "GitHub"} · ${BuildConfig.BUILD_TYPE} · " +
+            "${BuildConfig.HAZEL_CHANNEL} · v${BuildConfig.VERSION_NAME}" +
+            (buildStamp()?.let { (commit, date) -> " · $commit $date" } ?: "")
+
+    /** The short commit and date of a CI beta or nightly build; null for stable and local builds. */
+    fun buildStamp(): Pair<String, String>? =
+        BuildConfig.BUILD_COMMIT.takeIf { it.isNotBlank() }?.let { it.take(7) to BuildConfig.BUILD_DATE.ifBlank { "?" } }
 
     fun versionCode(): String = BuildConfig.VERSION_CODE.toString()
 
@@ -43,6 +49,7 @@ object DebugInfo {
         appendLine("ABI ${abis()}")
         append("Locale ${Locale.getDefault().toLanguageTag()}")
         installedLabel(context)?.let { append("\nInstalled $it") }
+        YtDlpUpdater.lastFailure(context)?.let { append("\nLast yt-dlp update failure: $it") }
     }
 
     /** Puts [text] on the clipboard; false when the system refused. */

@@ -87,21 +87,22 @@ If Hazel has been useful to you, consider supporting its development. Your suppo
 ---
 ## ✨ Why Choose Hazel?
 
-Hazel is a free, open-source downloader for Android powered by **yt-dlp**. Save videos, music and playlists from **1500+ sites** with zero ads, zero tracking and no account.
+Hazel is a free, open-source downloader for Android powered by **yt-dlp** & **gallery-dl**. Save videos, music, playlists and images from **1500+ sites** with zero ads, zero tracking and no account.
 
 <table>
   <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
   <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
   <tr><td><b>Batch:</b> one link, many at once, or a whole playlist / channel.</td><td><b>Play first:</b> stream any result on its card with seek, double tap skip and full screen.</td></tr>
-  <tr><td><b>Hazel Instant:</b> share a link from any app and it starts at your saved quality.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview.</td></tr>
+  <tr><td><b>Hazel Instant:</b> share a link from any app and it starts at your saved quality.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. Quick, precise, or trim after download: the whole file at full speed, cut on your phone.</td></tr>
   <tr><td><b>Your format:</b> pick quality, container, audio track, and edit title / metadata.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
+  <tr><td><b>Images:</b> posts, profiles and image search on Instagram, X, Pinterest, Reddit and more, with captions.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
 </table>
 
 <table>
   <tr><th width="50%" align="left">⚙️ Processing & Downloads</th><th width="50%" align="left">🔒 Privacy & Customisation</th></tr>
   <tr><td><b>SponsorBlock:</b> cut sponsors, intros and other segments.</td><td><b>No tracking:</b> no accounts, no analytics. Incognito and HTTP / SOCKS5 proxy built in.</td></tr>
   <tr><td><b>Chapters & subtitles:</b> embed, split per chapter, pick subtitle and audio languages.</td><td><b>Glass look:</b> 8 see-through styles, dark and light themes, 20+ accent colours.</td></tr>
-  <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Engine updates:</b> update yt-dlp on its own, Stable, Nightly or Master channel.</td></tr>
+  <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Updates:</b> Hazel on Stable, Beta or Nightly, with an optional notice and background download. yt-dlp updates on its own.</td></tr>
   <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, backup & restore, settings search.</td></tr>
 </table>
 
@@ -195,6 +196,7 @@ We welcome contributions! See our [CONTRIBUTING.md](https://github.com/SibtainOc
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid repository management
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - The powerful download engine behind Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - yt-dlp bindings for Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Image and gallery downloads
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Fast listing, search & playback streams
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Smooth in-app playback
 

@@ -1,5 +1,6 @@
 package com.hazel.android.ui.theme
 
+import com.hazel.android.ui.components.ProvideLoadingClock
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -100,8 +101,11 @@ fun HazelTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = HazelTypography,
-            content = content
-        )
+            typography = HazelTypography
+        ) {
+            // One loop for every loading placeholder under this theme, so a sheet and the
+            // sheet it opens move together.
+            ProvideLoadingClock(content)
+        }
     }
 }

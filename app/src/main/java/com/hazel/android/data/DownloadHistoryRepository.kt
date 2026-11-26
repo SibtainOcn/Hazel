@@ -2,8 +2,10 @@ package com.hazel.android.data
 
 import android.content.Context
 import android.net.Uri
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.util.HistoryThumbnails
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaDeleter
 import com.hazel.android.util.MediaPresence
@@ -49,8 +51,20 @@ data class HistoryEntry(
      * the file and reading its streams, and a record that was never written cannot be
      * filled in later. Entries made before this existed simply have nothing to say.
      */
-    val embedded: String = ""
+    val embedded: String = "",
+    /** A picture saved by the gallery engine; [isVideo] is false for it. */
+    val isImage: Boolean = false,
+    /** Saved by the gallery engine, as one of the files of the post at [url]. */
+    val isGallery: Boolean = false
 ) {
+    /** The type other apps are asked to open or receive it as. */
+    val mimeType: String
+        get() = when {
+            isImage -> "image/*"
+            isVideo -> "video/*"
+            else -> "audio/*"
+        }
+
     val site: String
         get() = runCatching {
             java.net.URL(url).host.removePrefix("www.")
@@ -108,6 +122,15 @@ object DownloadHistoryRepository {
     private const val LIMIT = 500
 
     private val HISTORY_KEY = stringPreferencesKey("download_history")
+    /** Set when a file is saved, cleared once the Downloads screen is opened: its tab's dot. */
+    private val UNSEEN_KEY = booleanPreferencesKey("history_unseen")
+
+    fun hasUnseen(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[UNSEEN_KEY] == true }.distinctUntilChanged()
+
+    suspend fun markSeen(context: Context) {
+        context.dataStore.edit { it.remove(UNSEEN_KEY) }
+    }
 
     fun getHistory(context: Context): Flow<List<HistoryEntry>> =
         context.dataStore.data
@@ -121,10 +144,45 @@ object DownloadHistoryRepository {
             .flowOn(Dispatchers.Default)
 
     suspend fun record(context: Context, entry: HistoryEntry) = withContext(Dispatchers.IO) {
+        var saved = entry
+        var kept = emptyList<HistoryEntry>()
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[HISTORY_KEY])
-            prefs[HISTORY_KEY] = encode((listOf(withFreeId(entry, existing)) + existing).take(LIMIT))
+            saved = withFreeId(entry, existing)
+            kept = (listOf(saved) + existing).take(LIMIT)
+            prefs[HISTORY_KEY] = encode(kept)
+            prefs[UNSEEN_KEY] = true
         }
+        // Runs after the row is saved and survives the caller being cancelled.
+        withContext(NonCancellable) {
+            HistoryThumbnails.prune(context, kept.mapTo(HashSet()) { it.id })
+            HistoryThumbnails.store(context, saved.id, saved.thumbnail, saved.fileUri, saved.isVideo)
+        }
+        Unit
+    }
+
+    /** Several finished files in one write, such as the files of one gallery post. */
+    suspend fun recordAll(context: Context, entries: List<HistoryEntry>) = withContext(Dispatchers.IO) {
+        if (entries.isEmpty()) return@withContext
+        val saved = mutableListOf<HistoryEntry>()
+        var kept = emptyList<HistoryEntry>()
+        context.dataStore.edit { prefs ->
+            saved.clear()
+            var existing = decode(prefs[HISTORY_KEY])
+            entries.forEach { entry ->
+                val free = withFreeId(entry, existing)
+                saved += free
+                existing = listOf(free) + existing
+            }
+            kept = existing.take(LIMIT)
+            prefs[HISTORY_KEY] = encode(kept)
+            prefs[UNSEEN_KEY] = true
+        }
+        withContext(NonCancellable) {
+            HistoryThumbnails.prune(context, kept.mapTo(HashSet()) { it.id })
+            saved.forEach { HistoryThumbnails.store(context, it.id, it.thumbnail, it.fileUri, it.isVideo) }
+        }
+        Unit
     }
 
     suspend fun remove(context: Context, id: Long) = removeAll(context, setOf(id))
@@ -137,6 +195,7 @@ object DownloadHistoryRepository {
             if (remaining.isEmpty()) prefs.remove(HISTORY_KEY)
             else prefs[HISTORY_KEY] = encode(remaining)
         }
+        HistoryThumbnails.delete(context, ids)
     }
 
     /**
@@ -145,13 +204,15 @@ object DownloadHistoryRepository {
      */
     fun duplicatesIn(entries: List<HistoryEntry>): Set<Long> =
         entries.sortedByDescending { it.completedAt }
-            .groupBy { LinkKey.canonical(it.url) to it.isVideo }
+            // A post's files share its link, so for them the file is what repeats.
+            .groupBy { Triple(LinkKey.canonical(it.url), it.isVideo, if (it.isGallery) it.fileName else "") }
             .values
             .flatMap { group -> group.drop(1) }
             .mapTo(mutableSetOf()) { it.id }
 
     suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(HISTORY_KEY) }
+        HistoryThumbnails.clearAll(context)
     }
 
     /**
@@ -206,6 +267,8 @@ object DownloadHistoryRepository {
                     put("codec", entry.codec)
                     put("bitrate", entry.bitrateKbps)
                     put("embedded", entry.embedded)
+                    if (entry.isImage) put("isImage", true)
+                    if (entry.isGallery) put("isGallery", true)
                 }
             )
         }
@@ -234,7 +297,9 @@ object DownloadHistoryRepository {
                         formatLabel = json.optString("formatLabel"),
                         codec = json.optString("codec"),
                         bitrateKbps = json.optDouble("bitrate", 0.0),
-                        embedded = json.optString("embedded")
+                        embedded = json.optString("embedded"),
+                        isImage = json.optBoolean("isImage"),
+                        isGallery = json.optBoolean("isGallery")
                     )
                 }
             }.let(::uniqueIds)

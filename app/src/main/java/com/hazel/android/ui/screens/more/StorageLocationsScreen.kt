@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wifi
@@ -26,7 +27,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import com.hazel.android.ui.components.DropdownMenu
 import com.hazel.android.ui.components.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -57,10 +57,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.ui.screens.download.SaveDirDialog
-import com.hazel.android.ui.screens.download.rememberSaveDirPicker
-import com.hazel.android.util.MediaOpener
+import com.hazel.android.ui.screens.download.SaveLocationScreen
+import com.hazel.android.ui.screens.download.rememberSaveKindPicker
 import kotlinx.coroutines.launch
 
 /**
@@ -73,12 +73,12 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
     val wifiOnly by remember(context) { SettingsRepository.getWifiOnly(context) }.collectAsState(initial = false)
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
-    // The kind whose folder is being looked at or chosen, or null when neither is.
-    var dirDialogFor by remember { mutableStateOf<Boolean?>(null) }
+    // The kind whose folder is being looked at or chosen, or null when none is.
+    var dirDialogFor by remember { mutableStateOf<SaveKind?>(null) }
 
     // The same picker the download sheet uses: any folder or an SD card, saved for the
     // kind it was made for until it is changed or reset.
-    val pickSaveDir = rememberSaveDirPicker(saveDirs)
+    val pickSaveDir = rememberSaveKindPicker(saveDirs)
     val speedLimit by remember(context) { SettingsRepository.getSpeedLimit(context) }.collectAsState(initial = "")
     val concurrentFragments by remember(context) { SettingsRepository.getConcurrentFragments(context) }.collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
     val throttledRate by remember(context) { SettingsRepository.getThrottledRate(context) }.collectAsState(initial = "")
@@ -89,30 +89,35 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         description = stringResource(R.string.storage_locations_subtitle)
     ) {
         // Locations card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            // One row per kind: each is saved on its own, the built-in folder until a
-            // folder is picked for it.
-            StorageLocationItem(
-                icon = Icons.Filled.MusicNote,
-                title = stringResource(R.string.format_sheet_tab_audio),
-                path = saveDirs.labelOf(isVideo = false),
-                onClick = { dirDialogFor = false }
-            )
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-            StorageLocationItem(
-                icon = Icons.Filled.Videocam,
-                title = stringResource(R.string.format_sheet_tab_video),
-                path = saveDirs.labelOf(isVideo = true),
-                onClick = { dirDialogFor = true }
-            )
-        }
+        ConnectedRows(listOf(
+            {
+                // One row per kind: each is saved on its own, the built-in folder until a
+                // folder is picked for it.
+                StorageLocationItem(
+                    icon = Icons.Filled.MusicNote,
+                    title = stringResource(R.string.format_sheet_tab_audio),
+                    path = saveDirs.labelOf(SaveKind.AUDIO),
+                    onClick = { dirDialogFor = SaveKind.AUDIO }
+                )
+            },
+            {
+                StorageLocationItem(
+                    icon = Icons.Filled.Videocam,
+                    title = stringResource(R.string.format_sheet_tab_video),
+                    path = saveDirs.labelOf(SaveKind.VIDEO),
+                    onClick = { dirDialogFor = SaveKind.VIDEO }
+                )
+            },
+            {
+                StorageLocationItem(
+                    icon = Icons.Filled.PhotoLibrary,
+                    title = stringResource(R.string.storage_locations_gallery),
+                    path = saveDirs.labelOf(SaveKind.GALLERY),
+                    tag = stringResource(R.string.search_source_images),
+                    onClick = { dirDialogFor = SaveKind.GALLERY }
+                )
+            }
+        ))
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -205,24 +210,24 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         }
     }
 
-    dirDialogFor?.let { isVideo ->
-        SaveDirDialog(
-            isVideo = isVideo,
-            saveDir = saveDirs.of(isVideo),
-            label = saveDirs.labelOf(isVideo),
-            onOpen = {
-                dirDialogFor = null
-                MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
-            },
+    dirDialogFor?.let { kind ->
+        SaveLocationScreen(
+            isVideo = kind == SaveKind.VIDEO,
+            saveDir = saveDirs.of(kind),
+            label = saveDirs.labelOf(kind),
             onPick = { card ->
                 dirDialogFor = null
-                pickSaveDir(isVideo, card)
+                pickSaveDir(kind, card)
             },
             onReset = {
                 dirDialogFor = null
-                scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
+                scope.launch { SettingsRepository.resetSaveDir(context, kind) }
             },
-            onDismiss = { dirDialogFor = null }
+            onUseRecent = { SettingsRepository.setSaveDir(context, kind, it.uri, it.label) },
+            onDismiss = { dirDialogFor = null },
+            internalPath = kind.display,
+            internalFolder = { kind.builtInFolder() },
+            cardFolder = "Hazel/" + kind.folderName
         )
     }
 }
@@ -232,11 +237,30 @@ private fun StorageLocationItem(
     icon: ImageVector,
     title: String,
     path: String,
+    /** A small tonal tag beside the title, saying what the folder holds. */
+    tag: String? = null,
     onClick: () -> Unit
 ) {
     ListItem(
         headlineContent = {
-            Text(title, fontWeight = FontWeight.Medium)
+            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, fontWeight = FontWeight.Medium)
+                tag?.let {
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
         },
         supportingContent = {
             Text(

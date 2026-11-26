@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.material.icons.outlined.Collections
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -115,6 +118,8 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
     LaunchedEffect(Unit) { if (sample == null) refresh() }
 
     val total = categories.sumOf { it.bytes }
+    val busy = stringResource(R.string.gallery_settings_clear_record_busy)
+    val toastBusy = { Toast.makeText(context, busy, Toast.LENGTH_SHORT).show() }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -199,7 +204,7 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
                     val id = category.id
                     confirming = null
                     scope.launch {
-                        TempStorage.clear(context, id)
+                        if (!TempStorage.clear(context, id)) toastBusy()
                         refresh()
                     }
                 }) { Text(stringResource(R.string.cleanup_confirm_clear)) }
@@ -228,7 +233,8 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
                     val ids = categories.map { it.id }
                     confirmingAll = false
                     scope.launch {
-                        ids.forEach { TempStorage.clear(context, it) }
+                        val cleared = ids.map { TempStorage.clear(context, it) }
+                        if (false in cleared) toastBusy()
                         refresh()
                     }
                 }) { Text(stringResource(R.string.cleanup_confirm_all_confirm)) }
@@ -511,18 +517,23 @@ private fun ClearEverythingButton(enabled: Boolean, onClick: () -> Unit) {
 private fun categoryColor(id: String): Color = when (id) {
     "ytdlp_cache" -> MaterialTheme.colorScheme.primary
     TempStorage.LINK_READS -> InfoBlue
+    TempStorage.HISTORY_THUMBS -> MaterialTheme.colorScheme.tertiary
     "partial_downloads" -> WarningAmber
     "converted" -> SuccessGreen
+    TempStorage.GALLERY -> GalleryPink
     else -> OtherCacheViolet
 }
 
 private val OtherCacheViolet = Color(0xFFB388FF)
+private val GalleryPink = Color(0xFFF48FB1)
 
 private fun categoryIcon(id: String): ImageVector = when (id) {
     "ytdlp_cache" -> Icons.Outlined.Link
     TempStorage.LINK_READS -> Icons.Outlined.History
+    TempStorage.HISTORY_THUMBS -> Icons.Outlined.PhotoLibrary
     "partial_downloads" -> Icons.Outlined.Downloading
     "converted" -> Icons.Outlined.GraphicEq
+    TempStorage.GALLERY -> Icons.Outlined.Collections
     "other_cache" -> Icons.Outlined.Image
     else -> Icons.Outlined.FolderOpen
 }
