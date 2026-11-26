@@ -13,7 +13,7 @@
     <string name="gallery_error_sign_in_refused">Situs menolak login yang tersimpan. Masuk lagi di Cookies</string>
     <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
     <string name="gallery_links_skipped">Beberapa tautan tidak bisa dibaca</string>
-    <string name="gallery_reading_links">Membaca tautan, %1$d dari %2$d selesai</string>
+    <string name="search_fetching">Mengambil</string>
     <string name="gallery_error_not_found">Postingan dihapus, privat, atau kosong</string>
     <string name="gallery_error_network">Tidak dapat terhubung. Periksa jaringan atau proxy</string>
     <string name="gallery_error_setup">Galeri tidak dapat dimulai di perangkat ini</string>

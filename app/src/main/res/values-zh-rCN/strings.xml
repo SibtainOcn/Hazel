@@ -13,7 +13,7 @@
     <string name="gallery_error_sign_in_refused">网站拒绝了已保存的登录。请在 Cookies 中重新登录</string>
     <string name="gallery_error_unsupported">图库无法读取此链接</string>
     <string name="gallery_links_skipped">部分链接无法读取</string>
-    <string name="gallery_reading_links">正在读取链接，已完成 %1$d / %2$d</string>
+    <string name="search_fetching">正在获取</string>
     <string name="gallery_error_not_found">帖子已删除、私密或为空</string>
     <string name="gallery_error_network">无法连接。请检查网络或代理</string>
     <string name="gallery_error_setup">图库无法在此设备上启动</string>

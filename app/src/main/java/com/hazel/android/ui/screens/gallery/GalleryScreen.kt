@@ -380,11 +380,13 @@ fun GalleryScreen(
         }
     }
     val links = viewModel.linkCount
+    val reading by GalleryReading.progress.collectAsState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
             UrlSearchBar(
                 url = if (links > 1) pluralStringResource(R.plurals.batch_links, links, links) else viewModel.query,
+                fetching = reading?.let { it.read to it.total },
                 onOpenSearch = { searchOpen = true },
                 shineProgress = searchBarShine.value,
                 onMenuOpen = { menuOpen = true },

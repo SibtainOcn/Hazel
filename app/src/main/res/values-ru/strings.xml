@@ -13,7 +13,7 @@
     <string name="gallery_error_sign_in_refused">Сайт отклонил сохранённый вход. Войдите заново в разделе Cookies</string>
     <string name="gallery_error_unsupported">Галерея не может прочитать эту ссылку</string>
     <string name="gallery_links_skipped">Некоторые ссылки не удалось прочитать</string>
-    <string name="gallery_reading_links">Чтение ссылок: готово %1$d из %2$d</string>
+    <string name="search_fetching">Загрузка</string>
     <string name="gallery_error_not_found">Пост удалён, скрыт или пуст</string>
     <string name="gallery_error_network">Нет подключения. Проверьте сеть или прокси</string>
     <string name="gallery_error_setup">Галерея не запустилась на этом устройстве</string>

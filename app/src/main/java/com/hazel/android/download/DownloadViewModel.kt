@@ -94,6 +94,8 @@ data class DownloadState(
     val isFetching: Boolean = false,
     /** How many links the current read covers, so the screen can stand in for each one. */
     val fetchCount: Int = 0,
+    /** Pasted links read so far while several are read, for the search bar; -1 otherwise. */
+    val fetchDone: Int = -1,
     /** The words the results on screen were searched for, or blank when they came from links. */
     val searchQuery: String = "",
     /** Every link that resolved from the last search, in the order they were entered. */
@@ -942,6 +944,7 @@ class DownloadViewModel : ViewModel() {
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchCount = valid.size,
+            fetchDone = if (valid.size > 1) 0 else -1,
             searchQuery = ""
         ) }
 
@@ -974,7 +977,9 @@ class DownloadViewModel : ViewModel() {
                             }.onFailure { failure ->
                                 if (failure is CancellationException) throw failure
                                 lastFailure = failure.message?.trim().orEmpty()
-                            }.getOrDefault(emptyList())
+                            }.getOrDefault(emptyList()).also {
+                                if (valid.size > 1) _state.update { s -> s.copy(fetchDone = s.fetchDone + 1) }
+                            }
                         }
                     }.awaitAll().flatten().distinctBy { it.url }
                 }
@@ -1055,6 +1060,7 @@ class DownloadViewModel : ViewModel() {
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchCount = SEARCH_SKELETONS,
+            fetchDone = -1,
             searchQuery = text
         ) }
 
