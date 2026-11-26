@@ -59,7 +59,7 @@ class GettingStartedLayoutTest(private val locale: String) {
             assertEquals("card changed size at step ${it + 2}", first, nextTop(), 1f)
         }
         val width = context.resources.displayMetrics.widthPixels
-        listOf(R.string.share_label_video, R.string.instant_label, R.string.share_label_images, R.string.instant_images_label).forEach { id ->
+        listOf(R.string.share_label_video, R.string.instant_label, R.string.share_label_gallery, R.string.instant_gallery_label).forEach { id ->
             val node = compose.onNodeWithText(context.getString(id)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
             assertTrue("${context.getString(id)} runs off the edge", node.positionOnScreen.x + node.size.width <= width)
         }

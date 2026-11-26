@@ -14,7 +14,7 @@ Images
 
 * The Gallery tab saves the photos and videos of a post, a profile or an image search, with their captions
 * Works with Instagram, X, Reddit, Pinterest, Tumblr and many more sites through gallery-dl
-* Share a post to Hazel Images to choose what to save, or to Instant Images to save it at once
+* Share a post to Hazel Gallery to choose what to save, or to Instant Gallery to save it at once
 
 Choosing what you get
 

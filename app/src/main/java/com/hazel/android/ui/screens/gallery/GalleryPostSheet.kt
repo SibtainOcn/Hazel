@@ -52,9 +52,7 @@ import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -88,7 +86,6 @@ import com.hazel.android.ui.components.DropdownMenu
 import com.hazel.android.ui.components.DropdownMenuItem
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.MenuTone
-import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.components.keepFlingInSheet
 import com.hazel.android.ui.components.rememberScrollShrink
@@ -117,9 +114,11 @@ import com.hazel.android.ui.screens.download.batch.endsSearchOnTouchOutside
 import com.hazel.android.ui.screens.download.rememberIncognitoSwitch
 import com.hazel.android.ui.screens.download.rememberSaveKindPicker
 import com.hazel.android.ui.screens.download.rememberUseCookies
-import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetRaisedColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
+import com.hazel.android.gallery.GalleryPost
+import androidx.compose.runtime.DisposableEffect
 
 internal enum class GalleryFilter { ALL, IMAGES, VIDEOS }
 
@@ -134,6 +133,12 @@ internal class GalleryPick(
 /** A file adjusted on its own sheet: its settings, title and author, for that file alone. */
 private class FileChoice(val options: GalleryOptions, val title: String, val author: String)
 
+/**
+ * What lets Download all hand a post's videos to yt-dlp: a video's row opens yt-dlp's sheet,
+ * and a video adjusted there downloads with yt-dlp, apart from the files left to gallery-dl.
+ */
+internal class PostVideos(val post: GalleryPost, val links: GalleryVideoLinks, val onMissed: (Int) -> Unit)
+
 private enum class PostDialog { NONE, KIND, SIZE, FILENAME, COOKIES, SAVE_DIR, LINK }
 
 /**
@@ -147,13 +152,14 @@ private enum class PostDialog { NONE, KIND, SIZE, FILENAME, COOKIES, SAVE_DIR, L
 internal fun GalleryPostSheet(
     items: List<GalleryItem>,
     postUrl: String,
-    onDownload: (List<GalleryPick>) -> Unit,
-    onDismiss: () -> Unit
+    /** The files for gallery-dl, and the job handing the videos adjusted on yt-dlp's sheet to its queue. */
+    onDownload: (picks: List<GalleryPick>, videos: Job?) -> Unit,
+    onDismiss: () -> Unit,
+    postVideos: PostVideos? = null
 ) {
     val context = LocalContext.current
     // Expanded to its content, as the set-of-links sheet is: the list is held to a few rows,
     // so the sheet stops at its usual height and does not cover the screen.
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     var options by rememberGalleryOptions()
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }
         .collectAsState(initial = SaveDirs())
@@ -162,7 +168,10 @@ internal fun GalleryPostSheet(
     var dialog by remember { mutableStateOf(PostDialog.NONE) }
     var listMenuOpen by remember { mutableStateOf(false) }
     val current = options ?: GalleryOptions()
-    val update: (GalleryOptions) -> Unit = { options = it }
+    val update: (GalleryOptions) -> Unit = {
+        options = it
+        saveGalleryOptions(context, it)
+    }
 
     var kept by remember(items) { mutableStateOf(items) }
     var filter by remember { mutableStateOf(GalleryFilter.ALL) }
@@ -170,6 +179,15 @@ internal fun GalleryPostSheet(
     var selected by remember(items) { mutableStateOf(emptySet<Int>()) }
     var choices by remember(items) { mutableStateOf(emptyMap<Int, FileChoice>()) }
     var opened by remember { mutableStateOf<GalleryItem?>(null) }
+    var videoPicks by remember(items) { mutableStateOf(emptyMap<Int, VideoDownload>()) }
+    var openedVideo by remember { mutableStateOf<GalleryItem?>(null) }
+    var handedOff by remember(items) { mutableStateOf(false) }
+    DisposableEffect(items) {
+        onDispose { if (!handedOff) videoPicks.values.forEach { it.read.cancel() } }
+    }
+    fun open(item: GalleryItem) {
+        if (item.isVideo && postVideos != null) openedVideo = item else opened = item
+    }
     var pendingRemove by remember { mutableStateOf<GalleryItem?>(null) }
     var adjustOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -197,7 +215,7 @@ internal fun GalleryPostSheet(
     // What Download takes: the ticked files, or every file of the chosen kind when none are.
     val targets = ofKind.filter { selected.isEmpty() || it.index in selected }
     fun picks(base: GalleryOptions): List<GalleryPick> {
-        val (own, shared) = targets.partition { it.index in choices }
+        val (own, shared) = targets.filter { it.index !in videoPicks }.partition { it.index in choices }
         val whole = shared.size == items.size
         return buildList {
             if (shared.isNotEmpty()) add(GalleryPick(if (whole) null else shared.map { it.index }, base))
@@ -228,10 +246,8 @@ internal fun GalleryPostSheet(
     val twoPane = configuration.screenWidthDp >= TWO_PANE_MIN_WIDTH_DP &&
         configuration.screenHeightDp < TWO_PANE_MAX_HEIGHT_DP
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = sheetBlackColor,
+    GallerySheetFrame(
+        onDismiss = onDismiss,
         sheetMaxWidth = if (twoPane) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
     ) {
         Box(
@@ -260,7 +276,16 @@ internal fun GalleryPostSheet(
         val downloadButton: @Composable (Modifier) -> Unit = { modifier ->
             BatchDownloadButton(
                 enabled = options != null && targets.isNotEmpty(),
-                onClick = { options?.let { onDownload(picks(it)) } },
+                onClick = {
+                    options?.let { base ->
+                        handedOff = true
+                        val toYtDlp = targets.mapNotNull { videoPicks[it.index] }
+                        val job = postVideos?.takeIf { toYtDlp.isNotEmpty() }?.let { v ->
+                            v.links.download(toYtDlp, saveDirs, v.onMissed)
+                        }
+                        onDownload(picks(base), job)
+                    }
+                },
                 modifier = modifier
             )
         }
@@ -400,22 +425,24 @@ internal fun GalleryPostSheet(
                         BatchRowCard(
                             thumbnail = item.thumbnail ?: item.url.takeUnless { item.isVideo },
                             corner = "#${item.index}",
-                            title = choices[item.index]?.title?.takeIf { it.isNotBlank() } ?: defaultTitle(item),
+                            title = (choices[item.index]?.title ?: videoPicks[item.index]?.plan?.title)
+                                ?.takeIf { it.isNotBlank() } ?: defaultTitle(item),
                             typeIcon = if (item.isVideo) Icons.Filled.Videocam else Icons.Filled.Image,
                             typeDescription = stringResource(if (item.isVideo) R.string.gallery_video else R.string.gallery_image),
                             selectionMode = selecting,
                             checked = item.index in selected,
-                            onClick = { if (selecting) toggle(item) else opened = item },
+                            onClick = { if (selecting) toggle(item) else open(item) },
                             onLongClick = {
                                 if (!selecting) selecting = true
                                 toggle(item)
                             },
-                            onTypeClick = { if (selecting) toggle(item) else opened = item },
+                            onTypeClick = { if (selecting) toggle(item) else open(item) },
                             removeAsked = pendingRemove?.index == item.index,
                             onAskRemove = { pendingRemove = item }
                         ) {
                             // Marked when the file carries a choice of its own, as an adjusted link is.
-                            MetaBadge(galleryTag(item), tone = if (item.index in choices) BadgeTone.SOLID else BadgeTone.NEUTRAL)
+                            val adjusted = item.index in choices || item.index in videoPicks
+                            MetaBadge(galleryTag(item), tone = if (adjusted) BadgeTone.SOLID else BadgeTone.NEUTRAL)
                         }
                     }
                 }
@@ -613,6 +640,8 @@ internal fun GalleryPostSheet(
                         kept = kept - item
                         selected = selected - item.index
                         choices = choices - item.index
+                        videoPicks[item.index]?.read?.cancel()
+                        videoPicks = videoPicks - item.index
                     }
                 )
             },
@@ -632,6 +661,23 @@ internal fun GalleryPostSheet(
             onDismiss = { opened = null }
         )
     }
+
+    postVideos?.let { shared -> openedVideo?.let { item ->
+        GalleryVideoSheet(
+            post = shared.post,
+            items = listOf(item),
+            links = shared.links,
+            onQueued = {},
+            onMissed = shared.onMissed,
+            onDismiss = { openedVideo = null },
+            initial = videoPicks[item.index],
+            onApply = { pick ->
+                videoPicks[item.index]?.read?.takeIf { it !== pick.read }?.cancel()
+                videoPicks = videoPicks + (item.index to pick)
+                openedVideo = null
+            }
+        )
+    } }
 
     when (dialog) {
         PostDialog.NONE -> Unit

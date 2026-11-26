@@ -27,6 +27,19 @@ import com.hazel.android.ui.screens.download.TemplateKind
 import com.hazel.android.util.SdCard
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import com.hazel.android.HazelApp
+import com.hazel.android.ui.components.ModalBottomSheet
+import com.hazel.android.ui.theme.sheetBlackColor
 
 /** gallery-dl's own filename fields, written as `{name}`. */
 internal val GalleryTemplates = TemplateKind(
@@ -126,5 +139,47 @@ internal fun GallerySaveLocation(
         internalPath = kind.display,
         internalFolder = { kind.builtInFolder() },
         cardFolder = "Hazel/" + kind.folderName
+    )
+}
+
+/** Keeps a change made in a sheet as the default for the next one, as the video sheet does. */
+internal fun saveGalleryOptions(context: Context, options: GalleryOptions) {
+    SavedGalleryOptions.value = options
+    val app = context.applicationContext
+    HazelApp.instance.applicationScope.launch { SettingsRepository.setGalleryOptions(app, options) }
+}
+
+/** True inside a sheet a host already shows, so a gallery sheet fills it instead of opening its own. */
+internal val LocalInHostSheet = staticCompositionLocalOf { false }
+
+/**
+ * A gallery sheet's frame: its own bottom sheet, or, inside a host's ([LocalInHostSheet]), a
+ * plain column there. Sheets opened from inside it get frames of their own again.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun GallerySheetFrame(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    if (LocalInHostSheet.current) {
+        Column(modifier) {
+            CompositionLocalProvider(LocalInHostSheet provides false) { content() }
+        }
+        return
+    }
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = modifier,
+        sheetState = sheetState,
+        containerColor = sheetBlackColor,
+        sheetMaxWidth = sheetMaxWidth,
+        content = content
     )
 }

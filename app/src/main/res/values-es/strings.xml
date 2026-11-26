@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">Galería no puede leer este enlace</string>
     <string name="gallery_links_skipped">No se pudieron leer algunos enlaces</string>
     <string name="gallery_video_unavailable">No se pudo obtener este video</string>
+    <string name="format_sheet_not_for_file">No disponible para este archivo</string>
     <string name="profile_stories">Historias</string>
     <string name="profile_highlights">Destacadas</string>
     <string name="profile_posts">Publicaciones</string>
@@ -1052,9 +1053,9 @@
     <string name="home_empty_hint">Pega un enlace de YouTube, SoundCloud, Instagram Reels y 1700 sitios más</string>
     <string name="more_getting_started">Primeros pasos</string>
     <string name="instant_label">Instant Vídeo</string>
-    <string name="instant_images_label">Instant Imágenes</string>
+    <string name="instant_gallery_label">Instant Galería</string>
     <string name="share_label_video">Hazel Vídeo</string>
-    <string name="share_label_images">Hazel Imágenes</string>
+    <string name="share_label_gallery">Hazel Galería</string>
     <string name="gallery_instant_settings">Ajustes de Galería</string>
     <string name="shortcut_search">Buscar</string>
     <string name="instant_started">Descarga iniciada</string>
@@ -1271,7 +1272,7 @@
     <string name="more_image_settings">Ajustes de imágenes</string>
     <string name="guide_share_from_apps">Comparte un enlace desde cualquier app</string>
     <string name="guide_share_video">Elige cada opción y descarga</string>
-    <string name="guide_share_images">Elige las opciones de imagen y descarga</string>
+    <string name="guide_share_gallery">Elige qué guardar y descarga</string>
     <string name="guide_share_instant">Descarga al instante con tu calidad guardada</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Guardar como texto</string>

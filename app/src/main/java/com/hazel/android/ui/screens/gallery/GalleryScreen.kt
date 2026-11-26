@@ -1,13 +1,5 @@
 package com.hazel.android.ui.screens.gallery
 
-import android.util.Log
-import com.hazel.android.download.MediaInfo
-import com.hazel.android.download.DownloadViewModelHolder
-import com.hazel.android.download.DownloadPlan
-import com.hazel.android.download.DownloadOptions
-import com.hazel.android.data.SaveDirs
-import kotlinx.coroutines.ensureActive
-import android.content.Context
 import android.app.Application
 import kotlinx.coroutines.Dispatchers
 import com.hazel.android.data.SearchHistoryRepository
@@ -77,7 +69,6 @@ import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.gallery.FileLinks
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
@@ -110,8 +101,6 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -379,84 +368,24 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /** Fresh video links by the file's listed url, kept while the app runs; the saved results keep theirs. */
-    private val freshLinks = mutableMapOf<String, String>()
-    private val linkReads = mutableMapOf<String, Deferred<Map<String, String>>>()
+    internal val videoLinks = GalleryVideoLinks(viewModelScope, application)
 
-    /**
-     * A playable link for [item] that has not expired: the one it was listed with, or one from
-     * reading its post again (saved results can predate the link, and the sites' links expire).
-     * [failed] is a link that just stopped working. A post is read once for all its files, and
-     * once at a time. Null when none can be had.
-     */
+    /** A playable link for [item] of the results shown; see [GalleryVideoLinks.playableUrl]. */
     suspend fun playableUrl(item: GalleryItem, failed: String? = null): String? {
-        (freshLinks[item.url] ?: item.playUrl)?.takeUnless { FileLinks.isStale(it) || it == failed }?.let { return it }
         val post = posts.firstOrNull { item in it.items } ?: return null
-        // Kept in the view model's scope, so a viewer page left mid-read still gets the links.
-        val read = linkReads[post.source]?.takeIf { it.isActive } ?: viewModelScope.async {
-            val fresh = try {
-                withContext(Dispatchers.IO) {
-                    FileLinks.freshLinks(post.items, GalleryDlEngine.list(getApplication(), post.source).items)
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.w("Hazel", "Gallery link refresh failed: ${e.javaClass.simpleName}")
-                emptyMap()
-            }
-            freshLinks.putAll(fresh)
-            linkReads.remove(post.source)
-            fresh
-        }.also { linkReads[post.source] = it }
-        return read.await()[item.url]
+        return videoLinks.playableUrl(post, item, failed)
     }
 
     /** Videos asked for whose read came back empty, for a toast; reset once shown. */
     var videosMissed by mutableStateOf(0)
         private set
 
+    fun videosMissed(count: Int) {
+        videosMissed += count
+    }
+
     fun videosMissedShown() {
         videosMissed = 0
-    }
-
-    /**
-     * What the yt-dlp sheet downloads for [item]: its own page, read in full, else its file
-     * link with the post kept for history. Null when neither can be had.
-     */
-    internal fun videoInfo(post: GalleryPost, item: GalleryItem, labels: VideoLabels): Deferred<MediaInfo?> = viewModelScope.async {
-        ownPage(post, item)?.let { page ->
-            DownloadViewModelHolder.get().formatsFor(page)?.let { read ->
-                return@async read.copy(
-                    url = page,
-                    title = read.title.ifBlank { videoTitle(item) },
-                    thumbnail = read.thumbnail ?: item.thumbnail
-                )
-            }
-        }
-        playableUrl(item)?.let { fileInfo(item, it, labels) }
-    }
-
-    /** Hands each video to the yt-dlp queue once its read lands, in the order picked. */
-    fun downloadVideos(
-        context: Context,
-        picks: List<Pair<Deferred<MediaInfo?>, DownloadPlan>>,
-        options: DownloadOptions,
-        saveDirs: SaveDirs
-    ) {
-        val app = context.applicationContext
-        viewModelScope.launch {
-            val plans = picks.mapNotNull { (read, plan) ->
-                val info = try {
-                    read.await()
-                } catch (e: CancellationException) {
-                    ensureActive()
-                    null
-                }
-                info?.let { plan.copy(info = it) }
-            }
-            videosMissed += picks.size - plans.size
-            if (plans.isNotEmpty()) DownloadViewModelHolder.get().startBatch(app, plans, options, saveDirs = saveDirs)
-        }
     }
 
     internal fun fail(url: String, e: Exception) {
@@ -826,14 +755,22 @@ fun GalleryScreen(
 
     videoSheetPost?.let(viewModel.posts::getOrNull)?.let { post ->
         val files = post.items.getOrNull(videoSheetFile)?.let(::listOf) ?: post.items.filter { it.isVideo }
-        GalleryVideoSheet(post = post, items = files, viewModel = viewModel, onDismiss = { videoSheetPost = null })
+        GalleryVideoSheet(
+            post = post,
+            items = files,
+            links = viewModel.videoLinks,
+            onQueued = { videoSheetPost = null },
+            onMissed = viewModel::videosMissed,
+            onDismiss = { videoSheetPost = null }
+        )
     }
 
     postSheetFor?.let(viewModel.posts::getOrNull)?.let { post ->
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { picks ->
+            postVideos = PostVideos(post, viewModel.videoLinks, viewModel::videosMissed),
+            onDownload = { picks, _ ->
                 postSheetFor = null
                 picks.forEach { viewModel.download(it.indexes, it.options, post, it.title, it.author) }
             },

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
 import com.hazel.android.ui.saveScreen
+import com.hazel.android.ui.screens.gallery.GallerySheetSkeleton
 import com.hazel.android.ui.theme.HazelTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -20,7 +21,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** The Hazel Images reading sheet at the largest font on a small phone. */
+/** The Hazel Gallery reading skeleton, shaped as the image sheet, on a small phone. */
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35])
@@ -38,21 +39,27 @@ class GalleryReadingSheetLayoutTest(private val locale: String) {
     private val context: Context get() = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `reading sheet keeps its header and download pill inside`() {
+    fun `reading skeleton keeps the image sheet parts inside`() {
         RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
         compose.mainClock.autoAdvance = false
         compose.setContent {
             HazelTheme(darkTheme = true, glass = true) {
                 val density = LocalDensity.current
-                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
-                    GalleryReadingSheet(onDismiss = {})
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 1.3f)) {
+                    GallerySheetSkeleton()
                 }
             }
         }
         compose.mainClock.advanceTimeBy(2_000)
         saveScreen("gallery-share-reading-$locale")
         val width = context.resources.displayMetrics.widthPixels
-        listOf(R.string.format_sheet_fetching, R.string.format_sheet_download).forEach { id ->
+        listOf(
+            R.string.format_sheet_fetching,
+            R.string.format_sheet_download,
+            R.string.format_sheet_section_details,
+            R.string.gallery_image_size,
+            R.string.format_sheet_save_dir
+        ).forEach { id ->
             val text = context.getString(id)
             val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
             assertTrue("$text runs off the left edge", node.positionOnScreen.x >= 0f)

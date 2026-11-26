@@ -27,6 +27,7 @@ import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** The quality names the yt-dlp sheets show before a link is read, in the user's language. */
@@ -67,8 +68,17 @@ internal fun fileInfo(item: GalleryItem, file: String, labels: VideoLabels) = Me
 internal fun GalleryVideoSheet(
     post: GalleryPost,
     items: List<GalleryItem>,
-    viewModel: GalleryViewModel,
-    onDismiss: () -> Unit
+    links: GalleryVideoLinks,
+    /** The download was handed over; the job ends once every pick is queued or found missing. */
+    onQueued: (Job) -> Unit,
+    onMissed: (Int) -> Unit,
+    onDismiss: () -> Unit,
+    /**
+     * Opened for one video of Download all: OK hands the choice back for that download instead
+     * of starting it, and [initial] is the choice made there before.
+     */
+    onApply: ((VideoDownload) -> Unit)? = null,
+    initial: VideoDownload? = null
 ) {
     if (items.isEmpty()) return
     val context = LocalContext.current
@@ -79,7 +89,9 @@ internal fun GalleryVideoSheet(
         worst = stringResource(R.string.batch_quality_worst)
     )
     val unavailable = stringResource(R.string.gallery_video_unavailable)
-    val reads = remember(post, items) { items.associate { videoKey(it) to viewModel.videoInfo(post, it, labels) } }
+    val reads = remember(post, items) {
+        items.associate { item -> videoKey(item) to (initial?.read?.takeUnless { it.isCancelled } ?: links.videoInfo(post, item, labels)) }
+    }
     // A key with a null value was read and could not be had.
     val resolved = remember(reads) { mutableStateMapOf<String, MediaInfo?>() }
     LaunchedEffect(reads) {
@@ -87,7 +99,7 @@ internal fun GalleryVideoSheet(
     }
     var handedOff by remember(reads) { mutableStateOf(false) }
     DisposableEffect(reads) {
-        onDispose { if (!handedOff) reads.values.forEach { it.cancel() } }
+        onDispose { if (!handedOff) reads.values.filter { it !== initial?.read }.forEach { it.cancel() } }
     }
 
     val options by remember(context) { SettingsRepository.getDownloadOptions(context) }
@@ -103,7 +115,13 @@ internal fun GalleryVideoSheet(
         val key = videoKey(item)
         return resolved[key]?.copy(url = key)
             ?: GenericFormats.placeholder(key, labels.bestVideo, labels.bestAudio, labels.worst)
-                .copy(title = videoTitle(item), uploader = item.author, thumbnail = item.thumbnail)
+                .copy(
+                    title = videoTitle(item),
+                    uploader = item.author,
+                    thumbnail = item.thumbnail,
+                    // Marks a file without a page of its own from the first frame, as its read will.
+                    pageUrl = if (ownPage(post, item) == null) item.postUrl ?: key else null
+                )
     }
 
     if (items.size == 1) {
@@ -116,13 +134,19 @@ internal fun GalleryVideoSheet(
             saveDirs = saveDirs,
             isReadingLink = key !in resolved,
             formatsError = unavailable.takeIf { key in resolved && resolved[key] == null },
+            initialFormat = initial?.plan?.format,
+            initialAudioLanguage = initial?.plan?.audioLanguage,
+            confirmAsApply = onApply != null,
             onPickSaveDir = pickSaveDir,
             onResetSaveDir = resetSaveDir,
             onDownload = { format, audioLanguage, title, author, oneOff ->
                 handedOff = true
-                val plan = DownloadPlan(shown(item), format, title, author, audioLanguage)
-                viewModel.downloadVideos(context, listOf(reads.getValue(key) to plan), options.with(oneOff), saveDirs)
-                onDismiss()
+                val pick = VideoDownload(
+                    reads.getValue(key),
+                    DownloadPlan(shown(item), format, title, author, audioLanguage),
+                    options.with(oneOff)
+                )
+                if (onApply != null) onApply(pick) else onQueued(links.download(listOf(pick), saveDirs, onMissed))
             },
             onDismiss = onDismiss
         )
@@ -147,11 +171,10 @@ internal fun GalleryVideoSheet(
         },
         onDownload = { plans ->
             handedOff = true
-            val picks = plans.mapNotNull { plan -> reads[plan.info.url]?.let { it to plan } }
-            val picked = picks.map { it.first }.toSet()
+            val picks = plans.mapNotNull { plan -> reads[plan.info.url]?.let { VideoDownload(it, plan, options) } }
+            val picked = picks.map { it.read }.toSet()
             reads.values.filter { it !in picked }.forEach { it.cancel() }
-            viewModel.downloadVideos(context, picks, options, saveDirs)
-            onDismiss()
+            onQueued(links.download(picks, saveDirs, onMissed))
         },
         onDismiss = onDismiss
     )

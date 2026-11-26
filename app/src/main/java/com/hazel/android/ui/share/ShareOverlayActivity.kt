@@ -69,7 +69,7 @@ import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryPost
 
 /** The share targets, told apart by the component they were launched through. */
-private enum class ShareMode { VIDEO, INSTANT_VIDEO, IMAGES, INSTANT_IMAGES }
+private enum class ShareMode { VIDEO, INSTANT_VIDEO, GALLERY, INSTANT_GALLERY }
 
 /**
  * Builds a dark-only color scheme using the user's selected accent color.
@@ -151,8 +151,8 @@ class ShareOverlayActivity : ComponentActivity() {
 
     private fun Intent.shareMode(): ShareMode = when (component?.className?.substringAfterLast('.')) {
         INSTANT_ALIAS -> ShareMode.INSTANT_VIDEO
-        GALLERY_ALIAS -> ShareMode.IMAGES
-        INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_IMAGES
+        GALLERY_ALIAS -> ShareMode.GALLERY
+        INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_GALLERY
         else -> ShareMode.VIDEO
     }
 
@@ -257,21 +257,21 @@ class ShareOverlayActivity : ComponentActivity() {
                         }
 
                         when {
-                            mode == ShareMode.IMAGES -> GalleryShareContent(
+                            mode == ShareMode.GALLERY -> GalleryShareContent(
                                 url = url,
-                                onDownload = { requests ->
+                                onQueued = { requests, videos ->
                                     requests.forEach { request -> queueGallery { request } }
-                                    announceStarted()
-                                    closeOverlay()
-                                },
-                                onVideo = { link ->
-                                    sharedUrl = link
-                                    mode = ShareMode.VIDEO
+                                    // Kept open until the videos are queued, so their download starts in the foreground.
+                                    scope.launch {
+                                        videos?.join()
+                                        announceStarted()
+                                        closeOverlay()
+                                    }
                                 },
                                 onClose = { closeOverlay() }
                             )
 
-                            mode == ShareMode.INSTANT_IMAGES -> InstantDialog(
+                            mode == ShareMode.INSTANT_GALLERY -> InstantDialog(
                                 glass = glass,
                                 tuneLabel = R.string.gallery_instant_settings,
                                 onConfirm = { closeOverlay() },
@@ -420,8 +420,8 @@ class ShareOverlayActivity : ComponentActivity() {
                 com.hazel.android.util.AppShortcuts.reportShared(this, instant = true)
                 DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
             }
-            ShareMode.IMAGES -> recordLink(url)
-            ShareMode.INSTANT_IMAGES -> {
+            ShareMode.GALLERY -> recordLink(url)
+            ShareMode.INSTANT_GALLERY -> {
                 recordLink(url)
                 queueGallery { app ->
                     val options = SettingsRepository.getGalleryOptions(app).first()

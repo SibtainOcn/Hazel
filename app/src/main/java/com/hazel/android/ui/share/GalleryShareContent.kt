@@ -5,22 +5,8 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,12 +15,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
@@ -42,12 +24,8 @@ import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GallerySpare
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.request
-import com.hazel.android.ui.components.ArtworkPlaceholder
 import com.hazel.android.ui.components.ModalBottomSheet
-import com.hazel.android.ui.components.SheetHeaderLayout
-import com.hazel.android.ui.components.ShimmerLabel
 import com.hazel.android.ui.screens.download.NoResultsDialog
-import com.hazel.android.ui.screens.download.SheetDownloadPill
 import com.hazel.android.ui.screens.gallery.GalleryItemSheet
 import com.hazel.android.ui.screens.gallery.GalleryPostSheet
 import com.hazel.android.ui.screens.gallery.WarmGalleryOptions
@@ -57,6 +35,19 @@ import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
+import androidx.compose.runtime.CompositionLocalProvider
+import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.ui.screens.gallery.GallerySheetSkeleton
+import com.hazel.android.ui.screens.gallery.GalleryVideoLinks
+import com.hazel.android.ui.screens.gallery.GalleryVideoSheet
+import com.hazel.android.ui.screens.gallery.LocalInHostSheet
+import com.hazel.android.ui.screens.gallery.PostVideos
+import kotlinx.coroutines.Job
 
 private sealed interface GalleryRead {
     data object Reading : GalleryRead
@@ -65,15 +56,20 @@ private sealed interface GalleryRead {
 }
 
 /**
- * Hazel Images over the app a link was shared from: a reading sheet while gallery-dl reads
- * the link, then the gallery sheet for the first post, or the failure with its log.
+ * Hazel Gallery over the app a link was shared from. One sheet shows the image sheet's
+ * skeleton while gallery-dl reads the link and then fills in place with the image sheet, or
+ * Download all for a post of several files. Videos open the yt-dlp sheets; a failure shows
+ * its log.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun GalleryShareContent(
     url: String,
-    onDownload: (List<GalleryDownloadRequest>) -> Unit,
-    /** A post that is one video goes to the video sheet, with this link. */
-    onVideo: (String) -> Unit,
+    /**
+     * Files for gallery-dl's queue, and the job handing videos to yt-dlp's, which ends once
+     * each is queued or found missing.
+     */
+    onQueued: (requests: List<GalleryDownloadRequest>, videos: Job?) -> Unit,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
@@ -100,10 +96,15 @@ internal fun GalleryShareContent(
             GalleryRead.Failed(GalleryDlException(GalleryDlException.Kind.OTHER, e.javaClass.simpleName, e))
         }
     }
+    val links = GalleryVideoLinks.forShares
+    val onMissed: (Int) -> Unit = {
+        Toast.makeText(context, R.string.gallery_video_unavailable, Toast.LENGTH_SHORT).show()
+    }
 
-    when (val state = read) {
-        GalleryRead.Reading -> GalleryReadingSheet(onDismiss = onClose)
-        is GalleryRead.Failed -> {
+    val state = read
+    val videos = (state as? GalleryRead.Ready)?.post?.let(::videosOnly)
+    when {
+        state is GalleryRead.Failed -> {
             val log = state.error.log.ifBlank { stringResource(state.error.kind.message) }
             NoResultsDialog(
                 message = log,
@@ -123,33 +124,61 @@ internal fun GalleryShareContent(
                 onDismiss = onClose
             )
         }
-        is GalleryRead.Ready -> {
-            val post = state.post
-            val single = post.items.singleOrNull()
-            if (single != null && single.isVideo) {
-                LaunchedEffect(single.url) { onVideo(single.postUrl ?: post.source) }
-            } else if (single != null) {
-                GalleryItemSheet(
-                    item = single,
-                    postUrl = post.source,
-                    onDownload = { options, title, author, save ->
-                        onDownload(listOf(requestFor(post, listOf(single.index), options, title, author, save)))
-                    },
-                    onDismiss = onClose
-                )
-            } else {
-                GalleryPostSheet(
-                    items = post.items,
-                    postUrl = post.source,
-                    onDownload = { picks ->
-                        onDownload(picks.map { requestFor(post, it.indexes, it.options, it.title, it.author) })
-                    },
-                    onDismiss = onClose
-                )
+        state is GalleryRead.Ready && videos != null -> GalleryVideoSheet(
+            post = state.post,
+            items = videos,
+            links = links,
+            onQueued = { job -> onQueued(emptyList(), job) },
+            onMissed = onMissed,
+            onDismiss = onClose
+        )
+        else -> {
+            val sheetState = rememberBottomSheetState(
+                initialValue = SheetValue.Hidden,
+                enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+            )
+            ModalBottomSheet(onDismissRequest = onClose, sheetState = sheetState, containerColor = sheetBlackColor) {
+                CompositionLocalProvider(LocalInHostSheet provides true) {
+                    AnimatedContent(
+                        targetState = state,
+                        contentKey = { it::class },
+                        transitionSpec = { fadeIn(tween(FILL_IN_MS)) togetherWith fadeOut(tween(FILL_IN_MS / 2)) },
+                        label = "galleryShareSheet"
+                    ) { shown ->
+                        val post = (shown as? GalleryRead.Ready)?.post
+                        val single = post?.items?.singleOrNull()
+                        when {
+                            post == null -> GallerySheetSkeleton()
+                            single != null -> GalleryItemSheet(
+                                item = single,
+                                postUrl = post.source,
+                                onDownload = { options, title, author, save ->
+                                    onQueued(listOf(requestFor(post, listOf(single.index), options, title, author, save)), null)
+                                },
+                                onDismiss = onClose
+                            )
+                            else -> GalleryPostSheet(
+                                items = post.items,
+                                postUrl = post.source,
+                                postVideos = PostVideos(post, links, onMissed),
+                                onDownload = { picks, job ->
+                                    onQueued(picks.map { requestFor(post, it.indexes, it.options, it.title, it.author) }, job)
+                                },
+                                onDismiss = onClose
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
+private const val FILL_IN_MS = 240
+
+/** The post's files when they are all videos, which the yt-dlp sheets take; null otherwise. */
+internal fun videosOnly(post: GalleryPost): List<GalleryItem>? =
+    post.items.takeIf { it.isNotEmpty() && it.all(GalleryItem::isVideo) }
 
 /** The first post the link holds; a profile or tag page is followed to its first post. */
 private suspend fun readFirstPost(context: Context, url: String): GalleryPost {
@@ -170,48 +199,3 @@ private fun requestFor(
     author: String?,
     save: com.hazel.android.gallery.GallerySave = com.hazel.android.gallery.GallerySave.MEDIA
 ): GalleryDownloadRequest = post.request(indexes, options, title, author, save)
-
-/** The gallery sheet's header and preview while the link is read, as the video overlay shows it. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun GalleryReadingSheet(onDismiss: () -> Unit) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = sheetBlackColor) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            SheetHeaderLayout {
-                Column {
-                    ShimmerLabel(
-                        stringResource(R.string.format_sheet_fetching),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        stringResource(R.string.format_sheet_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-                SheetDownloadPill(
-                    label = stringResource(R.string.format_sheet_download),
-                    icon = Icons.Filled.Download,
-                    enabled = false,
-                    onClick = {}
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                ArtworkPlaceholder(Modifier.fillMaxSize())
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}

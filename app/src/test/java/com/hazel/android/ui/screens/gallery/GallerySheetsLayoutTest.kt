@@ -95,7 +95,7 @@ class GallerySheetsLayoutTest(private val locale: String) {
 
     @Test
     fun `download all sheet keeps the list bar, adjust section and buttons in view`() {
-        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {}) }
+        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-post-$locale")
         assertInside(
             context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
@@ -109,7 +109,7 @@ class GallerySheetsLayoutTest(private val locale: String) {
         RuntimeEnvironment.setQualifiers("$locale-w800dp-h360dp-land")
         compose.setContent {
             HazelTheme(darkTheme = true, glass = true) {
-                GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {})
+                GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _ -> }, onDismiss = {})
             }
         }
         compose.waitForIdle()
