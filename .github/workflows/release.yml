@@ -246,9 +246,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write the release notes
-        # Kept short on purpose: what changed lives in docs/release-notes/<tag>.md, shown on
-        # the website's What's new page under #<tag> and linked there, so the release page only
-        # says which APK to take. A beta has no notes file of its own and links the page itself.
+        # The body only says which APK to take. The notes live in docs/release-notes/<tag>.md
+        # and are linked on the website's What's new page under #<tag>; betas link the page.
         run: |
           cat > release-notes.md <<'NOTES'
           Most devices are arm64 - Not sure?
