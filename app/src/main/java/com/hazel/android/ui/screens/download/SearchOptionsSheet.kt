@@ -53,7 +53,6 @@ import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.gallery.GalleryShow
 import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.ModalBottomSheet
@@ -130,7 +129,6 @@ fun SearchOptionsSheet(
     }.collectAsState(initial = null)
     val galleryPrefs by remember(context) {
         combine(
-            SettingsRepository.getGallerySearchSite(context),
             SettingsRepository.getGalleryPostsPerSearch(context),
             SettingsRepository.getGalleryShow(context),
             SettingsRepository.getGallerySkipReposts(context),
@@ -225,14 +223,6 @@ fun SearchOptionsSheet(
                 SettingsSection(
                     title = stringResource(R.string.search_source_images),
                     rows = listOf<@Composable () -> Unit>(
-                        {
-                            ValueSettingRow(
-                                icon = Icons.Filled.TravelExplore,
-                                title = stringResource(R.string.fetch_settings_search_on),
-                                value = gallery.site.label,
-                                onClick = { open = SearchChoice.GALLERY_SITE }
-                            )
-                        },
                         {
                             ValueSettingRow(
                                 icon = Icons.Filled.FormatListNumbered,
@@ -359,13 +349,6 @@ fun SearchOptionsSheet(
             onDismiss = close,
             describe = { engineSummary(it) }
         )
-        SearchChoice.GALLERY_SITE -> SingleChoiceDialog(
-            title = stringResource(R.string.fetch_settings_search_on),
-            choices = GallerySearchSite.entries.map { it to it.label },
-            selected = gallery.site,
-            onSelect = { scope.launch { SettingsRepository.setGallerySearchSite(context, it) }; close() },
-            onDismiss = close
-        )
         SearchChoice.GALLERY_POSTS -> SingleChoiceDialog(
             title = stringResource(R.string.gallery_posts_per_search),
             choices = SettingsRepository.GALLERY_POST_COUNTS.map { it to it.toString() },
@@ -430,7 +413,6 @@ private data class SearchPrefs(
 )
 
 private data class GalleryPrefs(
-    val site: GallerySearchSite,
     val posts: Int,
     val show: GalleryShow,
     val skipReposts: Boolean,
@@ -445,7 +427,7 @@ private fun showLabel(show: GalleryShow): Int = when (show) {
 
 private enum class SearchChoice {
     NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY,
-    GALLERY_SITE, GALLERY_POSTS, GALLERY_SHOW
+    GALLERY_POSTS, GALLERY_SHOW
 }
 
 /** A clear action on a six-sided cookie, named in a small line under it. */

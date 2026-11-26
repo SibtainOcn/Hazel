@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
 - Search: an "i" button (also Info in Search options) opens a guide screen to what each side finds.
 - Search options: one fixed height for both tabs; rows scroll inside it.
+- Search opens on Media from Home and on Gallery from the Gallery tab.
+- Search: Search all is a cookie icon button; the field's search cookie also runs the search.
+- Image search site is picked only from the chips; the old Search on row is removed.
+- Choice dialogs and sheets mark the pick with a cookie check.
 ### Fixed
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.

@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">मीडिया · नतीजे होम पर</string>
     <string name="search_guide_media_body">वीडियो और संगीत। YouTube, YouTube Music, SoundCloud या Bandcamp पर खोजें, या 1,500 से ज़्यादा साइटों का लिंक पेस्ट करें। वीडियो या ऑडियो के रूप में सेव करें: एक लिंक, कई लिंक, या पूरी प्लेलिस्ट या चैनल।</string>
     <string name="search_guide_gallery_title">गैलरी · नतीजे गैलरी टैब में</string>
-    <string name="search_guide_gallery_body">फ़ोटो, कैरोसेल, छोटे वीडियो और कैप्शन। Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv या Instagram टैग पर शब्द खोजें, या किसी पोस्ट, बोर्ड या प्रोफ़ाइल का लिंक पेस्ट करें।</string>
+    <string name="search_guide_gallery_body">फ़ोटो, कैरोसेल, छोटे वीडियो और कैप्शन। Pinterest, Bluesky, Tumblr या DeviantArt पर शब्द खोजें, या किसी पोस्ट, बोर्ड या प्रोफ़ाइल का लिंक पेस्ट करें।</string>
     <string name="search_guide_profiles_title">प्रोफ़ाइल</string>
     <string name="search_guide_profiles_body">Instagram या X प्रोफ़ाइल का लिंक पूछता है कि क्या लाना है, एक बार में दो: Instagram पर स्टोरीज़, हाइलाइट्स, पोस्ट, रील्स या टैग किए गए; X पर मीडिया, पोस्ट और जवाब, या लाइक। हर हाइलाइट अपने अलग समूह में आता है।</string>
     <string name="search_guide_links_title">पेस्ट किए गए लिंक</string>

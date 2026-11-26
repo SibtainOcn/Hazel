@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">媒体 · 结果在首页</string>
     <string name="search_guide_media_body">视频和音乐。在 YouTube、YouTube Music、SoundCloud 或 Bandcamp 上搜索，或粘贴来自 1,500 多个网站的链接。可存为视频或音频：一个链接、多个链接，或整个播放列表或频道。</string>
     <string name="search_guide_gallery_title">图库 · 结果在图库标签页</string>
-    <string name="search_guide_gallery_body">照片、轮播、短视频和说明文字。在 Pinterest、X、Bluesky、Tumblr、DeviantArt、Pixiv 或 Instagram 标签中搜索关键词，或粘贴帖子、画板或主页的链接。</string>
+    <string name="search_guide_gallery_body">照片、轮播、短视频和说明文字。在 Pinterest、Bluesky、Tumblr 或 DeviantArt 中搜索关键词，或粘贴帖子、画板或主页的链接。</string>
     <string name="search_guide_profiles_title">主页</string>
     <string name="search_guide_profiles_body">Instagram 或 X 的主页链接会询问要获取什么，一次两项：Instagram 上的快拍、精选、帖子、Reels 或被标记；X 上的媒体、帖子和回复，或喜欢。每个精选单独成组。</string>
     <string name="search_guide_links_title">粘贴的链接</string>

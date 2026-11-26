@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">Médias · résultats sur Accueil</string>
     <string name="search_guide_media_body">Vidéos et musique. Recherchez sur YouTube, YouTube Music, SoundCloud ou Bandcamp, ou collez un lien de plus de 1 500 sites. Enregistrez en vidéo ou en audio : un lien, plusieurs liens, ou toute une playlist ou une chaîne.</string>
     <string name="search_guide_gallery_title">Galerie · résultats dans l\'onglet Galerie</string>
-    <string name="search_guide_gallery_body">Photos, carrousels, courtes vidéos et légendes. Recherchez des mots sur Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv ou des hashtags Instagram, ou collez le lien d\'une publication, d\'un tableau ou d\'un profil.</string>
+    <string name="search_guide_gallery_body">Photos, carrousels, courtes vidéos et légendes. Recherchez des mots sur Pinterest, Bluesky, Tumblr ou DeviantArt, ou collez le lien d\'une publication, d\'un tableau ou d\'un profil.</string>
     <string name="search_guide_profiles_title">Profils</string>
     <string name="search_guide_profiles_body">Un lien de profil Instagram ou X demande quoi récupérer, deux à la fois : stories, à la une, publications, reels ou identifié sur Instagram ; médias, publications et réponses, ou j\'aime sur X. Chaque story à la une arrive comme un groupe à part.</string>
     <string name="search_guide_links_title">Liens collés</string>

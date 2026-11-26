@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Check
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -418,7 +417,7 @@ internal fun ChoiceDialog(
 
 /**
  * One choice, as a tonal block in the group. The whole block is the target. The chosen one
- * takes the accent tint and a filled check at its end; the rest carry nothing there, so the
+ * takes the accent tint and a cookie check at its end; the rest carry nothing there, so the
  * eye goes straight to what is set. Shared by every place the app offers a choice, so a
  * pick looks the same in a dialog, a sheet, or a confirmation.
  *
@@ -467,22 +466,9 @@ internal fun ChoiceRow(
                 )
             }
         }
-        if (chosen) {
+        if (chosen || role == Role.Checkbox) {
             Spacer(modifier = Modifier.width(12.dp))
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            com.hazel.android.ui.components.CookieTick(selected = chosen, showEmpty = role == Role.Checkbox)
         }
     }
 }

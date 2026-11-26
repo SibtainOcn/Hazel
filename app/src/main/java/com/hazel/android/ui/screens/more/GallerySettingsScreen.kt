@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,7 +53,6 @@ import com.hazel.android.download.YtDlpEngine
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryOptions
-import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.gallery.GalleryShow
 import com.hazel.android.gallery.GalleryVideoMode
 import com.hazel.android.ui.components.AlertDialog
@@ -67,7 +65,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, SITE, POSTS, SHOW, CLEAR_RECORD, RETRIES }
+private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, POSTS, SHOW, CLEAR_RECORD, RETRIES }
 
 /** Defaults for gallery-dl downloads and image search. */
 @Composable
@@ -76,7 +74,6 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
     val scope = rememberCoroutineScope()
     val options by remember(context) { SettingsRepository.getGalleryOptions(context) }.collectAsState(initial = GalleryOptions())
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
-    val site by remember(context) { SettingsRepository.getGallerySearchSite(context) }.collectAsState(initial = GallerySearchSite.DEFAULT)
     val posts by remember(context) { SettingsRepository.getGalleryPostsPerSearch(context) }.collectAsState(initial = SettingsRepository.DEFAULT_GALLERY_POSTS)
     val show by remember(context) { SettingsRepository.getGalleryShow(context) }.collectAsState(initial = GalleryShow.ALL)
     val skipReposts by remember(context) { SettingsRepository.getGallerySkipReposts(context) }.collectAsState(initial = true)
@@ -190,14 +187,6 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
             rows = listOf(
                 {
                     ValueSettingRow(
-                        icon = Icons.Filled.TravelExplore,
-                        title = stringResource(R.string.fetch_settings_search_on),
-                        value = site.label,
-                        onClick = { open = GalleryChoice.SITE }
-                    )
-                },
-                {
-                    ValueSettingRow(
                         icon = Icons.Filled.FormatListNumbered,
                         title = stringResource(R.string.gallery_posts_per_search),
                         value = posts.toString(),
@@ -292,13 +281,6 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
         GalleryChoice.FILENAME -> GalleryTemplateDialog(
             current = options.filenameTemplate,
             onSave = { template -> save { it.copy(filenameTemplate = template) }; close() },
-            onDismiss = close
-        )
-        GalleryChoice.SITE -> SingleChoiceDialog(
-            title = stringResource(R.string.fetch_settings_search_on),
-            choices = GallerySearchSite.entries.map { it to it.label },
-            selected = site,
-            onSelect = { scope.launch { SettingsRepository.setGallerySearchSite(context, it) }; close() },
             onDismiss = close
         )
         GalleryChoice.POSTS -> SingleChoiceDialog(

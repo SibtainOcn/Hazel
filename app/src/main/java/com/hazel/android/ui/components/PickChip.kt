@@ -91,15 +91,7 @@ fun PickChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(MaterialShapes.Cookie7Sided.toShape())
-                        .background(colors.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
-                }
+                CookieTick(selected = true)
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(
@@ -167,3 +159,23 @@ private const val WAVE_GROW = 0.04f
 /** A fixed blue, apart from the accent, that reads on dark, light and glass alike. */
 private val WAVE_TINT = Color(0xFF4F86F7)
 private const val WAVE_ALPHA = 0.42f
+
+/**
+ * The app's pick mark: a check on an accent seven-sided cookie. Unpicked it is an empty faint
+ * cookie when [showEmpty], so a list of checkboxes keeps its marks in line; otherwise nothing.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun CookieTick(selected: Boolean, modifier: Modifier = Modifier, showEmpty: Boolean = false) {
+    if (!selected && !showEmpty) return
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier = modifier
+            .size(28.dp)
+            .clip(MaterialShapes.Cookie7Sided.toShape())
+            .background(if (selected) colors.primary else colors.onSurface.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
+    }
+}

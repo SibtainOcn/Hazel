@@ -52,4 +52,17 @@ class SearchModeLayoutTest(private val locale: String) {
         compose.onNodeWithText(context.getString(R.string.search_guide_title)).fetchSemanticsNode()
         saveScreen("search-guide-$locale")
     }
+
+    @Test
+    fun `opened from home it searches media even after gallery was used`() {
+        org.junit.Assume.assumeTrue(locale == "en")
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                SearchScreen(onSearch = {}, onSearchWords = { _, _ -> }, onDismiss = {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("YouTube Music").assertExists()
+        compose.onNodeWithText("Pinterest").assertDoesNotExist()
+    }
 }

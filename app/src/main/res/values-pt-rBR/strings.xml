@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">Mídia · resultados no Início</string>
     <string name="search_guide_media_body">Vídeos e música. Pesquise no YouTube, YouTube Music, SoundCloud ou Bandcamp, ou cole um link de mais de 1.500 sites. Salve como vídeo ou áudio: um link, vários links, ou uma playlist ou um canal inteiro.</string>
     <string name="search_guide_gallery_title">Galeria · resultados na aba Galeria</string>
-    <string name="search_guide_gallery_body">Fotos, carrosséis, vídeos curtos e legendas. Pesquise palavras no Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv ou em tags do Instagram, ou cole o link de uma publicação, pasta ou perfil.</string>
+    <string name="search_guide_gallery_body">Fotos, carrosséis, vídeos curtos e legendas. Pesquise palavras no Pinterest, Bluesky, Tumblr ou DeviantArt, ou cole o link de uma publicação, pasta ou perfil.</string>
     <string name="search_guide_profiles_title">Perfis</string>
     <string name="search_guide_profiles_body">Um link de perfil do Instagram ou do X pergunta o que buscar, dois por vez: stories, destaques, publicações, reels ou marcadas no Instagram; mídia, publicações e respostas, ou curtidas no X. Cada destaque vem como um grupo próprio.</string>
     <string name="search_guide_links_title">Links colados</string>

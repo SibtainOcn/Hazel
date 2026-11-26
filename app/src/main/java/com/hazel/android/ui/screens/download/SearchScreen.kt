@@ -1,7 +1,5 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.ui.theme.accentTint
-import com.hazel.android.ui.theme.accentInk
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -10,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,12 +53,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,6 +72,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -78,6 +80,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -100,14 +103,14 @@ import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.ui.components.ActionsRow
 import com.hazel.android.ui.components.AlertDialog
+import com.hazel.android.ui.components.PickChip
 import com.hazel.android.ui.components.pressCorner
 import com.hazel.android.ui.components.pressScale
-import com.hazel.android.ui.screens.gallery.GallerySiteRow
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.ui.graphics.graphicsLayer
-import com.hazel.android.ui.components.PickChip
 import com.hazel.android.ui.components.rememberChipWave
+import com.hazel.android.ui.screens.gallery.GallerySiteRow
 import com.hazel.android.ui.screens.more.groupShape
+import com.hazel.android.ui.theme.accentInk
+import com.hazel.android.ui.theme.accentTint
 import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
@@ -171,20 +174,14 @@ fun SearchScreen(
 
     val source by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
     val suggestionsOn by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
-    val imageSearchSaved by remember(context) { SettingsRepository.getImageSearch(context) }.collectAsState(initial = imagesFirst)
-    var imagesChosen by remember { mutableStateOf(if (imagesFirst) true else null) }
-    val images = imagesChosen ?: imageSearchSaved
+    // Opens on the side of the tab it came from: Home searches media, the Gallery tab images.
+    var images by remember { mutableStateOf(imagesFirst) }
     val gallerySite by remember(context) { SettingsRepository.getGallerySearchSitePicked(context) }
         .collectAsState(initial = null)
     // Bumped when words are searched in Gallery with no site picked: the site chips wave at once.
     var nudge by remember { mutableIntStateOf(0) }
     var guideOpen by remember { mutableStateOf(false) }
     if (guideOpen) SearchGuideScreen(onBack = { guideOpen = false })
-
-    fun chooseImages(on: Boolean) {
-        imagesChosen = on
-        scope.launch { SettingsRepository.setImageSearch(context, on) }
-    }
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -384,6 +381,7 @@ fun SearchScreen(
             SearchOptionsSheet(
                 onClearResults = onClearResults,
                 onDismiss = { menuOpen = false },
+                imagesFirst = images,
                 onCleared = statusToast::show
             )
         }
@@ -432,32 +430,16 @@ fun SearchScreen(
                 )
                 // Reads every queued link, offered only while there are some.
                 if (queued.isNotEmpty()) {
-                    Surface(
-                        onClick = { submit() },
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painterResource(R.drawable.ic_search),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                stringResource(R.string.search_all),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1
-                            )
-                        }
+                    CookieButton(onClick = { submit() }) {
+                        Icon(
+                            painterResource(R.drawable.ic_search),
+                            contentDescription = stringResource(R.string.search_all),
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
+                    Spacer(modifier = Modifier.width(6.dp))
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 GuideButton(onClick = { guideOpen = true })
                 Spacer(modifier = Modifier.width(6.dp))
                 CookieButton(
@@ -492,17 +474,25 @@ fun SearchScreen(
                     modifier = Modifier.padding(start = 8.dp, end = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // The same accent cookie the home bar leads with.
+                    // The same accent cookie the home bar leads with; here it also runs the search.
+                    val cookiePress = remember { MutableInteractionSource() }
                     Box(
                         modifier = Modifier
+                            .pressScale(cookiePress, pressed = 0.9f)
                             .size(40.dp)
                             .clip(MaterialShapes.Cookie7Sided.toShape())
-                            .background(MaterialTheme.colorScheme.primary),
+                            .background(MaterialTheme.colorScheme.primary)
+                            .clickable(
+                                interactionSource = cookiePress,
+                                indication = ripple(),
+                                role = Role.Button,
+                                onClick = { submit() }
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_search),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.fetch_settings_search),
                             modifier = Modifier.size(19.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -557,7 +547,7 @@ fun SearchScreen(
             // they apply, a wave runs across them now and then.
             MediaGallerySwitch(
                 gallery = images,
-                onGallery = ::chooseImages,
+                onGallery = { images = it },
                 modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 10.dp)
             )
             val forLinks = queued.isNotEmpty() || isLinks(text)

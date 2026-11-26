@@ -338,7 +338,6 @@ object SettingsRepository {
     val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
     const val DEFAULT_PLAY_QUALITY = 720
 
-    private val IMAGE_SEARCH_KEY = booleanPreferencesKey("image_search")
     private val GALLERY_SITE_KEY = stringPreferencesKey("gallery_search_site")
     private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
     private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
@@ -347,20 +346,6 @@ object SettingsRepository {
 
     val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
     const val DEFAULT_GALLERY_POSTS = 30
-
-    fun getImageSearch(context: Context): Flow<Boolean> =
-        context.dataStore.data.map { prefs -> prefs[IMAGE_SEARCH_KEY] ?: false }
-
-    suspend fun setImageSearch(context: Context, on: Boolean) {
-        context.dataStore.edit { prefs -> prefs[IMAGE_SEARCH_KEY] = on }
-    }
-
-    fun getGallerySearchSite(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite> =
-        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GallerySearchSite.fromName(prefs[GALLERY_SITE_KEY]) }
-
-    suspend fun setGallerySearchSite(context: Context, site: com.hazel.android.gallery.GallerySearchSite) {
-        context.dataStore.edit { prefs -> prefs[GALLERY_SITE_KEY] = site.name }
-    }
 
     /** The site picked on the search screen for image word searches; null until one is picked. */
     fun getGallerySearchSitePicked(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite?> =

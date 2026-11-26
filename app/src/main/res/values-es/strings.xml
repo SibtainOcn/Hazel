@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">Multimedia · resultados en Inicio</string>
     <string name="search_guide_media_body">Vídeos y música. Busca en YouTube, YouTube Music, SoundCloud o Bandcamp, o pega un enlace de más de 1500 sitios. Guarda como vídeo o audio: un enlace, varios enlaces o toda una lista o un canal.</string>
     <string name="search_guide_gallery_title">Galería · resultados en la pestaña Galería</string>
-    <string name="search_guide_gallery_body">Fotos, carruseles, vídeos cortos y descripciones. Busca palabras en Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv o etiquetas de Instagram, o pega un enlace a una publicación, un tablero o un perfil.</string>
+    <string name="search_guide_gallery_body">Fotos, carruseles, vídeos cortos y descripciones. Busca palabras en Pinterest, Bluesky, Tumblr o DeviantArt, o pega un enlace a una publicación, un tablero o un perfil.</string>
     <string name="search_guide_profiles_title">Perfiles</string>
     <string name="search_guide_profiles_body">Un enlace a un perfil de Instagram o X pregunta qué obtener, dos a la vez: historias, destacadas, publicaciones, reels o etiquetadas en Instagram; multimedia, publicaciones y respuestas, o me gusta en X. Cada destacada llega como su propio grupo.</string>
     <string name="search_guide_links_title">Enlaces pegados</string>

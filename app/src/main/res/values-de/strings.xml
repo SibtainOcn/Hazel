@@ -18,7 +18,7 @@
     <string name="search_guide_media_title">Medien · Ergebnisse auf Start</string>
     <string name="search_guide_media_body">Videos und Musik. Suche auf YouTube, YouTube Music, SoundCloud oder Bandcamp oder füge einen Link von über 1.500 Seiten ein. Als Video oder Audio speichern: ein Link, viele Links oder eine ganze Playlist oder ein Kanal.</string>
     <string name="search_guide_gallery_title">Galerie · Ergebnisse im Galerie-Tab</string>
-    <string name="search_guide_gallery_body">Fotos, Karussells, kurze Videos und Beschreibungen. Suche Wörter auf Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv oder in Instagram-Tags oder füge einen Link zu einem Beitrag, einer Pinnwand oder einem Profil ein.</string>
+    <string name="search_guide_gallery_body">Fotos, Karussells, kurze Videos und Beschreibungen. Suche Wörter auf Pinterest, Bluesky, Tumblr oder DeviantArt oder füge einen Link zu einem Beitrag, einer Pinnwand oder einem Profil ein.</string>
     <string name="search_guide_profiles_title">Profile</string>
     <string name="search_guide_profiles_body">Ein Instagram- oder X-Profillink fragt, was abgerufen werden soll, zwei auf einmal: Storys, Highlights, Beiträge, Reels oder Markiert auf Instagram; Medien, Beiträge und Antworten oder Gefällt mir auf X. Jedes Highlight kommt als eigene Gruppe.</string>
     <string name="search_guide_links_title">Eingefügte Links</string>
