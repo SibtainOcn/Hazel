@@ -415,9 +415,9 @@ def main():
 
     pages = {
         'index': page('index', 'Hazel: save video and music on Android',
-                      'Hazel saves video and music from YouTube and more than 1000 other sites to your Android phone. Free, open source, no account, no ads.',
+                      'Hazel saves stories, highlights, posts, video and music from YouTube, Instagram and more than 1000 other sites to your Android phone. Free, open source, no account, no ads.',
                       'home', 'home.css', facts),
-        'guide': page('guide', 'Guide | Hazel', 'How to use Hazel: your first download, playlists, sharing from other apps, where files go and more.', 'guide', 'pages.css', facts),
+        'guide': page('guide', 'Guide | Hazel', 'How to use Hazel: your first download, playlists, sharing from other apps, stories and highlights, where files go and more.', 'guide', 'pages.css', facts),
         'faq': page('faq', 'FAQ | Hazel', 'Answers to common questions about Hazel.', 'faq', 'pages.css', facts),
         'whats-new': page('whats-new', "What's new | Hazel", 'The highlights of the latest Hazel release.', 'whats-new', 'pages.css', facts),
         'changelog': page('changelog', 'Changelog | Hazel', 'Every change to Hazel, newest first.', 'changelog', 'pages.css', facts),
