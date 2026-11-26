@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Format sheet: the quality rail is one connected group, the panes keep their height while formats load, and codec and id badges are crimson.
 - Home long-press card: a full-width Play button above connected Download, Open and Properties tiles.
 - Fullscreen player: Download, Minimize and Close as one connected button group.
-- Queue tabs, Downloads rows and the bottom bar follow the accent's tonal colours.
+- Queue tabs, the Downloads rows and header buttons, and the bottom bar follow the accent's tonal colours.
 - Support Hazel screen follows the accent and theme, with a redesigned developer card.
 - Audio options use a waveform icon; Play in the download sheet is a tilted accent gem.
 - Glass: Mono is listed first, and dialogs, sheets, menus and toasts have no edge line.
