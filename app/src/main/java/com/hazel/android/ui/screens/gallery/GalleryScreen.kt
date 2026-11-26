@@ -513,12 +513,9 @@ fun GalleryScreen(
                                 })
                             }
                         }
-                        // Posts of one profile section run together, each run under its label.
-                        val runs = viewModel.posts.indices.groupBy { viewModel.posts[it].section }.entries
-                        runs.forEach { (section, indices) ->
-                            if (section != null) item(key = "label-${section.name}") {
-                                SectionLabel(stringResource(section.label), indices.size)
-                            }
+                        // Posts of one profile section run together; each card names its section in a tag.
+                        val runs = viewModel.posts.indices.groupBy { viewModel.posts[it].section }.values
+                        runs.forEach { indices ->
                         gridItems(indices, columns, SkeletonSpacing, key = { "post-$it" }) { i ->
                             val post = viewModel.posts[i]
                             val single = post.items.singleOrNull()
@@ -527,6 +524,7 @@ fun GalleryScreen(
                                     GalleryCard(
                                         item = single,
                                         total = 1,
+                                        section = post.section?.let { stringResource(it.label) },
                                         status = GalleryQueue.statusOf(galleryJobs, galleryFinished, post, post.items.first()),
                                         onOpen = { openItem(i, 0) },
                                         onView = { viewing = i to 0 }

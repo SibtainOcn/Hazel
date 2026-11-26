@@ -35,17 +35,32 @@ import com.hazel.android.gallery.ProfileSection
 import com.hazel.android.ui.theme.accentInk
 import com.hazel.android.ui.theme.accentTint
 
-/** The small label over one profile section's results, with how many posts it holds. */
+/** The small label over a profile section that needs a sign-in. */
 @Composable
-internal fun SectionLabel(text: String, count: Int? = null) {
+internal fun SectionLabel(text: String) {
     Text(
-        if (count != null) "$text · $count" else text,
+        text,
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 2.dp)
     )
+}
+
+/** Which profile section a result came from, as a small accent pill at the end of its header. */
+@Composable
+internal fun SectionTag(text: String, modifier: Modifier = Modifier) {
+    Surface(shape = RoundedCornerShape(50), color = accentTint(), modifier = modifier) {
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = accentInk(),
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+        )
+    }
 }
 
 /** Stands in for a section the site shows only to signed-in accounts, with the way to sign in. */
