@@ -38,10 +38,14 @@ internal fun videoKey(item: GalleryItem): String = item.url.removePrefix("ytdl:"
 
 /**
  * The post's own page when it holds just this video and a reader opens it (a reel, a one-video
- * post), so yt-dlp offers its full quality list. Stories have no page of their own.
+ * post, also inside a profile section), so yt-dlp offers its full quality list. Stories have no
+ * page of their own.
  */
 internal fun ownPage(post: GalleryPost, item: GalleryItem): String? =
-    item.postUrl?.takeIf { post.items.size == 1 && it.startsWith("http") && "/stories/" !in it }
+    item.postUrl?.takeIf { page ->
+        page.startsWith("http") && "/stories/" !in page &&
+            post.items.count { it.postKey == item.postKey && it.postUrl == page } == 1
+    }
 
 /** A name for a file the site left untitled, as stories are. */
 internal fun videoTitle(item: GalleryItem): String =

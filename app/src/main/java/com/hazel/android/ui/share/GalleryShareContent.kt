@@ -48,18 +48,23 @@ import com.hazel.android.ui.screens.gallery.GalleryVideoSheet
 import com.hazel.android.ui.screens.gallery.LocalInHostSheet
 import com.hazel.android.ui.screens.gallery.PostVideos
 import kotlinx.coroutines.Job
+import com.hazel.android.ui.screens.gallery.MergedPosts
+import com.hazel.android.gallery.ProfileSection
+import com.hazel.android.gallery.GalleryProfiles
+import com.hazel.android.gallery.GalleryProfile
 
 private sealed interface GalleryRead {
     data object Reading : GalleryRead
-    data class Ready(val post: GalleryPost) : GalleryRead
+    data class Asking(val profile: GalleryProfile) : GalleryRead
+    data class Ready(val posts: List<GalleryPost>, val profile: Boolean) : GalleryRead
     data class Failed(val error: GalleryDlException) : GalleryRead
 }
 
 /**
- * Hazel Gallery over the app a link was shared from. One sheet shows the image sheet's
- * skeleton while gallery-dl reads the link and then fills in place with the image sheet, or
- * Download all for a post of several files. Videos open the yt-dlp sheets; a failure shows
- * its log.
+ * Hazel Gallery over the app a link was shared from. A profile first asks which sections to
+ * fetch. One sheet shows the image sheet's skeleton while gallery-dl reads, then fills in
+ * place: the image sheet for one file, else Download all, which for a profile lists every
+ * chosen section's files. Videos open the yt-dlp sheets; a failure shows its log.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,12 +75,15 @@ internal fun GalleryShareContent(
      * each is queued or found missing.
      */
     onQueued: (requests: List<GalleryDownloadRequest>, videos: Job?) -> Unit,
+    /** Opens Image settings in the app, from the profile sheet. */
+    onTune: () -> Unit,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
     WarmGalleryOptions()
     var read by remember(url) { mutableStateOf<GalleryRead>(GalleryRead.Reading) }
     var attempt by remember(url) { mutableIntStateOf(0) }
+    var sections by remember(url) { mutableStateOf<List<ProfileSection>?>(null) }
     // Signing in from the failure dialog reads the link again with the new cookies.
     val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -85,9 +93,17 @@ internal fun GalleryShareContent(
             onClose()
         }
     }
-    LaunchedEffect(url, attempt) {
+    LaunchedEffect(url, attempt, sections) {
+        val app = context.applicationContext
         read = try {
-            GalleryRead.Ready(readFirstPost(context.applicationContext, url))
+            val profile = GalleryProfiles.detect(url)
+            if (profile == null) {
+                GalleryRead.Ready(listOf(readFirstPost(app, url)), profile = false)
+            } else {
+                val chosen = sections ?: profileSectionsToAsk(app, profile)
+                if (chosen == null) GalleryRead.Asking(profile)
+                else GalleryRead.Ready(readProfileSections(app, profile, chosen), profile = true)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: GalleryDlException) {
@@ -102,7 +118,11 @@ internal fun GalleryShareContent(
     }
 
     val state = read
-    val videos = (state as? GalleryRead.Ready)?.post?.let(::videosOnly)
+    val ready = state as? GalleryRead.Ready
+    val merged = remember(ready) { ready?.let { MergedPosts(it.posts) } }
+    val only = merged?.items?.singleOrNull()?.let(merged::originOf)
+    // One post of only videos goes to yt-dlp's sheet for several links; a profile lists in Download all.
+    val videos = ready?.takeUnless { it.profile }?.posts?.singleOrNull()?.let(::videosOnly)
     when {
         state is GalleryRead.Failed -> {
             val log = state.error.log.ifBlank { stringResource(state.error.kind.message) }
@@ -124,8 +144,25 @@ internal fun GalleryShareContent(
                 onDismiss = onClose
             )
         }
-        state is GalleryRead.Ready && videos != null -> GalleryVideoSheet(
-            post = state.post,
+        state is GalleryRead.Asking -> ProfileAskSheet(
+            profile = state.profile,
+            onFetch = { chosen ->
+                read = GalleryRead.Reading
+                sections = chosen
+            },
+            onTune = onTune,
+            onDismiss = onClose
+        )
+        only != null && only.second.isVideo -> GalleryVideoSheet(
+            post = only.first,
+            items = listOf(only.second),
+            links = links,
+            onQueued = { job -> onQueued(emptyList(), job) },
+            onMissed = onMissed,
+            onDismiss = onClose
+        )
+        ready != null && videos != null && videos.size > 1 -> GalleryVideoSheet(
+            post = ready.posts.single(),
             items = videos,
             links = links,
             onQueued = { job -> onQueued(emptyList(), job) },
@@ -140,29 +177,31 @@ internal fun GalleryShareContent(
             ModalBottomSheet(onDismissRequest = onClose, sheetState = sheetState, containerColor = sheetBlackColor) {
                 CompositionLocalProvider(LocalInHostSheet provides true) {
                     AnimatedContent(
-                        targetState = state,
-                        contentKey = { it::class },
+                        targetState = merged,
+                        contentKey = { it == null },
                         transitionSpec = { fadeIn(tween(FILL_IN_MS)) togetherWith fadeOut(tween(FILL_IN_MS / 2)) },
                         label = "galleryShareSheet"
                     ) { shown ->
-                        val post = (shown as? GalleryRead.Ready)?.post
-                        val single = post?.items?.singleOrNull()
+                        val single = shown?.items?.singleOrNull()?.let(shown::originOf)
                         when {
-                            post == null -> GallerySheetSkeleton()
+                            shown == null -> GallerySheetSkeleton()
                             single != null -> GalleryItemSheet(
-                                item = single,
-                                postUrl = post.source,
+                                item = single.second,
+                                postUrl = single.first.source,
                                 onDownload = { options, title, author, save ->
-                                    onQueued(listOf(requestFor(post, listOf(single.index), options, title, author, save)), null)
+                                    onQueued(listOf(single.first.request(listOf(single.second.index), options, title, author, save)), null)
                                 },
                                 onDismiss = onClose
                             )
                             else -> GalleryPostSheet(
-                                items = post.items,
-                                postUrl = post.source,
-                                postVideos = PostVideos(post, links, onMissed),
+                                items = shown.items,
+                                postUrl = shown.posts.first().source,
+                                postVideos = PostVideos(shown::originOf, links, onMissed),
                                 onDownload = { picks, job ->
-                                    onQueued(picks.map { requestFor(post, it.indexes, it.options, it.title, it.author) }, job)
+                                    val requests = shown.split(picks) { post, indexes, pick ->
+                                        post.request(indexes, pick.options, pick.title, pick.author)
+                                    }
+                                    onQueued(requests, job)
                                 },
                                 onDismiss = onClose
                             )
@@ -190,12 +229,3 @@ private suspend fun readFirstPost(context: Context, url: String): GalleryPost {
         }
     return post ?: throw GalleryDlException(GalleryDlException.Kind.NOT_FOUND, "no files")
 }
-
-private fun requestFor(
-    post: GalleryPost,
-    indexes: List<Int>?,
-    options: com.hazel.android.gallery.GalleryOptions,
-    title: String?,
-    author: String?,
-    save: com.hazel.android.gallery.GallerySave = com.hazel.android.gallery.GallerySave.MEDIA
-): GalleryDownloadRequest = post.request(indexes, options, title, author, save)
