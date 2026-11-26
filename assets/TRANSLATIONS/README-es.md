@@ -87,7 +87,7 @@ Si Hazel te ha resultado útil, considera apoyar su desarrollo. Tu apoyo me ayud
 ---
 ## ✨ ¿Por qué elegir Hazel?
 
-Hazel es un descargador gratuito y de código abierto para Android impulsado por **yt-dlp** & **gallery-dl**. Guarda vídeos, música y listas de reproducción de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
+Hazel es un descargador gratuito y de código abierto para Android basado en **yt-dlp** y **gallery-dl**. Guarda **historias, destacadas, publicaciones, reels**, vídeos, música, listas de reproducción e imágenes de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
 
 <table>
   <tr><th width="50%" align="left">📥 Descargas</th><th width="50%" align="left">🔍 Buscar y reproducir</th></tr>

@@ -87,7 +87,7 @@ If Hazel has been useful to you, consider supporting its development. Your suppo
 ---
 ## ✨ Why Choose Hazel?
 
-Hazel is a free, open-source downloader for Android powered by **yt-dlp** & **gallery-dl**. Save **stories, highlights, posts, reels**, videos, music, playlists and images from **1500+ sites** with zero ads, zero tracking and no account.
+Hazel is a free, open-source downloader for Android built on **yt-dlp** and **gallery-dl**. Save **stories, highlights, posts, reels**, videos, music, playlists and images from **1500+ sites** with zero ads, zero tracking and no account.
 
 <table>
   <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
