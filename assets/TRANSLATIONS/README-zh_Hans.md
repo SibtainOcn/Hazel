@@ -87,7 +87,7 @@
 ---
 ## ✨ 为什么选择 Hazel？
 
-Hazel 是一款基于 **yt-dlp** 和 **gallery-dl** 的免费开源 Android 下载器。从 **1500+ 个网站** 保存视频、音乐和播放列表，无广告、无追踪、无需账号。
+Hazel 是一款基于 **yt-dlp** 和 **gallery-dl** 的免费开源 Android 下载器。从 **1500+ 个网站** 保存**快拍、精选、帖子、Reels**、视频、音乐、播放列表和图片，无广告、无追踪、无需账号。
 
 <table>
   <tr><th width="50%" align="left">📥 下载</th><th width="50%" align="left">🔍 搜索与播放</th></tr>
