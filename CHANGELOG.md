@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in page: page zoom slider and a help item in the menu.
 ### Changed
 - Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
+- Bottom bar: the chosen tab sits on a 6-sided cookie or a 4-leaf clover in turn, and a tap springs the tab.
+- Gallery empty state and Getting started name stories, highlights and captions; share target rows say what each one saves.
 - Delete all cookies also clears saved site data and gallery-dl sessions.
 - Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
 - Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
@@ -23,8 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: Search all is a cookie icon button; the field's search cookie also runs the search.
 - Image search site is picked only from the chips; the old Search on row is removed.
 - Choice dialogs and sheets mark the pick with a cookie check.
-- Bottom bar: the chosen tab sits on a 6-sided cookie or a 4-leaf clover in turn, and a tap springs the tab.
-- Gallery empty state and Getting started name stories, highlights and captions; share target rows say what each one saves.
 - Tests: only core unit tests kept (230); layout and screenshot tests and the offline Python harnesses removed.
 ### Fixed
 - Gallery: videos play inside the viewer in Hazel's own player, with a seek bar and mute button; Instagram stories and reels no longer say no app can play them, and links only yt-dlp can read (Reddit) play too.
