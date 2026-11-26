@@ -700,6 +700,11 @@
     <string name="glass_style_forest">Hutan</string>
     <string name="glass_style_ocean">Samudra</string>
     <string name="glass_style_mono">Mono</string>
+    <string name="glass_style_rose">Mawar</string>
+    <string name="glass_style_ember">Bara</string>
+    <string name="glass_style_lagoon">Laguna</string>
+    <string name="glass_style_dusk">Senja</string>
+    <string name="glass_style_sand">Pasir</string>
     <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
     <string name="whats_new_tag">Yang baru</string>
     <string name="whats_new_version">Versi %1$s</string>

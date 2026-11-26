@@ -33,7 +33,8 @@ val LocalDarkTheme = staticCompositionLocalOf { true }
 val LocalGlassSolid = staticCompositionLocalOf { false }
 
 enum class GlassStyle(val key: String) {
-    MONO("mono"), AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
+    MONO("mono"), ROSE("rose"), EMBER("ember"), LAGOON("lagoon"), DUSK("dusk"), SAND("sand"),
+    AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
     SUNSET("sunset"), NEBULA("nebula"), FOREST("forest");
 
     companion object {
@@ -62,6 +63,11 @@ private val OceanDark = listOf(Color(0xFF00C9A7), Color(0xFF0077FF), Color(0xFF0
 private val NebulaDark = listOf(Color(0xFF8B5CF6), Color(0xFF4F46E5), Color(0xFFE040FB), Color(0xFF38BDF8))
 private val ForestDark = listOf(Color(0xFF10B981), Color(0xFF15803D), Color(0xFF84CC16), Color(0xFF2DD4BF))
 private val MonoDark = listOf(Color(0xFF9AA0AA), Color(0xFF6B7280), Color(0xFFC9CED6), Color(0xFF4B5563))
+private val RoseDark = listOf(Color(0xFFFF7EB3), Color(0xFFC084FC), Color(0xFFFFB4A2), Color(0xFFE879F9))
+private val EmberDark = listOf(Color(0xFFEF4444), Color(0xFFF97316), Color(0xFFB91C1C), Color(0xFFF59E0B))
+private val LagoonDark = listOf(Color(0xFF06B6D4), Color(0xFF99F6E4), Color(0xFF22D3EE), Color(0xFF5EEAD4))
+private val DuskDark = listOf(Color(0xFF7C3AED), Color(0xFF1E3A8A), Color(0xFFFB923C), Color(0xFFA78BFA))
+private val SandDark = listOf(Color(0xFFD6A35C), Color(0xFFE8C9A0), Color(0xFFB7791F), Color(0xFFF3D9B1))
 
 private fun fixedPalette(style: GlassStyle): List<Color>? = when (style) {
     GlassStyle.SUNSET -> SunsetDark
@@ -69,6 +75,11 @@ private fun fixedPalette(style: GlassStyle): List<Color>? = when (style) {
     GlassStyle.NEBULA -> NebulaDark
     GlassStyle.FOREST -> ForestDark
     GlassStyle.MONO -> MonoDark
+    GlassStyle.ROSE -> RoseDark
+    GlassStyle.EMBER -> EmberDark
+    GlassStyle.LAGOON -> LagoonDark
+    GlassStyle.DUSK -> DuskDark
+    GlassStyle.SAND -> SandDark
     GlassStyle.AURORA, GlassStyle.ACCENT, GlassStyle.WALLPAPER -> null
 }
 
@@ -90,7 +101,8 @@ fun glassPalette(style: GlassStyle, dark: Boolean, accent: Color): List<Color> {
         val base = when (style) {
             GlassStyle.AURORA -> return@remember if (dark) AuroraDark else AuroraLight
             GlassStyle.ACCENT -> listOf(accent, shiftHue(accent, 30f), shiftHue(accent, -35f), shiftHue(accent, 160f))
-            GlassStyle.SUNSET, GlassStyle.OCEAN, GlassStyle.NEBULA, GlassStyle.FOREST, GlassStyle.MONO ->
+            GlassStyle.SUNSET, GlassStyle.OCEAN, GlassStyle.NEBULA, GlassStyle.FOREST, GlassStyle.MONO,
+            GlassStyle.ROSE, GlassStyle.EMBER, GlassStyle.LAGOON, GlassStyle.DUSK, GlassStyle.SAND ->
                 fixedPalette(style) ?: AuroraDark
             GlassStyle.WALLPAPER -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val s = dynamicDarkColorScheme(context)

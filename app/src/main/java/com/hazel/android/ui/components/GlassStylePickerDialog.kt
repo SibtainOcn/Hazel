@@ -28,6 +28,11 @@ fun glassStyleLabel(style: GlassStyle): String = stringResource(
         GlassStyle.FOREST -> R.string.glass_style_forest
         GlassStyle.OCEAN -> R.string.glass_style_ocean
         GlassStyle.MONO -> R.string.glass_style_mono
+        GlassStyle.ROSE -> R.string.glass_style_rose
+        GlassStyle.EMBER -> R.string.glass_style_ember
+        GlassStyle.LAGOON -> R.string.glass_style_lagoon
+        GlassStyle.DUSK -> R.string.glass_style_dusk
+        GlassStyle.SAND -> R.string.glass_style_sand
     }
 )
 

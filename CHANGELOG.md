@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Glass styles: Rose, Ember, Lagoon, Dusk and Sand, listed right after Mono.
 - Cookies: Quick sign-in card on top, with a check on signed-in sites and help for sign-in pages that do not work.
 - Cookies: export chosen accounts to the clipboard or as a cookie file.
 - Cookies: delete chosen accounts from the menu.
