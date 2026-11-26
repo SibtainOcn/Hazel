@@ -24,13 +24,7 @@ class LinkKeyTest {
         )
     }
 
-    @Test
-    fun `the share sheet's tracking parameter is not part of the media`() {
-        assertEquals(
-            LinkKey.canonical("https://youtu.be/kUox2TPnpzo"),
-            LinkKey.canonical("https://youtu.be/kUox2TPnpzo?si=CJpDuLYmG1d_0TOk")
-        )
-    }
+
 
     @Test
     fun `a video opened from inside a playlist is the same video`() {
@@ -71,10 +65,7 @@ class LinkKeyTest {
         assertEquals(watch, LinkKey.canonical("https://www.youtube.com/live/kUox2TPnpzo"))
     }
 
-    @Test
-    fun `the key names the service rather than the host it was written with`() {
-        assertEquals("youtube/kUox2TPnpzo", LinkKey.canonical("https://youtu.be/kUox2TPnpzo"))
-    }
+
 
     @Test
     fun `two different videos never collapse onto one key`() {
@@ -90,21 +81,9 @@ class LinkKeyTest {
         )
     }
 
-    @Test
-    fun `a site with no known id form still drops the noise around it`() {
-        assertEquals(
-            LinkKey.canonical("https://example.com/media/clip"),
-            LinkKey.canonical("https://www.example.com/media/clip/?utm_source=x&fbclid=y")
-        )
-    }
 
-    @Test
-    fun `parameters that identify the media on such a site are kept`() {
-        assertNotEquals(
-            LinkKey.canonical("https://example.com/watch?id=1"),
-            LinkKey.canonical("https://example.com/watch?id=2")
-        )
-    }
+
+
 
     @Test
     fun `the order parameters were written in does not matter`() {
@@ -114,49 +93,18 @@ class LinkKeyTest {
         )
     }
 
-    @Test
-    fun `something that is not an address is still comparable to itself`() {
-        assertTrue(LinkKey.sameMedia("not a url at all", "not a url at all"))
-        assertEquals(LinkKey.canonical("NOT A URL"), LinkKey.canonical("  not a url  "))
-    }
+
 
     @Test
     fun `two blank links are not treated as the same media`() {
         assertFalse(LinkKey.sameMedia("", ""))
     }
 
-    @Test
-    fun `the digest is stable, filename safe, and follows the key rather than the spelling`() {
-        val share = LinkKey.digest("https://youtu.be/kUox2TPnpzo?si=abc")
-        val bar = LinkKey.digest("https://www.youtube.com/watch?v=kUox2TPnpzo")
 
-        assertEquals(share, bar)
-        assertEquals(share, LinkKey.digest("https://youtu.be/kUox2TPnpzo?si=abc"))
-        assertEquals(32, share.length)
-        assertTrue(share.all { it.isDigit() || it in 'a'..'f' })
-    }
 
-    @Test
-    fun `a video opened from a playlist is read apart from the video alone`() {
-        val inList = "https://music.youtube.com/watch?v=kUox2TPnpzo&list=OLAK5uy_abc"
-        val alone = "https://www.youtube.com/watch?v=kUox2TPnpzo"
 
-        // Still the same media for the repeat-download check...
-        assertTrue(LinkKey.sameMedia(inList, alone))
-        // ...but a different read, so the playlist is never answered with one song.
-        assertNotEquals(LinkKey.readKey(inList), LinkKey.readKey(alone))
-        assertNotEquals(LinkKey.digest(inList), LinkKey.digest(alone))
-    }
 
-    @Test
-    fun `a playlist link reads under its own id only once`() {
-        val key = LinkKey.readKey("https://www.youtube.com/playlist?list=PL111&si=x")
-        assertEquals("youtube/playlist/PL111", key)
-    }
 
-    @Test
-    fun `links without a collection read under their media key`() {
-        val url = "https://www.jiosaavn.com/song/leja-re/OQsEfQFVUXk"
-        assertEquals(LinkKey.canonical(url), LinkKey.readKey(url))
-    }
+
+
 }

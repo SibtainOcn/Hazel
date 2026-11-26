@@ -21,7 +21,7 @@ is genuinely the best or the worst the link offers.
 
 Nothing is downloaded: yt-dlp is asked which formats it would take (`-J`).
 
-Needs network and yt-dlp, so it is not part of test_all.py:
+Needs network and yt-dlp, so it is run by hand:
 
     pip install -U yt-dlp
     python tools/tests/live/test_best_worst_live.py            # full run

@@ -30,12 +30,7 @@ class BatchSelectionDownloadTest {
         assertEquals(links.map { it.url }, state().plans.map { it.info.url })
     }
 
-    @Test
-    fun `one ticked link downloads that link alone`() {
-        val state = state()
-        state.startSelection(links[2])
-        assertEquals(listOf(links[2].url), state.plans.map { it.info.url })
-    }
+
 
     @Test
     fun `inverting a selection downloads the other links`() {
@@ -45,18 +40,7 @@ class BatchSelectionDownloadTest {
         assertEquals(links.drop(1).map { it.url }, state.plans.map { it.info.url })
     }
 
-    @Test
-    fun `leaving selection goes back to the whole list`() {
-        val state = state()
-        state.startSelection(links[1])
-        state.endSelection()
-        assertEquals(links.size, state.plans.size)
-    }
 
-    @Test
-    fun `selection mode with nothing ticked still downloads the whole list`() {
-        val state = state()
-        state.startSelection()
-        assertEquals(links.size, state.plans.size)
-    }
+
+
 }

@@ -21,7 +21,7 @@ It also checks, without the network, that the flags below are the ones the Kotli
 so the two cannot drift apart.
 
 Needs yt-dlp, ffmpeg/ffprobe and mutagen, and the network for the real sites. Not part of
-test_all.py; run it by hand when the download flags change:
+CI; run it by hand when the download flags change:
 
     pip install -U yt-dlp mutagen
     python tools/tests/live/test_thumbnail_embed_live.py              # full matrix

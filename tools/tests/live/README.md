@@ -1,8 +1,8 @@
 # Live verification scripts
 
 Scripts that run the real yt-dlp and ffmpeg against real links and local stand-in files,
-to prove that the download flags the app builds actually work. They are **not** part of
-`tools/tests/test_all.py`: they need the network and take minutes. Run them by hand whenever
+to prove that the download flags the app builds actually work. CI does not run them:
+they need the network and take minutes. Run them by hand whenever
 the flags in `DownloadViewModel.buildRequest` change.
 
 Setup (Python 3):
