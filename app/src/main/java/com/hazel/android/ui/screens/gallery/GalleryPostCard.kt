@@ -49,7 +49,6 @@ import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.components.ArtworkPlaceholder
-import com.hazel.android.ui.screens.download.CornerTag
 import com.hazel.android.ui.theme.tonalFill
 
 /**
@@ -145,11 +144,6 @@ internal fun GalleryPostCard(
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
-                        if (i == 0) {
-                            Box(modifier = Modifier.align(Alignment.BottomStart).padding(10.dp)) {
-                                CornerTag(text = "1 / $count")
-                            }
-                        }
                         if (item.isVideo) {
                             Box(
                                 modifier = Modifier
@@ -178,7 +172,18 @@ internal fun GalleryPostCard(
             ) {
                 PostDownloadAllChip(onClick = onDownloadAll, modifier = Modifier.weight(1f, fill = false))
                 Spacer(modifier = Modifier.width(12.dp))
-                PageDots(count = count, current = state.currentItem)
+                // Under the carousel, not on the artwork, so it reads on any picture and follows the scroll.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${state.currentItem + 1} / $count",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    PageDots(count = count, current = state.currentItem)
+                }
             }
         }
     }
