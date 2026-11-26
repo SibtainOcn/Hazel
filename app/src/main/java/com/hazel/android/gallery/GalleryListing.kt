@@ -157,11 +157,6 @@ data class GalleryPost(val key: String, val source: String, val items: List<Gall
 
     companion object {
         /**
-         * Splits the files read from [source] into posts, in the order they came, each counted
-         * from 1. A post with its own link is downloaded from it; one read from a [feed] (search,
-         * profile, several posts) without a link is fetched file by file, since the feed moves.
-         */
-        /**
          * Single-file posts by one author gathered into one post, where the author first
          * appears. Posts with several files stay as they are. The gathered files come from
          * different posts, so they are fetched by their own addresses.
@@ -186,6 +181,11 @@ data class GalleryPost(val key: String, val source: String, val items: List<Gall
             }
         }
 
+        /**
+         * Splits the files read from [source] into posts, in the order they came, each counted
+         * from 1. A post with its own link is downloaded from it; one read from a [feed] (search,
+         * profile, several posts) without a link is fetched file by file, since the feed moves.
+         */
         fun group(source: String, items: List<GalleryItem>, feed: Boolean = false): List<GalleryPost> {
             if (items.isEmpty()) return emptyList()
             val groups = items.groupBy { it.postKey }

@@ -12,6 +12,7 @@
     <string name="gallery_error_login">Inicia sesión en este sitio en Cookies y vuelve a intentarlo</string>
     <string name="gallery_error_sign_in_refused">El sitio rechazó tu inicio de sesión guardado. Vuelve a iniciar sesión en Cookies</string>
     <string name="gallery_error_unsupported">Galería no puede leer este enlace</string>
+    <string name="gallery_links_skipped">No se pudieron leer algunos enlaces</string>
     <string name="gallery_error_not_found">La publicación ya no existe, es privada o está vacía</string>
     <string name="gallery_error_network">Sin conexión. Revisa la red o el proxy</string>
     <string name="gallery_error_setup">Galería no pudo iniciarse en este dispositivo</string>

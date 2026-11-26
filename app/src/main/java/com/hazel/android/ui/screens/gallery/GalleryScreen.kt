@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
@@ -133,7 +134,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     /** The post shown as cards: the only one, or the one opened from the list. */
     val post: GalleryPost? get() = posts.singleOrNull()
     val items: List<GalleryItem> get() = post?.items.orEmpty()
-    val showsList: Boolean get() = posts.size > 1
+    /** How many links were pasted; with several, results stay a list of posts from the first one in. */
+    val linkCount: Int get() = if (fromSearch) 0 else query.split(' ').count { it.startsWith("http") }
+    val showsList: Boolean get() = posts.size > 1 || (linkCount > 1 && posts.isNotEmpty())
 
     /** Whether the results came from a search, where each post is a result of its own. */
     var fromSearch by mutableStateOf(false)
@@ -186,28 +189,47 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 val url = request.site.urlFor(request.query)
                 launchRun(url) {
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-                    val found = GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items, feed = true)
+                    val listing = GalleryDlEngine.list(getApplication(), url, postLimit = limit)
                     val byAuthor = SettingsRepository.getGalleryGroupByAuthor(getApplication()).first()
-                    show(if (byAuthor) GalleryPost.byAuthor(found) else found)
+                    show(withContext(Dispatchers.Default) {
+                        GalleryPost.group(url, listing.items, feed = true).let { if (byAuthor) GalleryPost.byAuthor(it) else it }
+                    })
                 }
             }
         }
     }
 
-    /** Each link in turn, its posts shown as they land. A failed link is skipped while others remain. */
+    /**
+     * Every link in one read per site, each link's posts shown in paste order as they land. A
+     * failed link is skipped while others remain, and [skippedLinks] says so.
+     */
     private suspend fun readLinks(urls: List<String>) {
-        var failure: GalleryDlException? = null
-        val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-        urls.forEach { url ->
-            try {
-                posts = posts + GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items)
-            } catch (e: GalleryDlException) {
-                if (urls.size == 1) throw e
-                failure = e
-            }
+        val app = getApplication<Application>()
+        val limit = SettingsRepository.getGalleryPostsPerSearch(app).first()
+        val byAuthor = SettingsRepository.getGalleryGroupByAuthor(app).first()
+        val links = urls.distinct()
+        val read = arrayOfNulls<List<GalleryPost>>(links.size)
+        val failures = mutableListOf<Throwable>()
+        GalleryDlEngine.listEach(app, links, postLimit = limit) { url, result ->
+            result.onSuccess { listing ->
+                val found = withContext(Dispatchers.Default) {
+                    read[links.indexOf(url)] = GalleryPost.group(url, listing.items)
+                    read.filterNotNull().flatten().let { if (byAuthor) GalleryPost.byAuthor(it) else it }
+                }
+                posts = found
+            }.onFailure { failures += it }
         }
-        if (posts.isEmpty()) failure?.let { throw it }
+        if (posts.isEmpty()) failures.firstOrNull()?.let { throw it }
+        if (failures.isNotEmpty() && posts.isNotEmpty()) skippedLinks = failures.size
         show(posts)
+    }
+
+    /** How many pasted links could not be read while others were; the screen says so once. */
+    var skippedLinks by mutableStateOf(0)
+        private set
+
+    fun skippedLinksShown() {
+        skippedLinks = 0
     }
 
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
@@ -330,11 +352,19 @@ fun GalleryScreen(
     }
 
     val statusToast = rememberStatusToastState()
+    val skippedText = stringResource(R.string.gallery_links_skipped)
+    LaunchedEffect(viewModel.skippedLinks) {
+        if (viewModel.skippedLinks > 0) {
+            statusToast.show(skippedText, ok = false)
+            viewModel.skippedLinksShown()
+        }
+    }
+    val links = viewModel.linkCount
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
             UrlSearchBar(
-                url = viewModel.query,
+                url = if (links > 1) pluralStringResource(R.plurals.batch_links, links, links) else viewModel.query,
                 onOpenSearch = { searchOpen = true },
                 shineProgress = searchBarShine.value,
                 onMenuOpen = { menuOpen = true },

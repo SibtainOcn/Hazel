@@ -101,7 +101,7 @@ internal object GallerySpare {
      * would. The line is read from the byte stream: gallery-dl reconfigures stdin, which fails once
      * its text layer has been read.
      */
-    private const val BOOT = "import sys, json, gallery_dl, gallery_dl.extractor, gallery_dl.job\n" +
+    private const val BOOT = GalleryLinkOutput.RUN_PREFIX + "import json\n" +
         "args = json.loads(sys.stdin.buffer.readline() or b'null')\n" +
         "if args is None: sys.exit(0)\n" +
         "sys.argv = ['gallery-dl'] + args\n" +

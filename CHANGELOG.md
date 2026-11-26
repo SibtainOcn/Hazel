@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Gallery: a saved sign-in the site turns away now asks to sign in again instead of a generic read error.
 
 ## [1.2.17] - 2026-11-26
