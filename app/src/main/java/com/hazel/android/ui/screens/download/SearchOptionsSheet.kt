@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hub
@@ -132,6 +134,11 @@ fun SearchOptionsSheet(
         )
     }.collectAsState(initial = null)
     var imagesTab by remember { mutableStateOf(imagesFirst) }
+    val profileAsk by remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    var profileSheet by remember { mutableStateOf<com.hazel.android.gallery.ProfileSite?>(null) }
+    profileSheet?.let { site ->
+        com.hazel.android.ui.screens.gallery.SavedProfileSectionsSheet(site = site, onDismiss = { profileSheet = null })
+    }
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
@@ -204,7 +211,7 @@ fun SearchOptionsSheet(
             if (imagesTab) {
                 SettingsSection(
                     title = stringResource(R.string.search_source_images),
-                    rows = listOf(
+                    rows = listOf<@Composable () -> Unit>(
                         {
                             ValueSettingRow(
                                 icon = Icons.Filled.TravelExplore,
@@ -246,7 +253,7 @@ fun SearchOptionsSheet(
                                 onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryGroupByAuthor(context, on) } }
                             )
                         }
-                    )
+                    ) + profileRows(profileAsk, onOpen = { profileSheet = it })
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 return@Column
@@ -450,4 +457,34 @@ private fun ClearShape(
             modifier = Modifier.widthIn(max = 84.dp)
         )
     }
+}
+
+/** The profile-link rows, shared by the three dots menu and Image settings: one setting, two doors. */
+@Composable
+internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.ProfileSite) -> Unit): List<@Composable () -> Unit> {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val rows = mutableListOf<@Composable () -> Unit>()
+    rows += {
+        SwitchSettingRow(
+            icon = Icons.Filled.PersonSearch,
+            title = stringResource(R.string.profile_ask),
+            summary = stringResource(R.string.profile_ask_hint),
+            checked = ask,
+            onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryProfileAsk(context, on) } }
+        )
+    }
+    com.hazel.android.gallery.ProfileSite.entries.forEach { site ->
+        rows += {
+            val sections by remember(site) { SettingsRepository.getGalleryProfileSections(context, site) }
+                .collectAsState(initial = com.hazel.android.gallery.ProfileSection.defaults(site))
+            ValueSettingRow(
+                icon = Icons.Filled.AccountCircle,
+                title = stringResource(R.string.profile_sections_title, site.label),
+                value = sections.map { stringResource(it.label) }.joinToString(", "),
+                onClick = { onOpen(site) }
+            )
+        }
+    }
+    return rows
 }

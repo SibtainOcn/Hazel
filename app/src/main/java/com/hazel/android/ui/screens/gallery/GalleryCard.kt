@@ -52,6 +52,8 @@ fun GalleryCard(
     total: Int,
     /** Where this file stands in the gallery queue; null when it was never queued. */
     status: GalleryQueue.ItemStatus? = null,
+    /** The profile section this file was read from, shown as a tag; null outside a profile. */
+    section: String? = null,
     onOpen: () -> Unit,
     onView: () -> Unit,
     modifier: Modifier = Modifier
@@ -131,6 +133,7 @@ fun GalleryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CornerTag(text = if (total > 1) "${item.extension.uppercase()} · ${item.index} / $total" else item.extension.uppercase())
+                section?.let { CornerTag(text = it) }
                 when (status) {
                     GalleryQueue.ItemStatus.Saved -> CornerTag(
                         text = stringResource(R.string.download_saved),

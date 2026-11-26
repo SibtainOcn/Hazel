@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -82,14 +80,14 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
     val posts by remember(context) { SettingsRepository.getGalleryPostsPerSearch(context) }.collectAsState(initial = SettingsRepository.DEFAULT_GALLERY_POSTS)
     val show by remember(context) { SettingsRepository.getGalleryShow(context) }.collectAsState(initial = GalleryShow.ALL)
     val skipReposts by remember(context) { SettingsRepository.getGallerySkipReposts(context) }.collectAsState(initial = true)
+    val profileAsk by remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    var profileSheet by remember { mutableStateOf<com.hazel.android.gallery.ProfileSite?>(null) }
 
     var open by rememberSaveable { mutableStateOf<GalleryChoice?>(null) }
     var folderOpen by rememberSaveable { mutableStateOf(false) }
     val pickSaveDir = rememberSaveKindPicker(saveDirs)
     val close = { open = null }
 
-    val maintenance = stringResource(R.string.search_under_maintenance)
-    val later = { Toast.makeText(context, maintenance, Toast.LENGTH_SHORT).show() }
     fun save(change: (GalleryOptions) -> GalleryOptions) {
         scope.launch { SettingsRepository.setGalleryOptions(context, change(options)) }
     }
@@ -227,25 +225,11 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
 
         SettingsSection(
             title = stringResource(R.string.gallery_settings_profiles),
-            rows = listOf(
-                {
-                    ValueSettingRow(
-                        icon = Icons.Filled.AccountCircle,
-                        title = stringResource(R.string.gallery_settings_instagram_sections),
-                        value = stringResource(R.string.gallery_settings_instagram_sections_value),
-                        onClick = later
-                    )
-                },
-                {
-                    ValueSettingRow(
-                        icon = Icons.Filled.Forum,
-                        title = stringResource(R.string.gallery_settings_x_posts),
-                        value = stringResource(R.string.gallery_settings_x_posts_value),
-                        onClick = later
-                    )
-                }
-            )
+            rows = com.hazel.android.ui.screens.download.profileRows(profileAsk, onOpen = { profileSheet = it })
         )
+        profileSheet?.let { site ->
+            com.hazel.android.ui.screens.gallery.SavedProfileSectionsSheet(site = site, onDismiss = { profileSheet = null })
+        }
 
         SettingsSection(
             title = stringResource(R.string.gallery_settings_network),

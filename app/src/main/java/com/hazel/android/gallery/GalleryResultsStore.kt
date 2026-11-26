@@ -59,6 +59,7 @@ object GalleryResultsStore {
             posts.put(
                 JSONObject().put("key", post.key).put("source", post.source)
                     .put("direct", post.direct).put("items", items)
+                    .put("section", post.section?.name.orEmpty())
             )
         }
         return JSONObject().put("query", saved.query).put("fromSearch", saved.fromSearch)
@@ -85,7 +86,10 @@ object GalleryResultsStore {
                 )
             }
             if (items.isEmpty()) null
-            else GalleryPost(post.optString("key"), post.optString("source"), items, post.optBoolean("direct"))
+            else GalleryPost(
+                post.optString("key"), post.optString("source"), items, post.optBoolean("direct"),
+                section = ProfileSection.entries.firstOrNull { it.name == post.optString("section") }
+            )
         }
         if (posts.isEmpty()) return null
         return Saved(root.optString("query"), root.optBoolean("fromSearch"), posts)

@@ -153,7 +153,8 @@ class GalleryScreenLayoutTest(private val locale: String) {
                     title = "", author = "spacebrief_with_a_long_name", site = "instagram",
                     width = 1080, height = 1350, thumbnail = null, postKey = "p1"
                 )
-            }
+            },
+            section = com.hazel.android.gallery.ProfileSection.IG_STORIES
         )
         compose.setContent {
             HazelTheme(darkTheme = true, glass = true) {
@@ -170,7 +171,8 @@ class GalleryScreenLayoutTest(private val locale: String) {
         val width = context.resources.displayMetrics.widthPixels
         listOf(
             "spacebrief_with_a_long_name",
-            "1 / 4"
+            "1 / 4",
+            context.getString(com.hazel.android.R.string.profile_stories)
         ).forEach { text ->
             val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
             assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= width)
