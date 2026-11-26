@@ -31,17 +31,20 @@ check the same commit twice.
 
 - **String resources:** `tools/strings/check.py`. Translation coverage is reported in the job
   summary, not enforced.
-- **Unit tests:** `:app:testDebugUnitTest`, the Kotlin tests in `app/src/test`.
+- **Unit tests:** `:app:testDebugUnitTest`, the Kotlin tests in `app/src/test`. They cover only
+  what breaks without showing on screen: arguments for yt-dlp and gallery-dl, parsing their
+  output, queue and resume, saved data, file locations and cleanup, proxy, updates, sheet routing.
+  On a pull request into `main` it also fails while `app/src/test/java/com/hazel/android/temp/`
+  holds any file: temporary tests are deleted or moved into the core tests before a release.
   [scripts/test_summary.py](../scripts/test_summary.py) writes the counts to the job summary
-  and posts them as the **Test results** check, e.g. `348/348 passed · 4s`, with each failing
+  and posts them as the **Test results** check, e.g. `230/230 passed · 10s`, with each failing
   test flagged on its file.
 - **Build APK:** debug on pull requests (unsigned, universal). Release on a push to `main`
   (signed, arm64-v8a uploaded for 3 days).
 
-CI checks the real code and the resources, nothing else. The Python harnesses in `tools/tests/`
-are local tools (`python tools/tests/test_all.py`) and do not run in CI: many of them read the
-Kotlin source as text or copy its logic into Python, so they fail on harmless refactors and can
-pass while the app is wrong. Behaviour worth guarding in CI gets a Kotlin unit test.
+CI checks the real code and the resources, nothing else. Layouts, colours and text are checked
+on a device, not in tests. `tools/tests/live/` holds network checks run by hand; CI never runs
+them. Behaviour worth guarding in CI gets one short Kotlin unit test.
 
 Test results is informational. Do not make it a required check: pull requests from forks
 cannot post it, so it would block them.

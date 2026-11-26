@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
@@ -65,6 +66,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.R
 import com.hazel.android.data.FailedDownload
+import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.gallery.GalleryDlEngine
@@ -72,6 +74,10 @@ import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryPost
+import com.hazel.android.gallery.GalleryReading
+import com.hazel.android.gallery.GalleryProfile
+import com.hazel.android.gallery.GalleryProfiles
+import com.hazel.android.gallery.ProfileSection
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
 import com.hazel.android.gallery.queue.request
@@ -133,7 +139,10 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     /** The post shown as cards: the only one, or the one opened from the list. */
     val post: GalleryPost? get() = posts.singleOrNull()
     val items: List<GalleryItem> get() = post?.items.orEmpty()
-    val showsList: Boolean get() = posts.size > 1
+    /** How many links were pasted; with several, results stay a list of posts from the first one in. */
+    val linkCount: Int get() = if (fromSearch) 0 else query.split(' ').count { it.startsWith("http") }
+    val showsList: Boolean get() = posts.size > 1 || (linkCount > 1 && posts.isNotEmpty()) ||
+        posts.any { it.section != null } || signInSections.isNotEmpty()
 
     /** Whether the results came from a search, where each post is a result of its own. */
     var fromSearch by mutableStateOf(false)
@@ -145,6 +154,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
 
+    /** Until the saved results are looked up, so the empty state doesn't flash before them. */
+    var restoring by mutableStateOf(true)
+        private set
+    /** The results on screen came back from the last session; they appear without arriving. */
+    var restored by mutableStateOf(false)
+        private set
+
     init {
         val app = getApplication<Application>()
         viewModelScope.launch {
@@ -155,7 +171,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 query = saved.query
                 fromSearch = saved.fromSearch
                 posts = saved.posts
+                restored = true
             }
+            restoring = false
             snapshotFlow { GalleryResultsStore.Saved(query, fromSearch, posts) }
                 .distinctUntilChangedBy { it.posts }
                 .drop(1)
@@ -172,13 +190,24 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
         lastRun = { handle(request) }
         posts = emptyList()
+        restored = false
+        restoring = false
         recordInHistory(request)
         when (request) {
             is GalleryRequest.Links -> {
                 fromSearch = false
                 if (request.urls.isEmpty()) return
                 query = request.urls.joinToString(" ")
-                launchRun(request.urls.first()) { readLinks(request.urls) }
+                val profile = request.urls.singleOrNull()?.let(GalleryProfiles::detect)
+                if (profile == null) {
+                    launchRun(request.urls.first()) { readLinks(request.urls) }
+                    return
+                }
+                launchRun(request.urls.first()) {
+                    val app = getApplication<Application>()
+                    if (SettingsRepository.getGalleryProfileAsk(app).first()) profilePrompt = profile
+                    else readProfile(profile, SettingsRepository.getGalleryProfileSections(app, profile.site).first())
+                }
             }
             is GalleryRequest.Search -> {
                 fromSearch = true
@@ -186,28 +215,91 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 val url = request.site.urlFor(request.query)
                 launchRun(url) {
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-                    val found = GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items, feed = true)
+                    val listing = GalleryDlEngine.list(getApplication(), url, postLimit = limit)
                     val byAuthor = SettingsRepository.getGalleryGroupByAuthor(getApplication()).first()
-                    show(if (byAuthor) GalleryPost.byAuthor(found) else found)
+                    show(withContext(Dispatchers.Default) {
+                        GalleryPost.group(url, listing.items, feed = true).let { if (byAuthor) GalleryPost.byAuthor(it) else it }
+                    })
                 }
             }
         }
     }
 
-    /** Each link in turn, its posts shown as they land. A failed link is skipped while others remain. */
-    private suspend fun readLinks(urls: List<String>) {
-        var failure: GalleryDlException? = null
-        val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-        urls.forEach { url ->
-            try {
-                posts = posts + GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items)
-            } catch (e: GalleryDlException) {
-                if (urls.size == 1) throw e
-                failure = e
+    /**
+     * Every link in one read per site, each link's posts shown in paste order as they land. A
+     * failed link is skipped while others remain, and [skippedLinks] says so.
+     */
+    /** The profile a pasted link pointed at, while the screen asks which sections to fetch. */
+    var profilePrompt by mutableStateOf<GalleryProfile?>(null)
+        private set
+    /** Sections of the last profile read that were turned away for want of a sign-in. */
+    var signInSections by mutableStateOf<List<ProfileSection>>(emptyList())
+        private set
+    /** The profile the results on screen were read from, for signing in to it. */
+    var shownProfile by mutableStateOf<GalleryProfile?>(null)
+        private set
+
+    fun dismissProfilePrompt() {
+        profilePrompt = null
+    }
+
+    /** Reads [sections] of [profile], and keeps them as the site's default for next time. */
+    fun fetchProfile(profile: GalleryProfile, sections: List<ProfileSection>) {
+        profilePrompt = null
+        lastRun = { fetchProfile(profile, sections) }
+        posts = emptyList()
+        val app = getApplication<Application>()
+        HazelApp.instance.applicationScope.launch { SettingsRepository.setGalleryProfileSections(app, profile.site, sections) }
+        launchRun(profile.home) { readProfile(profile, sections) }
+    }
+
+    private suspend fun readProfile(profile: GalleryProfile, sections: List<ProfileSection>) {
+        shownProfile = profile
+        val chosen = sections.sortedBy { it.ordinal }
+        readLinks(chosen.map { it.link(profile.user) }, chosen.associateBy { it.link(profile.user) })
+    }
+
+    private suspend fun readLinks(urls: List<String>, sections: Map<String, ProfileSection> = emptyMap()) {
+        val app = getApplication<Application>()
+        if (sections.isEmpty()) shownProfile = null
+        signInSections = emptyList()
+        val limit = SettingsRepository.getGalleryPostsPerSearch(app).first()
+        val byAuthor = sections.isEmpty() && SettingsRepository.getGalleryGroupByAuthor(app).first()
+        val links = urls.distinct()
+        val read = arrayOfNulls<List<GalleryPost>>(links.size)
+        val failures = mutableListOf<Throwable>()
+        var handed = 0
+        val counted = links.size > 1
+        if (counted) GalleryReading.set(GalleryReading.Progress(0, links.size))
+        try {
+            GalleryDlEngine.listEach(app, links, postLimit = limit) { url, result ->
+                result.onSuccess { listing ->
+                    val found = withContext(Dispatchers.Default) {
+                        read[links.indexOf(url)] = GalleryPost.group(url, listing.items).map { it.copy(section = sections[url]) }
+                        read.filterNotNull().flatten().let { if (byAuthor) GalleryPost.byAuthor(it) else it }
+                    }
+                    posts = found
+                }.onFailure { failure ->
+                    val section = sections[url]
+                    if (section != null && (failure as? GalleryDlException)?.kind in SIGN_IN_KINDS) signInSections = signInSections + section
+                    else failures += failure
+                }
+                if (counted) GalleryReading.set(GalleryReading.Progress(++handed, links.size))
             }
+        } finally {
+            if (counted) GalleryReading.set(null)
         }
-        if (posts.isEmpty()) failure?.let { throw it }
+        if (posts.isEmpty() && signInSections.isEmpty()) failures.firstOrNull()?.let { throw it }
+        if (failures.isNotEmpty() && posts.isNotEmpty()) skippedLinks = failures.size
         show(posts)
+    }
+
+    /** How many pasted links could not be read while others were; the screen says so once. */
+    var skippedLinks by mutableStateOf(0)
+        private set
+
+    fun skippedLinksShown() {
+        skippedLinks = 0
     }
 
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
@@ -249,6 +341,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         failure = null
         lastRun = null
         query = ""
+        signInSections = emptyList()
+        shownProfile = null
+        profilePrompt = null
     }
 
     internal fun show(found: List<GalleryPost>) {
@@ -273,6 +368,26 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    internal val videoLinks = GalleryVideoLinks(viewModelScope, application)
+
+    /** A playable link for [item] of the results shown; see [GalleryVideoLinks.playableUrl]. */
+    suspend fun playableUrl(item: GalleryItem, failed: String? = null): String? {
+        val post = posts.firstOrNull { item in it.items } ?: return null
+        return videoLinks.playableUrl(post, item, failed)
+    }
+
+    /** Videos asked for whose read came back empty, for a toast; reset once shown. */
+    var videosMissed by mutableStateOf(0)
+        private set
+
+    fun videosMissed(count: Int) {
+        videosMissed += count
+    }
+
+    fun videosMissedShown() {
+        videosMissed = 0
+    }
+
     internal fun fail(url: String, e: Exception) {
         val log = (e as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: e.message.orEmpty()
         notice = GalleryNotice((e as? GalleryDlException)?.let { it.kind.message } ?: R.string.gallery_failed)
@@ -286,6 +401,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 @Composable
 fun GalleryScreen(
     onVideoLinks: (List<String>) -> Unit,
+    onOpenImageSettings: () -> Unit = {},
     onVideoSearch: (String, SearchSource) -> Unit,
     viewModel: GalleryViewModel = viewModel()
 ) {
@@ -302,6 +418,9 @@ fun GalleryScreen(
     var logOpen by rememberSaveable { mutableStateOf(false) }
     var sheetFor by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     var postSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
+    // The post whose videos the yt-dlp sheet is open on, and the one file, or -1 for all of them.
+    var videoSheetPost by rememberSaveable { mutableStateOf<Int?>(null) }
+    var videoSheetFile by rememberSaveable { mutableStateOf(-1) }
 
     val currentPost = viewModel.posts.indexOf(viewModel.post)
 
@@ -316,12 +435,21 @@ fun GalleryScreen(
             searchBarShine.animateTo(1f, tween(durationMillis = 850, easing = FastOutSlowInEasing))
         }
     }
-    // A video in a post is read by yt-dlp and opens the video sheet on Home.
+    // A video opens yt-dlp's video sheet here, an image gallery-dl's item sheet.
     val openItem: (Int, Int) -> Unit = { postIndex, position ->
-        val post = viewModel.posts.getOrNull(postIndex)
-        val item = post?.items?.getOrNull(position)
-        if (item != null && item.isVideo) onVideoLinks(listOf(item.postUrl ?: post.source))
-        else sheetFor = postIndex to position
+        val item = viewModel.posts.getOrNull(postIndex)?.items?.getOrNull(position)
+        if (item != null && item.isVideo) {
+            videoSheetFile = position
+            videoSheetPost = postIndex
+        } else sheetFor = postIndex to position
+    }
+    // A post of videos only goes to yt-dlp's sheet for several links; anything with images to Download all.
+    val openPost: (Int?) -> Unit = { postIndex ->
+        val post = postIndex?.let(viewModel.posts::getOrNull)
+        if (post != null && post.items.all { it.isVideo }) {
+            videoSheetFile = -1
+            videoSheetPost = postIndex
+        } else postSheetFor = postIndex
     }
 
     LaunchedEffect(Unit) {
@@ -330,11 +458,51 @@ fun GalleryScreen(
     }
 
     val statusToast = rememberStatusToastState()
+    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) viewModel.retry()
+    }
+    viewModel.profilePrompt?.let { profile ->
+        // The sheet starts on the saved sections; what is picked here is saved on Fetch.
+        var picked by remember(profile) { mutableStateOf<List<ProfileSection>?>(null) }
+        val saved by remember(profile.site) { SettingsRepository.getGalleryProfileSections(context, profile.site) }
+            .collectAsState(initial = null)
+        val signedIn by remember(profile) { CookieRepository.signsIn(context, listOf(profile.home)) }
+            .collectAsState(initial = false)
+        val chosen = picked ?: saved ?: return@let
+        ProfileSectionsSheet(
+            site = profile.site,
+            title = stringResource(R.string.profile_fetch_from, profile.user),
+            chosen = chosen,
+            onChosen = { picked = it },
+            signedIn = signedIn,
+            onDismiss = viewModel::dismissProfilePrompt,
+            onTune = onOpenImageSettings,
+            onSignIn = { signInLauncher.launch(CookieWebViewActivity.intent(context, profile.home)) },
+            onFetch = { viewModel.fetchProfile(profile, chosen) }
+        )
+    }
+    val skippedText = stringResource(R.string.gallery_links_skipped)
+    LaunchedEffect(viewModel.skippedLinks) {
+        if (viewModel.skippedLinks > 0) {
+            statusToast.show(skippedText, ok = false)
+            viewModel.skippedLinksShown()
+        }
+    }
+    val videoMissedText = stringResource(R.string.gallery_video_unavailable)
+    LaunchedEffect(viewModel.videosMissed) {
+        if (viewModel.videosMissed > 0) {
+            statusToast.show(videoMissedText, ok = false)
+            viewModel.videosMissedShown()
+        }
+    }
+    val links = viewModel.linkCount
+    val reading by GalleryReading.progress.collectAsState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
             UrlSearchBar(
-                url = viewModel.query,
+                url = if (links > 1) pluralStringResource(R.plurals.batch_links, links, links) else viewModel.query,
+                fetching = reading?.let { it.read to it.total },
                 onOpenSearch = { searchOpen = true },
                 shineProgress = searchBarShine.value,
                 onMenuOpen = { menuOpen = true },
@@ -346,6 +514,7 @@ fun GalleryScreen(
             when {
                 viewModel.busy && viewModel.posts.isEmpty() ->
                     ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
+                viewModel.restoring -> Spacer(modifier = Modifier.fillMaxWidth().weight(1f))
                 viewModel.posts.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
@@ -375,14 +544,26 @@ fun GalleryScreen(
                     verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)
                 ) {
                     if (viewModel.showsList) {
-                        gridItems(viewModel.posts.indices.toList(), columns, SkeletonSpacing, key = { "post-$it" }) { i ->
+                        viewModel.signInSections.forEach { section ->
+                            item(key = "signin-${section.name}") {
+                                SectionLabel(stringResource(section.label))
+                                SectionSignInRow(section, onSignIn = {
+                                    viewModel.shownProfile?.let { signInLauncher.launch(CookieWebViewActivity.intent(context, it.home)) }
+                                })
+                            }
+                        }
+                        // Posts of one profile section run together; each card names its section in a tag.
+                        val runs = viewModel.posts.indices.groupBy { viewModel.posts[it].section }.values
+                        runs.forEach { indices ->
+                        gridItems(indices, columns, SkeletonSpacing, key = { "post-$it" }) { i ->
                             val post = viewModel.posts[i]
                             val single = post.items.singleOrNull()
-                            ArrivingCard(post.source to i, shrink) {
+                            ArrivingCard(post.source to i, shrink, animate = !viewModel.restored) {
                                 if (single != null) {
                                     GalleryCard(
                                         item = single,
                                         total = 1,
+                                        section = post.section?.let { stringResource(it.label) },
                                         status = GalleryQueue.statusOf(galleryJobs, galleryFinished, post, post.items.first()),
                                         onOpen = { openItem(i, 0) },
                                         onView = { viewing = i to 0 }
@@ -391,15 +572,16 @@ fun GalleryScreen(
                                     GalleryPostCard(
                                         post = post,
                                         onOpen = { position -> viewing = i to position },
-                                        onDownloadAll = { postSheetFor = i }
+                                        onDownloadAll = { openPost(i) }
                                     )
                                 }
                             }
                         }
+                        }
                     } else {
                         gridItems(viewModel.items.indices.toList(), columns, SkeletonSpacing, key = { viewModel.items[it].index }) { position ->
                             val item = viewModel.items[position]
-                            ArrivingCard(item.url, shrink) {
+                            ArrivingCard(item.url, shrink, animate = !viewModel.restored) {
                                 GalleryCard(
                                     item = item,
                                     total = viewModel.items.size,
@@ -446,7 +628,7 @@ fun GalleryScreen(
                 )
             }
             if (viewModel.offersDownloadAll && !viewModel.busy) {
-                DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
+                DownloadAllButton(onClick = { openPost(currentPost.takeIf { it >= 0 }) })
             }
         }
         StatusToastHost(
@@ -495,18 +677,16 @@ fun GalleryScreen(
                 startIndex = places.indexOf(postIndex to start).coerceAtLeast(0),
                 onOpenSheet = { item ->
                     val (p, i) = places.getOrNull(items.indexOfFirst { it === item }) ?: return@GalleryViewer
-                    // A video goes to the video sheet on Home, so the viewer closes first.
+                    // The video sheet opens on the Gallery tab under the viewer, so the viewer closes first.
                     if (item.isVideo) viewing = null
                     openItem(p, i)
                 },
+                onRefresh = viewModel::playableUrl,
                 onDismiss = { viewing = null }
             )
         }
     }
 
-    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) viewModel.retry()
-    }
     viewModel.failure?.takeIf { viewModel.failureDialog }?.let { item ->
         NoResultsDialog(
             message = item.errorLog,
@@ -555,6 +735,7 @@ fun GalleryScreen(
             sheetFor = null
             viewing = null
             postSheetFor = null
+            videoSheetPost = null
         }
     }
 
@@ -572,11 +753,24 @@ fun GalleryScreen(
         )
     }
 
+    videoSheetPost?.let(viewModel.posts::getOrNull)?.let { post ->
+        val files = post.items.getOrNull(videoSheetFile)?.let(::listOf) ?: post.items.filter { it.isVideo }
+        GalleryVideoSheet(
+            post = post,
+            items = files,
+            links = viewModel.videoLinks,
+            onQueued = { videoSheetPost = null },
+            onMissed = viewModel::videosMissed,
+            onDismiss = { videoSheetPost = null }
+        )
+    }
+
     postSheetFor?.let(viewModel.posts::getOrNull)?.let { post ->
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { picks ->
+            postVideos = PostVideos(post, viewModel.videoLinks, viewModel::videosMissed),
+            onDownload = { picks, _ ->
                 postSheetFor = null
                 picks.forEach { viewModel.download(it.indexes, it.options, post, it.title, it.author) }
             },
@@ -597,7 +791,11 @@ fun GalleryScreen(
 /** gallery-dl's own reading of a failure, in the terms of the shared failure dialog. */
 internal fun dialogKind(kind: GalleryDlException.Kind): FailureKind = when (kind) {
     GalleryDlException.Kind.LOGIN_REQUIRED -> FailureKind.SIGN_IN
+    GalleryDlException.Kind.SIGN_IN_REFUSED -> FailureKind.SIGN_IN_AGAIN
     GalleryDlException.Kind.UNSUPPORTED -> FailureKind.UNSUPPORTED
     GalleryDlException.Kind.NOT_FOUND -> FailureKind.GONE
     GalleryDlException.Kind.NETWORK, GalleryDlException.Kind.SETUP, GalleryDlException.Kind.OTHER -> FailureKind.OTHER
 }
+
+/** Read failures a sign-in would fix. */
+private val SIGN_IN_KINDS = setOf(GalleryDlException.Kind.LOGIN_REQUIRED, GalleryDlException.Kind.SIGN_IN_REFUSED)

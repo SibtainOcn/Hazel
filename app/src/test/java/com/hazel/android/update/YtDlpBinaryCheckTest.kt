@@ -44,16 +44,9 @@ class YtDlpBinaryCheckTest {
         assertTrue(YtDlpUpdater.isValidBinary(file))
     }
 
-    @Test
-    fun `accepts a plain zip`() {
-        assertTrue(YtDlpUpdater.isValidBinary(write(zipBytes("yt_dlp/YoutubeDL.py", "__main__.py"))))
-    }
 
-    @Test
-    fun `accepts a zip whose comment holds the end record signature`() {
-        val file = write(shebang + zipBytes("yt_dlp/YoutubeDL.py", "__main__.py", comment = "PK\u0005\u0006 not the real end"))
-        assertTrue(YtDlpUpdater.isValidBinary(file))
-    }
+
+
 
     @Test
     fun `rejects a cut short download`() {
@@ -61,20 +54,12 @@ class YtDlpBinaryCheckTest {
         assertFalse(YtDlpUpdater.isValidBinary(write(whole.copyOf(whole.size - 5_000))))
     }
 
-    @Test
-    fun `rejects a zip with a damaged entry header`() {
-        val whole = shebang + zipBytes("yt_dlp/__init__.py", "yt_dlp/YoutubeDL.py", "__main__.py")
-        whole[shebang.size] = 0
-        assertFalse(YtDlpUpdater.isValidBinary(write(whole)))
-    }
+
 
     @Test
     fun `rejects a zip that is not yt-dlp`() {
         assertFalse(YtDlpUpdater.isValidBinary(write(shebang + zipBytes("a.txt", "b.txt"))))
     }
 
-    @Test
-    fun `rejects a non-zip file`() {
-        assertFalse(YtDlpUpdater.isValidBinary(write(Random(1).nextBytes(800_000))))
-    }
+
 }

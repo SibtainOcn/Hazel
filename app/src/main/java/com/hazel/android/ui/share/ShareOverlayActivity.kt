@@ -64,12 +64,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.GalleryQueue
+import com.hazel.android.gallery.queue.request
 import com.hazel.android.gallery.queue.instantRequest
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryPost
 
 /** The share targets, told apart by the component they were launched through. */
-private enum class ShareMode { VIDEO, INSTANT_VIDEO, IMAGES, INSTANT_IMAGES }
+private enum class ShareMode { VIDEO, INSTANT_VIDEO, GALLERY, INSTANT_GALLERY }
 
 /**
  * Builds a dark-only color scheme using the user's selected accent color.
@@ -149,10 +150,13 @@ class ShareOverlayActivity : ComponentActivity() {
      */
     private var mode by mutableStateOf(ShareMode.VIDEO)
 
-    private fun Intent.shareMode(): ShareMode = when (component?.className?.substringAfterLast('.')) {
+    /** A profile shared to Instant Gallery, while it asks once which sections to save. */
+    private var instantProfile by mutableStateOf<com.hazel.android.gallery.GalleryProfile?>(null)
+
+    private fun Intent.shareMode(): ShareMode = when (component?.className?.let(com.hazel.android.util.AppIcon::baseName)) {
         INSTANT_ALIAS -> ShareMode.INSTANT_VIDEO
-        GALLERY_ALIAS -> ShareMode.IMAGES
-        INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_IMAGES
+        GALLERY_ALIAS -> ShareMode.GALLERY
+        INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_GALLERY
         else -> ShareMode.VIDEO
     }
 
@@ -253,25 +257,41 @@ class ShareOverlayActivity : ComponentActivity() {
                         // with this attempt's log in place of the last one.
                         LaunchedEffect(failure) {
                             val log = failure ?: return@LaunchedEffect
-                            com.hazel.android.data.FailedDownloadRepository.refreshLog(applicationContext, url, log)
+                            com.hazel.android.data.FailedDownloadRepository.recordRead(
+                                applicationContext,
+                                com.hazel.android.data.FailedDownload(url = url, title = url, author = "", thumbnail = null, isVideo = true, errorLog = log)
+                            )
                         }
 
                         when {
-                            mode == ShareMode.IMAGES -> GalleryShareContent(
+                            mode == ShareMode.GALLERY -> GalleryShareContent(
                                 url = url,
-                                onDownload = { requests ->
+                                onQueued = { requests, videos ->
                                     requests.forEach { request -> queueGallery { request } }
-                                    announceStarted()
-                                    closeOverlay()
+                                    // Kept open until the videos are queued, so their download starts in the foreground.
+                                    scope.launch {
+                                        videos?.join()
+                                        announceStarted()
+                                        closeOverlay()
+                                    }
                                 },
-                                onVideo = { link ->
-                                    sharedUrl = link
-                                    mode = ShareMode.VIDEO
-                                },
+                                onTune = { openInApp("gallery_settings") },
                                 onClose = { closeOverlay() }
                             )
 
-                            mode == ShareMode.INSTANT_IMAGES -> InstantDialog(
+                            mode == ShareMode.INSTANT_GALLERY && instantProfile != null -> instantProfile?.let { profile ->
+                                ProfileAskSheet(
+                                    profile = profile,
+                                    onFetch = { chosen ->
+                                        queueProfile(url, profile, chosen)
+                                        instantProfile = null
+                                    },
+                                    onTune = { openInApp("gallery_settings") },
+                                    onDismiss = { closeOverlay() }
+                                )
+                            }
+
+                            mode == ShareMode.INSTANT_GALLERY -> InstantDialog(
                                 glass = glass,
                                 tuneLabel = R.string.gallery_instant_settings,
                                 onConfirm = { closeOverlay() },
@@ -420,9 +440,11 @@ class ShareOverlayActivity : ComponentActivity() {
                 com.hazel.android.util.AppShortcuts.reportShared(this, instant = true)
                 DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
             }
-            ShareMode.IMAGES -> recordLink(url)
-            ShareMode.INSTANT_IMAGES -> {
+            ShareMode.GALLERY -> recordLink(url)
+            ShareMode.INSTANT_GALLERY -> {
                 recordLink(url)
+                instantProfile = com.hazel.android.gallery.GalleryProfiles.detect(url)
+                if (instantProfile != null) return
                 queueGallery { app ->
                     val options = SettingsRepository.getGalleryOptions(app).first()
                     // A link that can't be read is still queued, so its failure shows in the Failed tab.
@@ -443,6 +465,33 @@ class ShareOverlayActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Queues the files of a shared profile's chosen sections, read first so exactly the files a
+     * search would list are saved, never a profile's whole history. A section that can't be
+     * read is left out and a toast says so.
+     */
+    private fun queueProfile(url: String, profile: com.hazel.android.gallery.GalleryProfile, sections: List<com.hazel.android.gallery.ProfileSection>) {
+        val app = applicationContext
+        HazelApp.instance.applicationScope.launch {
+            val options = SettingsRepository.getGalleryOptions(app).first()
+            val posts = runCatching { readProfileSections(app, profile, sections) }
+                .onFailure { e ->
+                    android.util.Log.w("HazelShare", "Could not read the shared profile: ${e.javaClass.simpleName}")
+                    recordGalleryRead(app, url, profile.user, e)
+                }
+                .getOrDefault(emptyList())
+            posts.forEach { post ->
+                runCatching { GalleryQueue.add(app, post.request(post.items.map { it.index }, options, author = profile.user)) }
+                    .onFailure { android.util.Log.w("HazelShare", "Could not queue a profile section", it) }
+            }
+            if (posts.size < sections.size) {
+                kotlinx.coroutines.withContext(Dispatchers.Main) {
+                    Toast.makeText(app, R.string.gallery_links_skipped, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private fun queueGallery(build: suspend (Context) -> GalleryDownloadRequest) {
         val app = applicationContext
         HazelApp.instance.applicationScope.launch {
@@ -453,8 +502,8 @@ class ShareOverlayActivity : ComponentActivity() {
 
     private fun openInApp(route: String) {
         startActivity(
-            Intent(this, com.hazel.android.MainActivity::class.java)
-                .putExtra(com.hazel.android.MainActivity.EXTRA_NAVIGATE_TO, route)
+            Intent(this, com.hazel.android.HazelActivity::class.java)
+                .putExtra(com.hazel.android.HazelActivity.EXTRA_NAVIGATE_TO, route)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         )
         closeOverlay()
@@ -465,9 +514,20 @@ class ShareOverlayActivity : ComponentActivity() {
     }
 
     companion object {
-        const val INSTANT_ALIAS = "InstantShareActivity"
-        const val GALLERY_ALIAS = "GalleryShareActivity"
-        const val INSTANT_GALLERY_ALIAS = "InstantGalleryShareActivity"
+        const val INSTANT_ALIAS = com.hazel.android.util.AppIcon.INSTANT
+        const val GALLERY_ALIAS = com.hazel.android.util.AppIcon.GALLERY
+
+        /** Opens the Hazel Gallery sheet on [url], as sharing it there does. */
+        fun openGallery(context: Context, url: String) {
+            context.startActivity(
+                Intent(Intent.ACTION_SEND)
+                    .setComponent(com.hazel.android.util.AppIcon.current(context).shareComponent(context, GALLERY_ALIAS))
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, url)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
+        const val INSTANT_GALLERY_ALIAS = com.hazel.android.util.AppIcon.INSTANT_GALLERY
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
         const val EXTRA_AUDIO_ONLY = "hazel.audio_only"

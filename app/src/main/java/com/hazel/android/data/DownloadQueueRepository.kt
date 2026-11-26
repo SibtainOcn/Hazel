@@ -49,6 +49,8 @@ data class QueuedDownload(
     val treeUri: String,
     /** Whether reading this link needed the saved sign-in, which the download needs too. */
     val requiresSignIn: Boolean = false,
+    /** The post a file link was taken from, which history records in its place. */
+    val pageUrl: String? = null,
     /** The soundtrack chosen for it, for a source that published more than one. */
     val audioLanguage: String? = null,
     /** The settings this link was asked for under, so a later change does not rewrite it. */
@@ -209,6 +211,7 @@ object DownloadQueueRepository {
         put("mergeAudioSize", item.mergeAudioSizeBytes)
         put("treeUri", item.treeUri)
         put("requiresSignIn", item.requiresSignIn)
+        put("pageUrl", item.pageUrl ?: JSONObject.NULL)
         put("audioLanguage", item.audioLanguage ?: JSONObject.NULL)
         put("options", encodeOptions(item.options))
         put("paused", item.paused)
@@ -246,6 +249,7 @@ object DownloadQueueRepository {
             mergeAudioSizeBytes = item.optLong("mergeAudioSize"),
             treeUri = item.optString("treeUri"),
             requiresSignIn = item.optBoolean("requiresSignIn"),
+            pageUrl = item.optString("pageUrl").takeIf { it.startsWith("http") },
             audioLanguage = item.optString("audioLanguage").takeIf {
                 it.isNotBlank() && it != "null"
             },
@@ -387,7 +391,8 @@ fun QueuedDownload.toPlan(): DownloadPlan {
             format.takeIf { !it.hasVideo },
             mergeAudio
         ),
-        requiresSignIn = requiresSignIn
+        requiresSignIn = requiresSignIn,
+        pageUrl = pageUrl
     )
 
     return DownloadPlan(info, format, title, author, audioLanguage)
@@ -419,6 +424,7 @@ fun DownloadPlan.toQueued(options: DownloadOptions, treeUri: String): QueuedDown
         mergeAudioSizeBytes = mergeAudio?.fileSizeBytes ?: 0L,
         treeUri = treeUri,
         requiresSignIn = info.requiresSignIn,
+        pageUrl = info.pageUrl,
         audioLanguage = audioLanguage,
         options = options
     )

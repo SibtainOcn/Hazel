@@ -276,10 +276,15 @@ fun GlintHost(
  * @param progress 0f to 1f animation progress.
  * @param shape Pill or rounded rectangle shape of the container.
  */
-fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.dp)): Modifier = this
+fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.dp)): Modifier =
+    refreshShine({ progress }, shape)
+
+/** [refreshShine] with the progress read at draw time, for a shine that runs on repeat. */
+fun Modifier.refreshShine(progressOf: () -> Float, shape: Shape = RoundedCornerShape(26.dp)): Modifier = this
     .clip(shape)
     .drawWithContent {
         drawContent()
+        val progress = progressOf()
 
         if (progress <= 0f || progress >= 1f) return@drawWithContent
 

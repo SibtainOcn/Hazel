@@ -129,7 +129,6 @@ internal object SignInBrowser {
         "YouTube" to "https://www.youtube.com",
         "X" to "https://x.com",
         "Facebook" to "https://www.facebook.com",
-        "TikTok" to "https://www.tiktok.com",
-        "Reddit" to "https://www.reddit.com"
+        "TikTok" to "https://www.tiktok.com"
     )
 }

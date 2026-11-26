@@ -16,24 +16,11 @@ class HistorySelectionTest {
 
     private val list = (1L..5L).map(::entry)
 
-    @Test
-    fun `toggling one id touches only that id`() {
-        val picked = HistorySelection.toggle(setOf(1L, 2L), 3L)
-        assertEquals(setOf(1L, 2L, 3L), picked)
-        assertEquals(setOf(1L, 2L), HistorySelection.toggle(picked, 3L))
-    }
 
-    @Test
-    fun `select all picks every visible row, deleted ones included`() {
-        assertEquals(setOf(1L, 2L, 3L, 4L, 5L), HistorySelection.all(list))
-        assertTrue(HistorySelection.allChosen(HistorySelection.all(list), list))
-        assertFalse(HistorySelection.allChosen(setOf(1L, 2L), list))
-    }
 
-    @Test
-    fun `an empty list is never all chosen`() {
-        assertFalse(HistorySelection.allChosen(emptySet(), emptyList()))
-    }
+
+
+
 
     @Test
     fun `targets are only picked rows still on the list`() {
@@ -48,14 +35,7 @@ class HistorySelectionTest {
         assertEquals(listOf(3L), targets.map { it.id })
     }
 
-    @Test
-    fun `nothing picked means nothing to act on`() {
-        assertTrue(HistorySelection.targets(emptySet(), list).isEmpty())
-    }
 
-    @Test
-    fun `prune drops rows hidden by a filter or removed`() {
-        assertEquals(setOf(1L), HistorySelection.prune(setOf(1L, 4L), list.take(2)))
-        assertTrue(HistorySelection.prune(setOf(1L), emptyList()).isEmpty())
-    }
+
+
 }

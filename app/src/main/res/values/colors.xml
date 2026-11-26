@@ -2,6 +2,7 @@
 <resources>
     <!-- Launcher icon placeholder colors -->
     <color name="ic_launcher_background">#000000</color>
+    <color name="ic_launcher_background_white">#FFFFFF</color>
 
     <!--
         The launch window, drawn by the system before any of the app is running. It stays

@@ -56,28 +56,19 @@ $changelog = Join-Path $repo 'CHANGELOG.md'
 
 # ---------------------------------------------------------------- release notes
 
-Step "Checking RELEASE-NOTES.md"
+Step "Checking docs/release-notes/v$Version.md"
 
-# The website's What's new page shows this file as it is, so it must be rewritten for every
-# release. Checked before anything else: unchanged since the last tag means it still
-# describes the last release, and nothing here runs until it is updated.
-$notes = Join-Path $repo 'RELEASE-NOTES.md'
+# Each release has its own notes file. The website's What's new page and the release page
+# both point at it, so it must exist and say something before anything else runs.
+$notesName = "docs/release-notes/v$Version.md"
+$notes = Join-Path $repo $notesName
 git fetch --tags --quiet 2>$null
 $lastTag = git describe --tags --abbrev=0 --match 'v*' 2>$null
 $notesText = if (Test-Path $notes) { (Get-Content $notes -Raw -Encoding UTF8) } else { '' }
 if (-not "$notesText".Trim()) {
-    Die "Please update RELEASE-NOTES.md for $Version. It is missing or empty."
+    Die "Please write $notesName for $Version. It is missing or empty."
 }
-if ($lastTag) {
-    git diff --quiet $lastTag -- RELEASE-NOTES.md 2>$null; $changed = $LASTEXITCODE -ne 0
-    $dirtyNotes = git status --porcelain -- RELEASE-NOTES.md
-    if (-not $changed -and -not $dirtyNotes) {
-        Die "Please update RELEASE-NOTES.md for $Version. It has not changed since $lastTag, so it still describes that release."
-    }
-    Info "updated since $lastTag, good to go"
-} else {
-    Info "written, good to go"
-}
+Info "written, good to go"
 
 # ---------------------------------------------------------------- checks
 
@@ -114,7 +105,8 @@ $oldCode = [int]$Matches[1]
 $parts = $Version.Split('.') | ForEach-Object { [int]$_ }
 if ($parts[0] -gt 200 -or $parts[1] -gt 99 -or $parts[2] -gt 99) { Die "Version $Version is out of range (major up to 200, minor and patch up to 99)." }
 $newCode = (($parts[0] * 10000 + $parts[1] * 100 + $parts[2]) * 1000) + 990
-if ($newCode -le $oldCode) { Die "Version code $newCode for $Version is not above the current $oldCode. Pick a higher version." }
+# Equal means the version was already bumped on nightly ahead of the release; lower is a mistake.
+if ($newCode -lt $oldCode) { Die "Version code $newCode for $Version is below the current $oldCode. Pick a higher version." }
 
 if ($buildText -notmatch '(?m)^\s*versionName\s*=\s*"(.+?)"\s*$') {
     Die "A literal 'versionName = \"x.y.z\"' was not found in app/build.gradle.kts."
@@ -213,20 +205,23 @@ if ($DryRun) {
 Step "Committing and tagging"
 
 if ($DryRun) {
-    Info "would commit app/build.gradle.kts, CHANGELOG.md, RELEASE-NOTES.md and the changelogs"
+    Info "would commit app/build.gradle.kts, CHANGELOG.md, $notesName and the changelogs"
     Info "would tag $tag"
     if (-not $NoPush) { Info "would push the branch and the tag to origin" }
     Write-Host "`nDry run only. Nothing was changed." -ForegroundColor Green
     exit 0
 }
 
-git add app/build.gradle.kts CHANGELOG.md RELEASE-NOTES.md fastlane/metadata/android/en-US/changelogs
+git add app/build.gradle.kts CHANGELOG.md $notesName fastlane/metadata/android/en-US/changelogs
 $staged = git diff --cached --name-only
-if (-not $staged) { Die "Nothing to commit. Was this release already prepared?" }
-Info ("staged: " + ($staged -join ', '))
-
-git commit -q -m "Release $Version"
-if ($LASTEXITCODE -ne 0) { Die "git commit failed." }
+if ($staged) {
+    Info ("staged: " + ($staged -join ', '))
+    git commit -q -m "Release $Version"
+    if ($LASTEXITCODE -ne 0) { Die "git commit failed." }
+} else {
+    # Version, changelog, notes and store changelogs were prepared and merged ahead of time.
+    Info "already prepared in $(git rev-parse --short HEAD), nothing to commit"
+}
 
 git tag -a $tag -m "Hazel $tag"
 if ($LASTEXITCODE -ne 0) { Die "git tag failed. The commit is made; fix the tag and push by hand." }

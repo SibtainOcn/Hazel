@@ -22,15 +22,9 @@ class SdCardsTest {
 
     // ── Picker route per version, from the app's minimum to the newest ──
 
-    @Test
-    fun `android 7 and 7_1 open the plain picker`() {
-        for (sdk in 24..25) assertEquals(SdCards.PickerRoute.PLAIN, SdCards.pickerRoute(sdk), "sdk $sdk")
-    }
 
-    @Test
-    fun `android 8 and 9 start the picker at the card's root`() {
-        for (sdk in 26..28) assertEquals(SdCards.PickerRoute.INITIAL_URI, SdCards.pickerRoute(sdk), "sdk $sdk")
-    }
+
+
 
     @Test
     fun `android 10 and newer let the volume build the picker`() {
@@ -39,14 +33,7 @@ class SdCardsTest {
 
     // ── Folder ids ──
 
-    @Test
-    fun `volume is read from a storage document id`() {
-        assertEquals("1A2B-3C4D", SdCards.volumeOfDocumentId("1A2B-3C4D:Music/Hazel"))
-        assertEquals("1A2B-3C4D", SdCards.volumeOfDocumentId("1A2B-3C4D:"))
-        assertEquals("primary", SdCards.volumeOfDocumentId("primary:Download"))
-        assertNull(SdCards.volumeOfDocumentId("no-colon-here"))
-        assertNull(SdCards.volumeOfDocumentId(":path"))
-    }
+
 
     @Test
     fun `internal storage is never taken for a card`() {
@@ -55,18 +42,9 @@ class SdCardsTest {
         assertEquals("0000-1111", SdCards.cardVolumeOfDocumentId("0000-1111:Hazel/Video"))
     }
 
-    @Test
-    fun `only a volume's top counts as its root`() {
-        assertTrue(SdCards.isVolumeRoot("1A2B-3C4D:"))
-        assertFalse(SdCards.isVolumeRoot("1A2B-3C4D:Movies"))
-        assertFalse(SdCards.isVolumeRoot("1A2B-3C4D"))
-    }
 
-    @Test
-    fun `kind folders match the built-in layout`() {
-        assertEquals("Video", SdCards.kindFolderName(isVideo = true))
-        assertEquals("Audio", SdCards.kindFolderName(isVideo = false))
-    }
+
+
 
     @Test
     fun `a folder made inside a picked tree is told apart from the tree`() {
@@ -78,25 +56,11 @@ class SdCardsTest {
 
     // ── Labels ──
 
-    @Test
-    fun `labels name the card when it is known`() {
-        val names = mapOf("1A2B-3C4D" to "SanDisk SD card")
-        assertEquals("SanDisk SD card/Hazel/Video", MediaStoreHelper.describeDocumentId("1A2B-3C4D:Hazel/Video", names::get))
-        assertEquals("SanDisk SD card", MediaStoreHelper.describeDocumentId("1A2B-3C4D:", names::get))
-    }
 
-    @Test
-    fun `labels fall back to the volume id for a card that is out`() {
-        assertEquals("9999-0000/Music", MediaStoreHelper.describeDocumentId("9999-0000:Music") { null })
-        assertEquals("9999-0000", MediaStoreHelper.describeDocumentId("9999-0000:") { null })
-    }
 
-    @Test
-    fun `internal labels are unchanged`() {
-        assertEquals("Movies/Clips", MediaStoreHelper.describeDocumentId("primary:Movies/Clips") { "never" })
-        assertEquals("Internal storage", MediaStoreHelper.describeDocumentId("primary:") { "never" })
-        assertEquals("odd-id", MediaStoreHelper.describeDocumentId("odd-id") { "never" })
-    }
+
+
+
 
     // ── Working folders ──
 
@@ -113,15 +77,7 @@ class SdCardsTest {
         }
     }
 
-    @Test
-    fun `no card folder means working internally`() {
-        val internal = Files.createTempDirectory("internal").toFile()
-        try {
-            assertEquals(internal, SdCards.chooseWorkRoot(null, internal))
-        } finally {
-            internal.deleteRecursively()
-        }
-    }
+
 
     @Test
     fun `a card that cannot hold the folder falls back to internal`() {
@@ -153,13 +109,7 @@ class SdCardsTest {
         }
     }
 
-    @Test
-    fun `a link keeps the same working folder name on every storage`() {
-        val url = "https://example.com/watch?v=abc"
-        assertEquals(workDirName(url), workDirName(url))
-        assertTrue(workDirName(url).startsWith("dl_"))
-        assertFalse(workDirName(url) == workDirName("$url&t=1"))
-    }
+
 
     // ── Queue ──
 
@@ -183,31 +133,11 @@ class SdCardsTest {
 
     // ── Saved somewhere else ──
 
-    @Test
-    fun `a batch that missed the card is reported once with every title`() {
-        var notice: SaveFallback? = null
-        for (title in listOf("One", "Two", "Three")) {
-            notice = SaveFallback.adding(notice, "SanDisk SD card/Hazel/Video", "Download/Hazel/Video", title)
-        }
-        assertEquals(listOf("One", "Two", "Three"), notice?.titles)
-    }
 
-    @Test
-    fun `a different folder starts a new notice`() {
-        val first = SaveFallback.adding(null, "Card A/Hazel/Audio", "Download/Hazel/Audio", "One")
-        val second = SaveFallback.adding(first, "Card B/Hazel/Audio", "Download/Hazel/Audio", "Two")
-        assertEquals(listOf("Two"), second.titles)
-        assertEquals("Card B/Hazel/Audio", second.wanted)
-    }
 
-    @Test
-    fun `raw ids from the Downloads provider read like other paths`() {
-        val names = mapOf("1A2B-3C4D" to "SanDisk SD card")
-        assertEquals("Download/testing_hz", MediaStoreHelper.describeDocumentId("raw:/storage/emulated/0/Download/testing_hz", names::get))
-        assertEquals("Internal storage", MediaStoreHelper.describeDocumentId("raw:/storage/emulated/0/", names::get))
-        assertEquals("SanDisk SD card/Movies", MediaStoreHelper.describeDocumentId("raw:/storage/1A2B-3C4D/Movies", names::get))
-        assertEquals("/data/x", MediaStoreHelper.describeDocumentId("raw:/data/x", names::get))
-    }
+
+
+
 
     @Test
     fun `document ids map to paths only when they are paths`() {

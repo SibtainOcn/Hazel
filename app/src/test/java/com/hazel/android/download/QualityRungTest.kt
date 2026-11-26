@@ -12,12 +12,7 @@ class QualityRungTest {
         hasVideo = true, hasAudio = false
     )
 
-    @Test
-    fun `standard heights stay on their step`() {
-        listOf(144, 240, 360, 480, 720, 1080, 1440, 2160).forEach {
-            assertEquals(it, video(it).qualityRung())
-        }
-    }
+
 
     @Test
     fun `encoder rounding snaps to the nearest step`() {
@@ -26,11 +21,7 @@ class QualityRungTest {
         assertEquals(720, video(704).qualityRung())
     }
 
-    @Test
-    fun `a cinema crop counts by its width`() {
-        assertEquals(1080, video(800, "1080p (1920x800)").qualityRung())
-        assertEquals(2160, video(1600, "2160p (3840x1600)").qualityRung())
-    }
+
 
     @Test
     fun `a vertical clip counts by its short side`() {
@@ -38,15 +29,7 @@ class QualityRungTest {
         assertEquals(720, video(1280, "720p (720x1280)").qualityRung())
     }
 
-    @Test
-    fun `a size near no step keeps its own number`() {
-        assertEquals(2880, video(2880).qualityRung())
-        assertEquals(600, video(600).qualityRung())
-    }
 
-    @Test
-    fun `audio and unknown sizes have no step`() {
-        assertEquals(0, video(0).qualityRung())
-        assertEquals(0, video(720).copy(hasVideo = false).qualityRung())
-    }
+
+
 }

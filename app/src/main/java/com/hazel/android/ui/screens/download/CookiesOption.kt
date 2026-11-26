@@ -42,7 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.hazel.android.MainActivity
+import com.hazel.android.HazelActivity
 import com.hazel.android.R
 import com.hazel.android.data.AccountState
 import com.hazel.android.data.AccountStatus
@@ -255,9 +255,9 @@ internal fun CookiesDialogContent(
 private fun openCookiesScreen(context: Context) {
     runCatching {
         context.startActivity(
-            Intent(context, MainActivity::class.java)
+            Intent(context, HazelActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .putExtra(MainActivity.EXTRA_NAVIGATE_TO, "cookies")
+                .putExtra(HazelActivity.EXTRA_NAVIGATE_TO, "cookies")
         )
     }
 }

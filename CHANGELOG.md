@@ -5,6 +5,54 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.2.18] - 2026-11-27
+### Added
+- Glass styles: Rose, Ember, Lagoon, Dusk and Sand, listed right after Mono.
+- Cookies: Quick sign-in card on top, with a check on signed-in sites and help for sign-in pages that do not work.
+- Cookies: export chosen accounts to the clipboard or as a cookie file.
+- Cookies: delete chosen accounts from the menu.
+- Sign-in page: page zoom slider and a help item in the menu.
+- Appearance: App icon (Classic, White, Glass); the home screen and all four share targets follow it after a restart.
+### Changed
+- Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
+- Bottom bar: the chosen tab sits on a 6-sided cookie or a 4-leaf clover in turn, and a tap springs the tab.
+- Gallery empty state and Getting started name stories, highlights and captions; share target rows say what each one saves.
+- Delete all cookies also clears saved site data and gallery-dl sessions.
+- Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
+- Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
+- Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
+- Search: an "i" button (also Info in Search options) opens a guide screen to what each side finds.
+- Search options: one fixed height for both tabs; rows scroll inside it.
+- Search opens on Media from Home and on Gallery from the Gallery tab.
+- Search: Search all is a cookie icon button; the field's search cookie also runs the search.
+- Image search site is picked only from the chips; the old Search on row is removed.
+- Tonal buttons, chips and tabs are see-through on Glass and calmer on Dark; the search Media | Gallery switch matches the Queue tabs.
+- Search guide cards are glass on the Glass theme; Teal moves to second in the accent list.
+- Choice dialogs and sheets mark the pick with a cookie check.
+- Tests: only core unit tests kept (230); layout and screenshot tests and the offline Python harnesses removed.
+- Appearance: App icon row joins the theme group, with the current icon shown on the right.
+### Fixed
+- Gallery: videos play inside the viewer in Hazel's own player, with a seek bar and mute button; Instagram stories and reels no longer say no app can play them, and links only yt-dlp can read (Reddit) play too.
+- Gallery: videos in saved results or with expired links are read again as soon as they show, before Play.
+- Gallery: Download on a video opens the video download sheet on the Gallery tab; a post of only videos opens the sheet for several links, and stories download from their file instead of failing to read.
+- Gallery share: videos open the video download sheet; the reading sheet matches the image sheet and fills in place, also for Download all.
+- Gallery: Download all opens a video's own video download sheet, so videos can be saved as audio or another quality next to the images.
+- Gallery: image sheet and Download all settings are kept for the next download.
+- Video download sheet: options a site's plain file can't use are greyed out with a short reason.
+- Share targets Hazel Images and Instant Images are now Hazel Gallery and Instant Gallery.
+- Gallery share: a shared profile asks which sections to fetch; one file opens its sheet, more open Download all with every file. Instant Gallery asks once, then saves the files those sections list.
+- Share: a link that can't be read is listed in the Failed tab with its log; Retry opens the sheet on it again. Instagram turning a saved sign-in away now asks to sign in again.
+- Gallery share: a profile the site turns away says it may be too many requests, to wait or sign in again.
+- Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
+- Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.
+- Gallery: saved results reopen at once without replaying.
+- Gallery: carousels drop the duplicate item count tag.
+- Gallery: Instagram and X profile links ask which sections to fetch (stories, highlights, posts, reels, tagged; media, replies, likes), two at a time; results carry a section tag, highlight names and a sign-in row.
+- Gallery: a saved sign-in the site turns away now asks to sign in again instead of a generic read error.
+- Sign-in page: X, Instagram and other sign-in forms no longer load blank; pages fit, zoom and stay above the keyboard, and sign-in popups open.
+
 ## [1.2.17] - 2026-11-26
 ### Added
 - Gallery tab powered by gallery-dl: save photos, videos and captions from posts, profiles and galleries on Instagram, X, Reddit, Pinterest, Tumblr and many more sites.

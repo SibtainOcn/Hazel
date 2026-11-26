@@ -27,12 +27,7 @@ tools/
     check.py                           the gate: run it, believe it
     literal-allowlist.txt              literals deliberately left in the Kotlin, each with a reason
     BLOCKED.md                         text that needs a code change before it can be extracted
-  tests/                               harnesses that read the source, no network
-    test_all.py                        master runner: checks GitHub release versioning & runs all suites
-    test_release_regression_harness.py comprehensive release readiness & regression harness
-    test_artist_metadata.py            artist metadata and colon handling harness
-    test_*.py                          the other feature harnesses test_all.py runs
-    live/                              network tests, run by hand
+  tests/live/                          network checks of the real yt-dlp and ffmpeg, run by hand
   release/                             cutting a release and the F-Droid side of it
     README.md                          how to cut a release and what stops one
     release.ps1                        bumps versions, checks store changelogs and translations, tags, pushes
@@ -44,7 +39,7 @@ app/src/main/res/
   values-<lang>/strings.xml            one per language, added in Job 2
 ```
 
-`check.py` and the test harnesses need Python 3 and nothing else. Run them from the repository root.
+`check.py` needs Python 3 and nothing else. Run them from the repository root.
 
 ---
 

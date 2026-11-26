@@ -1,0 +1,8 @@
+* Gallery: stories, highlights and profile sections from Instagram and X
+* Gallery videos play in the viewer and save as video or audio
+* Hazel Gallery and Instant Gallery share targets, profiles included
+* Media | Gallery search switch with a guide
+* Choose the app icon: Classic, White or Glass
+* Five new glass styles and clearer tonal buttons
+* Quick sign-in, cookie export and JSON import
+* Fixed blank sign-in pages and unreadable shared links

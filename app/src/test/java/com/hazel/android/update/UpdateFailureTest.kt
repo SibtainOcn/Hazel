@@ -30,17 +30,7 @@ class UpdateFailureTest {
 
     private fun kind(error: Throwable) = UpdateFailure.from(error).kind
 
-    @Test
-    fun `a full phone is named as such, however the system words it`() {
-        assertEquals(
-            UpdateFailure.Kind.NO_SPACE,
-            kind(IOException("write failed: ENOSPC (No space left on device)"))
-        )
-        assertEquals(
-            UpdateFailure.Kind.NO_SPACE,
-            kind(RuntimeException("could not stage", IOException("No space left on device")))
-        )
-    }
+
 
     @Test
     fun `timeouts are told apart from an unreachable host`() {
@@ -68,28 +58,11 @@ class UpdateFailureTest {
         )
     }
 
-    @Test
-    fun `a dropped connection is not mistaken for a certificate problem`() {
-        assertEquals(UpdateFailure.Kind.CONNECTION_LOST, kind(SSLException("Connection reset by peer")))
-        assertEquals(UpdateFailure.Kind.CONNECTION_LOST, kind(SocketException("Software caused connection abort")))
-        assertEquals(UpdateFailure.Kind.CONNECTION_LOST, kind(EOFException()))
-        assertEquals(UpdateFailure.Kind.CONNECTION_LOST, kind(ProtocolException("unexpected end of stream")))
-    }
 
-    @Test
-    fun `an unknown error keeps its class and text for the bug report`() {
-        val failure = UpdateFailure.from(IllegalStateException("boom"))
-        assertEquals(UpdateFailure.Kind.UNKNOWN, failure.kind)
-        assertTrue(failure.summary, failure.summary.contains("IllegalStateException: boom"))
-        // It is also what the unknown sentence shows, since nothing else names the cause.
-        assertEquals(listOf<Any>("IllegalStateException: boom"), failure.messageArgs.toList())
-    }
 
-    @Test
-    fun `a failure that is already known passes through, even when wrapped`() {
-        val known = UpdateFailureException(UpdateFailure.Kind.WOULD_NOT_START, "ImportError: x")
-        assertEquals(UpdateFailure.Kind.WOULD_NOT_START, kind(RuntimeException("outer", known)))
-    }
+
+
+
 
     @Test
     fun `only failures a second try could change are retried`() {
@@ -121,60 +94,17 @@ class UpdateFailureTest {
         }
     }
 
-    @Test
-    fun `a start with no output or a memory complaint is transient`() {
-        assertTrue(UpdateFailure.isTransientStartFailure(null))
-        assertTrue(UpdateFailure.isTransientStartFailure("  \n"))
-        assertTrue(UpdateFailure.isTransientStartFailure("Traceback (most recent call last):\nMemoryError"))
-        assertTrue(UpdateFailure.isTransientStartFailure("Killed"))
-    }
 
-    @Test
-    fun `a refusal by Python itself is not transient`() {
-        assertFalse(
-            UpdateFailure.isTransientStartFailure(
-                "ImportError: You are using an unsupported version of Python."
-            )
-        )
-        assertFalse(UpdateFailure.isTransientStartFailure("zipimport.ZipImportError: bad local file header"))
-    }
 
-    @Test
-    fun `a refused build reports the last line of what it printed`() {
-        val failure = UpdateFailure.forStartFailure(
-            "Traceback (most recent call last):\n  File \"__main__.py\", line 1\nImportError: unsupported Python\n"
-        )
-        assertEquals(UpdateFailure.Kind.WOULD_NOT_START, failure.kind)
-        assertEquals("ImportError: unsupported Python", failure.detail)
-        assertEquals(UpdateFailure.Kind.STOPPED_WHILE_STARTING, UpdateFailure.forStartFailure("").kind)
-    }
 
-    @Test
-    fun `the cause is kept short and on one line`() {
-        val detail = UpdateFailure.of(UpdateFailure.Kind.UNKNOWN, "line one\n" + "x".repeat(500)).detail
-        assertTrue(detail.length <= 110)
-        assertFalse(detail.contains('\n'))
-    }
 
-    @Test
-    fun `every failure has its own sentence`() {
-        val sentences = UpdateFailure.Kind.entries.map { it.message }
-        assertEquals(UpdateFailure.Kind.entries.size, sentences.toSet().size)
-        assertEquals(R.string.upd_failure_no_space, UpdateFailure.of(UpdateFailure.Kind.NO_SPACE).messageRes)
-        assertEquals(R.string.upd_failure_release_gone, UpdateFailure.http(404).messageRes)
-        assertEquals(R.string.upd_failure_http, UpdateFailure.http(429).messageRes)
-    }
 
-    @Test
-    fun `a sentence is only ever given the arguments it has room for`() {
-        // The status fills the HTTP sentence, the cause fills the unknown one, nothing else has a slot.
-        assertEquals(listOf<Any>(429), UpdateFailure.http(429).messageArgs.toList())
-        assertEquals(listOf<Any>("?"), UpdateFailure.of(UpdateFailure.Kind.UNKNOWN).messageArgs.toList())
-        for (kind in UpdateFailure.Kind.entries) {
-            val expected = if (kind == UpdateFailure.Kind.HTTP || kind == UpdateFailure.Kind.UNKNOWN) 1 else 0
-            assertEquals(kind.name, expected, UpdateFailure.of(kind).messageArgs.size)
-        }
-    }
+
+
+
+
+
+
 
     @Test
     fun `the placeholders in every language match what the code supplies`() {

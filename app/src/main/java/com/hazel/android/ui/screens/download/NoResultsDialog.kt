@@ -72,10 +72,14 @@ internal fun NoResultsDialog(
     onContinueAnyway: () -> Unit,
     onDismiss: () -> Unit,
     /** The cause when the engine already knows it; read from [message] otherwise. */
-    knownKind: FailureKind? = null
+    knownKind: FailureKind? = null,
+    /** Title and line in place of the kind's own, for a case the caller can name better. */
+    title: String? = null,
+    body: String? = null
 ) {
     val kind = remember(message, knownKind) { knownKind ?: failureKind(message) }
-    val signIn = kind == FailureKind.SIGN_IN && canFetchCookies
+    val again = kind == FailureKind.SIGN_IN_AGAIN
+    val signIn = (kind == FailureKind.SIGN_IN || again) && canFetchCookies
     val addCookies = kind == FailureKind.REFUSED && canAddCookies
     val goAhead = kind == FailureKind.OTHER && canContinue
     val context = LocalContext.current
@@ -103,7 +107,13 @@ internal fun NoResultsDialog(
         },
         title = {
             Text(
-                stringResource(if (signIn) R.string.no_results_sign_in_title else R.string.no_results_error_title),
+                title ?: stringResource(
+                    when {
+                        signIn && again -> R.string.no_results_sign_in_again_title
+                        signIn -> R.string.no_results_sign_in_title
+                        else -> R.string.no_results_error_title
+                    }
+                ),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -111,8 +121,9 @@ internal fun NoResultsDialog(
         text = {
             Column {
                 Text(
-                    stringResource(
+                    body ?: stringResource(
                         when {
+                            signIn && again -> R.string.no_results_sign_in_again_body
                             signIn -> R.string.no_results_sign_in_body
                             kind == FailureKind.GONE -> R.string.no_results_gone_body
                             kind == FailureKind.UNSUPPORTED -> R.string.no_results_unsupported_body
@@ -219,6 +230,9 @@ private const val LOG_LINES = 7
 internal enum class FailureKind {
     /** The source wants an account. Signing in answers it. */
     SIGN_IN,
+
+    /** A saved sign-in was turned away. Signing in again may refresh it. */
+    SIGN_IN_AGAIN,
 
     /** The media is not there: removed, deleted, or never existed. */
     GONE,

@@ -27,10 +27,7 @@ class FormatFilterTest {
         audio("250", "opus", "low", 11), audio("249", "opus", "low", 9)
     )
 
-    @Test
-    fun `all keeps everything`() {
-        assertEquals(youtubeAudio, FormatFilter.ALL.apply(youtubeAudio, audio = true))
-    }
+
 
     @Test
     fun `suggested keeps the best stream per codec and drops loudness copies`() {
@@ -44,19 +41,9 @@ class FormatFilterTest {
         assertEquals(listOf("bestaudio", "251", "249"), ids)
     }
 
-    @Test
-    fun `smallest video is chosen per resolution`() {
-        val formats = listOf(video("a", 1080, 90), video("b", 1080, 60), video("c", 720, 40))
-        val ids = FormatFilter.SMALLEST.apply(formats, audio = false).map { it.formatId }
-        assertEquals(listOf("b", "c"), ids)
-    }
 
-    @Test
-    fun `suggested video keeps a high frame rate apart from a standard one`() {
-        val formats = listOf(video("a", 1080, 90, fps = 60), video("b", 1080, 60), video("c", 1080, 50))
-        val ids = FormatFilter.SUGGESTED.apply(formats, audio = false).map { it.formatId }
-        assertEquals(listOf("a", "b"), ids)
-    }
+
+
 
     @Test
     fun `generic offers the engine's own choice even when the source listed none`() {

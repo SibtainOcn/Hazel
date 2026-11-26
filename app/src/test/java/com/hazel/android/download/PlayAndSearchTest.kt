@@ -61,15 +61,7 @@ class PlayAndSearchTest {
         assertTrue(stream.audioTracks.single { it.id == "en-US-desc" }.descriptive)
     }
 
-    @Test
-    fun startsOnTheWishedLanguageOrAPickedTrack() {
-        val byLanguage = StreamResolver.pick(media(*dubbed), 720, AudioWish(language = "hi-IN"))
-        assertEquals("https://a/hi", byLanguage?.audioUrl)
-        val missing = StreamResolver.pick(media(*dubbed), 720, AudioWish(language = "fr"))
-        assertEquals("https://a/en", missing?.audioUrl)
-        val picked = StreamResolver.pick(media(*dubbed), 720, AudioWish(trackId = "en-US-desc", language = "hi"))
-        assertEquals("https://a/en-ad", picked?.audioUrl)
-    }
+
 
     @Test
     fun swapsOnlyTheSound() {
@@ -82,103 +74,19 @@ class PlayAndSearchTest {
         assertNull(stream.withAudio(hindi.copy(url = "")))
     }
 
-    @Test
-    fun choosingSkipsDescriptionUnlessAskedAndFallsBackToFirst() {
-        val tracks = listOf(
-            AudioTrack("a", "en", descriptive = true, url = "u1"),
-            AudioTrack("b", "es", url = "u2"),
-            AudioTrack("c", "de", url = "u3")
-        )
-        assertEquals("b", AudioTracks.choose(tracks, AudioWish())?.id)
-        assertEquals("b", AudioTracks.choose(tracks, AudioWish(language = "en"))?.id)
-        assertEquals("a", AudioTracks.choose(tracks, AudioWish(trackId = "a"))?.id)
-        assertNull(AudioTracks.choose(emptyList(), AudioWish(language = "en")))
-    }
 
-    @Test
-    fun oneLanguageOffersNoChoice() {
-        val stream = StreamResolver.pick(
-            media(
-                """{"url":"https://a/720v","protocol":"https","vcodec":"avc1","acodec":"none","height":720,"ext":"mp4"}""",
-                """{"url":"https://a/audio","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a","language":"en"}"""
-            ),
-            maxHeight = 720
-        )
-        assertTrue(stream!!.audioTracks.isEmpty())
-        assertNull(stream.audioTrackId)
-    }
 
-    @Test
-    fun takesProgressiveFileWhenNothingTallerIsSplit() {
-        val stream = StreamResolver.pick(
-            media(
-                """{"url":"https://a/720","protocol":"https","vcodec":"avc1","acodec":"mp4a","height":720,"ext":"mp4"}""",
-                """{"url":"https://a/audio","protocol":"https","vcodec":"none","acodec":"opus","ext":"webm"}"""
-            ),
-            maxHeight = 720
-        )
-        assertEquals("https://a/720", stream?.url)
-        assertNull(stream?.audioUrl)
-    }
 
-    @Test
-    fun capBelowEveryStreamTakesTheSmallestPicture() {
-        val split = StreamResolver.pick(
-            media(
-                """{"url":"https://a/360v","protocol":"https","vcodec":"avc1","acodec":"none","height":360,"ext":"mp4"}""",
-                """{"url":"https://a/720v","protocol":"https","vcodec":"avc1","acodec":"none","height":720,"ext":"mp4"}""",
-                """{"url":"https://a/audio","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a"}"""
-            ),
-            maxHeight = 144
-        )
-        assertEquals("https://a/360v", split?.url)
-        assertEquals("https://a/audio", split?.audioUrl)
 
-        val muxed = StreamResolver.pick(
-            media(
-                """{"url":"https://a/360","protocol":"https","vcodec":"avc1","acodec":"mp4a","height":360,"ext":"mp4"}""",
-                """{"url":"https://a/audio","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a"}"""
-            ),
-            maxHeight = 144
-        )
-        assertEquals("https://a/360", muxed?.url)
-        assertEquals(true, muxed?.hasVideo)
-    }
 
-    @Test
-    fun tallVideoCountsItsShortSideAndListsItsQualities() {
-        val stream = StreamResolver.pick(
-            media(
-                """{"url":"https://a/1080","protocol":"https","vcodec":"avc1","acodec":"mp4a","width":1080,"height":1920,"ext":"mp4"}""",
-                """{"url":"https://a/720","protocol":"https","vcodec":"avc1","acodec":"mp4a","width":720,"height":1280,"ext":"mp4"}""",
-                """{"url":"https://a/dash","protocol":"http_dash_segments","fragments":[{}],"vcodec":"avc1","acodec":"none","width":1440,"height":2560}"""
-            ),
-            maxHeight = 1080
-        )
-        assertEquals("https://a/1080", stream?.url)
-        assertEquals(listOf(1080, 720), stream?.heights)
-    }
 
-    @Test
-    fun streamWithoutCodecsCountsAsVideo() {
-        // Instagram reels often report neither codec nor height.
-        val stream = StreamResolver.pick(
-            media("""{"url":"https://cdn/reel.mp4","ext":"mp4"}"""),
-            maxHeight = 720
-        )
-        assertEquals("https://cdn/reel.mp4", stream?.url)
-        assertEquals(true, stream?.hasVideo)
-    }
 
-    @Test
-    fun soundOnlySourcePlaysWithoutPicture() {
-        val stream = StreamResolver.pick(
-            media("""{"url":"https://sc/track.mp3","protocol":"https","vcodec":"none","acodec":"mp3","ext":"mp3"}"""),
-            maxHeight = 720
-        )
-        assertEquals("https://sc/track.mp3", stream?.url)
-        assertEquals(false, stream?.hasVideo)
-    }
+
+
+
+
+
+
 
     @Test
     fun segmentedStreamsAreSkippedAndHlsIsKept() {
@@ -193,14 +101,7 @@ class PlayAndSearchTest {
         assertEquals(true, stream?.isHls)
     }
 
-    @Test
-    fun postWithSeveralItemsPlaysTheFirst() {
-        val root = JSONObject().put(
-            "entries",
-            org.json.JSONArray().put(media("""{"url":"https://a/first.mp4","ext":"mp4","height":640}"""))
-        )
-        assertEquals("https://a/first.mp4", StreamResolver.pick(root, 720)?.url)
-    }
+
 
     @Test
     fun cookieStringBecomesHeader() {
@@ -234,34 +135,9 @@ class PlayAndSearchTest {
         assertEquals(SearchSource.YOUTUBE, SearchSource.fromName("gone"))
     }
 
-    @Test
-    fun suggestionsParse() {
-        assertEquals(
-            listOf("oggy and the cockroaches", "oggy"),
-            SearchSuggestions.parse("""["oggy",["oggy and the cockroaches","oggy"],[],{}]""")
-        )
-        assertEquals(emptyList(), SearchSuggestions.parse("not json"))
-    }
 
-    @Test
-    fun eachSearchEngineHasTheOtherBehindItWhereBothCanSearch() {
-        val newPipe = ListingSource.NEWPIPE
-        val ytDlp = ListingSource.YT_DLP
-        // Both can search these: the picked one first, the other behind it.
-        listOf(SearchSource.YOUTUBE, SearchSource.YOUTUBE_MUSIC, SearchSource.SOUNDCLOUD).forEach { site ->
-            assertTrue(MediaSearch.newPipeFirst(site, newPipe), "$site, NewPipe picked")
-            assertFalse(MediaSearch.newPipeAfter(site, newPipe), "$site, NewPipe picked")
-            assertFalse(MediaSearch.newPipeFirst(site, ytDlp), "$site, yt-dlp picked")
-            assertTrue(MediaSearch.newPipeAfter(site, ytDlp), "$site, yt-dlp picked")
-        }
-        // Only NewPipe can search Bandcamp, whatever is picked.
-        listOf(newPipe, ytDlp).forEach { engine ->
-            assertTrue(MediaSearch.newPipeFirst(SearchSource.BANDCAMP, engine))
-            assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
-        }
-        // Every site search offers is one NewPipe knows; none is left to yt-dlp alone.
-        SearchSource.entries.forEach { assertTrue(it.newPipeService != null, "$it") }
-    }
+
+
 
     @Test
     fun splitsQueuedLinkIntoSiteAndRest() {

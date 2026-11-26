@@ -68,6 +68,17 @@ data class GalleryDownloadRequest(
 
         fun isPayload(payload: String?): Boolean = payload?.startsWith(PAYLOAD_PREFIX) == true
 
+        /**
+         * Marks a failure that happened while reading a link for the gallery sheet: there is no
+         * download to replay, so retrying opens the sheet on the link again.
+         */
+        const val READ_MARK = "gallery-read"
+
+        fun isRead(payload: String?): Boolean = payload == READ_MARK
+
+        /** True for a failure the gallery engine had, whose link the gallery sheet reopens. */
+        fun isGallery(payload: String?): Boolean = isPayload(payload) || isRead(payload)
+
         fun fromPayload(payload: String?): GalleryDownloadRequest? =
             payload?.takeIf(::isPayload)?.let { fromJson(it.removePrefix(PAYLOAD_PREFIX)) }
 
@@ -126,7 +137,7 @@ fun GalleryPost.request(
     )
 }
 
-/** What a link shared to Instant Images saves: one post with its details, else the link with the author they share. */
+/** What a link shared to Instant Gallery saves: one post with its details, else the link with the author they share. */
 fun instantRequest(url: String, posts: List<GalleryPost>, options: GalleryOptions?): GalleryDownloadRequest =
     posts.singleOrNull()?.request(null, options)
         ?: GalleryDownloadRequest(url, options = options, author = posts.map { it.author }.distinct().singleOrNull().orEmpty())

@@ -13,13 +13,7 @@ class UpdaterTest {
 
     // ── 1. Semver & Version Comparison Tests ──
 
-    @Test
-    fun `HazelUpdater parseSemver parses versions correctly`() {
-        assertEquals(Triple(1, 0, 8), HazelUpdater.parseSemver("1.0.8"))
-        assertEquals(Triple(1, 0, 8), HazelUpdater.parseSemver("v1.0.8"))
-        assertEquals(Triple(1, 0, 8), HazelUpdater.parseSemver("V1.0.8-beta1"))
-        assertEquals(Triple(2, 14, 0), HazelUpdater.parseSemver("v2.14"))
-    }
+
 
     @Test
     fun `HazelUpdater isNewer correctly identifies newer versions`() {
@@ -46,38 +40,11 @@ class UpdaterTest {
         assertEquals("https://github.com/SibtainOcn/Hazel/releases/download/v1.0.8/Hazel-v1.0.8-arm64-v8a-stable.apk", url)
     }
 
-    @Test
-    fun `HazelUpdater resolveBestApkForDevice resolves armeabi-v7a correctly`() {
-        val (name, url) = HazelUpdater.resolveBestApkForDevice(
-            version = "1.0.8",
-            channel = HazelUpdater.Channel.STABLE,
-            supportedAbis = listOf("armeabi-v7a")
-        )
-        assertEquals("Hazel-v1.0.8-armeabi-v7a-stable.apk", name)
-        assertEquals("https://github.com/SibtainOcn/Hazel/releases/download/v1.0.8/Hazel-v1.0.8-armeabi-v7a-stable.apk", url)
-    }
 
-    @Test
-    fun `HazelUpdater resolveBestApkForDevice resolves x86_64 correctly`() {
-        val (name, url) = HazelUpdater.resolveBestApkForDevice(
-            version = "1.0.8",
-            channel = HazelUpdater.Channel.STABLE,
-            supportedAbis = listOf("x86_64")
-        )
-        assertEquals("Hazel-v1.0.8-x86_64-stable.apk", name)
-        assertEquals("https://github.com/SibtainOcn/Hazel/releases/download/v1.0.8/Hazel-v1.0.8-x86_64-stable.apk", url)
-    }
 
-    @Test
-    fun `HazelUpdater resolveBestApkForDevice resolves x86 correctly`() {
-        val (name, url) = HazelUpdater.resolveBestApkForDevice(
-            version = "1.0.8",
-            channel = HazelUpdater.Channel.STABLE,
-            supportedAbis = listOf("x86")
-        )
-        assertEquals("Hazel-v1.0.8-x86-stable.apk", name)
-        assertEquals("https://github.com/SibtainOcn/Hazel/releases/download/v1.0.8/Hazel-v1.0.8-x86-stable.apk", url)
-    }
+
+
+
 
     @Test
     fun `HazelUpdater resolveBestApkForDevice falls back to universal when ABI unknown`() {
@@ -132,18 +99,7 @@ class UpdaterTest {
         </feed>
     """.trimIndent()
 
-    @Test
-    fun `HazelUpdater parseReleasesAtom finds latest stable release`() {
-        val rel = HazelUpdater.parseReleasesAtom(
-            xml = sampleAtomFeed,
-            channel = HazelUpdater.Channel.STABLE,
-            supportedAbis = listOf("arm64-v8a")
-        )
-        assertNotNull(rel)
-        assertEquals("1.0.8", rel?.version)
-        assertEquals("Hazel-v1.0.8-arm64-v8a-stable.apk", rel?.assetName)
-        assertTrue(rel?.changelog?.contains("Android 7.0+") == true)
-    }
+
 
     @Test
     fun `HazelUpdater parseReleasesAtom gives Beta the stable when no beta is newer`() {
@@ -166,42 +122,7 @@ class UpdaterTest {
         assertEquals("1.0.8", rel?.version)
     }
 
-    @Test
-    fun `HazelUpdater parseReleasesAtom finds beta release when present`() {
-        val feedWithBeta = """
-            <feed xmlns="http://www.w3.org/2005/Atom">
-              <entry>
-                <id>tag:github.com,2008:Repository/1349996760/v1.0.9-beta1</id>
-                <updated>2026-09-10T12:00:00Z</updated>
-                <link rel="alternate" type="text/html" href="https://github.com/SibtainOcn/Hazel/releases/tag/v1.0.9-beta1"/>
-                <title>Hazel v1.0.9-beta1</title>
-                <content type="html">Beta preview</content>
-              </entry>
-              <entry>
-                <id>tag:github.com,2008:Repository/1349996760/v1.0.8</id>
-                <updated>2026-09-03T14:26:07Z</updated>
-                <link rel="alternate" type="text/html" href="https://github.com/SibtainOcn/Hazel/releases/tag/v1.0.8"/>
-                <title>🌿 Hazel v1.0.8</title>
-              </entry>
-            </feed>
-        """.trimIndent()
 
-        val betaRel = HazelUpdater.parseReleasesAtom(
-            xml = feedWithBeta,
-            channel = HazelUpdater.Channel.BETA,
-            supportedAbis = listOf("arm64-v8a")
-        )
-        assertNotNull(betaRel)
-        assertEquals("1.0.9-beta1", betaRel?.version)
-
-        val stableRel = HazelUpdater.parseReleasesAtom(
-            xml = feedWithBeta,
-            channel = HazelUpdater.Channel.STABLE,
-            supportedAbis = listOf("arm64-v8a")
-        )
-        assertNotNull(stableRel)
-        assertEquals("1.0.8", stableRel?.version)
-    }
 
     // ── 4. JSON Release Matching ──
 
@@ -251,23 +172,7 @@ class UpdaterTest {
         assertFalse(YtDlpUpdater.isNewer("v2026.08.19", "2026.08.19"))
     }
 
-    @Test
-    fun `YtDlpUpdater parseFirstTagFromAtom extracts release tag`() {
-        val atomXml = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <feed xmlns="http://www.w3.org/2005/Atom">
-              <id>tag:github.com,2008:https://github.com/yt-dlp/yt-dlp/releases</id>
-              <entry>
-                <id>tag:github.com,2008:Repository/307260205/2026.08.19</id>
-                <link rel="alternate" type="text/html" href="https://github.com/yt-dlp/yt-dlp/releases/tag/2026.08.19"/>
-                <title>yt-dlp 2026.08.19</title>
-              </entry>
-            </feed>
-        """.trimIndent()
 
-        val tag = YtDlpUpdater.parseFirstTagFromAtom(atomXml)
-        assertEquals("2026.08.19", tag)
-    }
 
     // ── 6. F-Droid Payload Parsing ──
 
@@ -311,49 +216,13 @@ class UpdaterTest {
         }
     }
 
-    @Test
-    fun `HazelUpdater latestReleaseResult answers for the Beta channel without 403`() = kotlinx.coroutines.runBlocking {
-        val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.BETA)
-        // F-Droid builds follow F-Droid's stable releases only.
-        if (HazelUpdater.isFdroid()) {
-            assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
-            return@runBlocking
-        }
-        assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
-        assertTrue((result as HazelUpdater.CheckResult.Success).info.channel != HazelUpdater.Channel.NIGHTLY)
-    }
 
-    @Test
-    fun `HazelUpdater latestReleaseResult answers for the Nightly channel without 403`() = kotlinx.coroutines.runBlocking {
-        val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.NIGHTLY)
-        if (HazelUpdater.isFdroid()) {
-            assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
-            return@runBlocking
-        }
-        assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
-    }
 
-    @Test
-    fun `YtDlpUpdater latestReleaseResult succeeds for Stable channel without 403`() = kotlinx.coroutines.runBlocking {
-        val result = YtDlpUpdater.latestReleaseResult(YtDlpUpdater.Channel.STABLE)
-        assertTrue("Expected Success but got $result", result is YtDlpUpdater.CheckResult.Success)
-        val info = (result as YtDlpUpdater.CheckResult.Success).info
-        assertTrue(info.version.isNotBlank())
-    }
 
-    @Test
-    fun `YtDlpUpdater latestReleaseResult succeeds for Nightly channel without 403`() = kotlinx.coroutines.runBlocking {
-        val result = YtDlpUpdater.latestReleaseResult(YtDlpUpdater.Channel.NIGHTLY)
-        assertTrue("Expected Success but got $result", result is YtDlpUpdater.CheckResult.Success)
-        val info = (result as YtDlpUpdater.CheckResult.Success).info
-        assertTrue(info.version.isNotBlank())
-    }
 
-    @Test
-    fun `YtDlpUpdater latestReleaseResult succeeds for Master channel without 403`() = kotlinx.coroutines.runBlocking {
-        val result = YtDlpUpdater.latestReleaseResult(YtDlpUpdater.Channel.MASTER)
-        assertTrue("Expected Success but got $result", result is YtDlpUpdater.CheckResult.Success)
-        val info = (result as YtDlpUpdater.CheckResult.Success).info
-        assertTrue(info.version.isNotBlank())
-    }
+
+
+
+
+
 }

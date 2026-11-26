@@ -94,6 +94,8 @@ data class DownloadState(
     val isFetching: Boolean = false,
     /** How many links the current read covers, so the screen can stand in for each one. */
     val fetchCount: Int = 0,
+    /** Pasted links read so far while several are read, for the search bar; -1 otherwise. */
+    val fetchDone: Int = -1,
     /** The words the results on screen were searched for, or blank when they came from links. */
     val searchQuery: String = "",
     /** Every link that resolved from the last search, in the order they were entered. */
@@ -942,6 +944,7 @@ class DownloadViewModel : ViewModel() {
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchCount = valid.size,
+            fetchDone = if (valid.size > 1) 0 else -1,
             searchQuery = ""
         ) }
 
@@ -974,7 +977,9 @@ class DownloadViewModel : ViewModel() {
                             }.onFailure { failure ->
                                 if (failure is CancellationException) throw failure
                                 lastFailure = failure.message?.trim().orEmpty()
-                            }.getOrDefault(emptyList())
+                            }.getOrDefault(emptyList()).also {
+                                if (valid.size > 1) _state.update { s -> s.copy(fetchDone = s.fetchDone + 1) }
+                            }
                         }
                     }.awaitAll().flatten().distinctBy { it.url }
                 }
@@ -1055,6 +1060,7 @@ class DownloadViewModel : ViewModel() {
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchCount = SEARCH_SKELETONS,
+            fetchDone = -1,
             searchQuery = text
         ) }
 
@@ -2514,6 +2520,10 @@ class DownloadViewModel : ViewModel() {
      * same way left nothing on the list.
      */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        if (com.hazel.android.gallery.queue.GalleryDownloadRequest.isRead(failed.queuedPayload)) {
+            com.hazel.android.ui.share.ShareOverlayActivity.openGallery(context, failed.url)
+            return
+        }
         com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
             viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
             return
@@ -2534,9 +2544,9 @@ class DownloadViewModel : ViewModel() {
      * once per batch rather than once per link. The rest are read again, a few at a time.
      */
     fun retryAllFailed(context: Context, all: List<com.hazel.android.data.FailedDownload>) {
-        val (gallery, failed) = all.partition {
-            com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload)
-        }
+        // A link that failed to read needs its sheet and a choice, so it stays listed for its own Retry.
+        val (gallery, failed) = all.filterNot { com.hazel.android.gallery.queue.GalleryDownloadRequest.isRead(it.queuedPayload) }
+            .partition { com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload) }
         gallery.forEach { retryFailed(context, it) }
         val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
             .distinctBy { it.url }
@@ -3235,7 +3245,7 @@ class DownloadViewModel : ViewModel() {
                 context,
                 HistoryEntry(
                     id = System.currentTimeMillis(),
-                    url = info.url,
+                    url = info.pageUrl ?: info.url,
                     title = info.title,
                     author = info.uploader,
                     thumbnail = info.thumbnail,

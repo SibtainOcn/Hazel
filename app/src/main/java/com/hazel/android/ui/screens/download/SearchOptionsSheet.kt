@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -50,7 +53,6 @@ import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.gallery.GalleryShow
 import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.ModalBottomSheet
@@ -91,12 +93,16 @@ fun SearchOptionsSheet(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // Opens at half height like any other sheet, and drags up to full.
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    // One height for both tabs, never the full screen: the rows scroll inside it, so switching
+    // tabs or opening never resizes the sheet.
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetHeight = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * SHEET_HEIGHT_SHARE).dp
     val resultsCleared = stringResource(R.string.search_results_cleared)
     val historyCleared = stringResource(R.string.search_history_cleared)
     val historyFailed = stringResource(R.string.search_history_clear_failed)
     var finishing by remember { mutableStateOf(false) }
+    var guideOpen by remember { mutableStateOf(false) }
+    if (guideOpen) SearchGuideScreen(onBack = { guideOpen = false })
     fun finish(message: String, ok: Boolean) {
         scope.launch {
             try {
@@ -123,7 +129,6 @@ fun SearchOptionsSheet(
     }.collectAsState(initial = null)
     val galleryPrefs by remember(context) {
         combine(
-            SettingsRepository.getGallerySearchSite(context),
             SettingsRepository.getGalleryPostsPerSearch(context),
             SettingsRepository.getGalleryShow(context),
             SettingsRepository.getGallerySkipReposts(context),
@@ -132,6 +137,11 @@ fun SearchOptionsSheet(
         )
     }.collectAsState(initial = null)
     var imagesTab by remember { mutableStateOf(imagesFirst) }
+    val profileAsk by remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    var profileSheet by remember { mutableStateOf<com.hazel.android.gallery.ProfileSite?>(null) }
+    profileSheet?.let { site ->
+        com.hazel.android.ui.screens.gallery.SavedProfileSectionsSheet(site = site, onDismiss = { profileSheet = null })
+    }
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
@@ -146,7 +156,7 @@ fun SearchOptionsSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .height(sheetHeight)
                 .padding(horizontal = 16.dp)
                 .navigationBarsPadding()
         ) {
@@ -165,6 +175,13 @@ fun SearchOptionsSheet(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
+                )
+                ClearShape(
+                    icon = Icons.Filled.Info,
+                    label = stringResource(R.string.search_options_info),
+                    description = stringResource(R.string.search_guide_title),
+                    filled = false,
+                    onClick = { guideOpen = true }
                 )
                 ClearShape(
                     icon = Icons.Filled.History,
@@ -201,18 +218,11 @@ fun SearchOptionsSheet(
                 )
             }
 
+            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             if (imagesTab) {
                 SettingsSection(
                     title = stringResource(R.string.search_source_images),
-                    rows = listOf(
-                        {
-                            ValueSettingRow(
-                                icon = Icons.Filled.TravelExplore,
-                                title = stringResource(R.string.fetch_settings_search_on),
-                                value = gallery.site.label,
-                                onClick = { open = SearchChoice.GALLERY_SITE }
-                            )
-                        },
+                    rows = listOf<@Composable () -> Unit>(
                         {
                             ValueSettingRow(
                                 icon = Icons.Filled.FormatListNumbered,
@@ -246,7 +256,7 @@ fun SearchOptionsSheet(
                                 onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryGroupByAuthor(context, on) } }
                             )
                         }
-                    )
+                    ) + profileRows(profileAsk, onOpen = { profileSheet = it })
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 return@Column
@@ -308,6 +318,7 @@ fun SearchOptionsSheet(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 
@@ -337,13 +348,6 @@ fun SearchOptionsSheet(
             onSelect = { scope.launch { SettingsRepository.setPlayEngine(context, it) }; close() },
             onDismiss = close,
             describe = { engineSummary(it) }
-        )
-        SearchChoice.GALLERY_SITE -> SingleChoiceDialog(
-            title = stringResource(R.string.fetch_settings_search_on),
-            choices = GallerySearchSite.entries.map { it to it.label },
-            selected = gallery.site,
-            onSelect = { scope.launch { SettingsRepository.setGallerySearchSite(context, it) }; close() },
-            onDismiss = close
         )
         SearchChoice.GALLERY_POSTS -> SingleChoiceDialog(
             title = stringResource(R.string.gallery_posts_per_search),
@@ -409,7 +413,6 @@ private data class SearchPrefs(
 )
 
 private data class GalleryPrefs(
-    val site: GallerySearchSite,
     val posts: Int,
     val show: GalleryShow,
     val skipReposts: Boolean,
@@ -424,7 +427,7 @@ private fun showLabel(show: GalleryShow): Int = when (show) {
 
 private enum class SearchChoice {
     NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY,
-    GALLERY_SITE, GALLERY_POSTS, GALLERY_SHOW
+    GALLERY_POSTS, GALLERY_SHOW
 }
 
 /** A clear action on a six-sided cookie, named in a small line under it. */
@@ -451,3 +454,36 @@ private fun ClearShape(
         )
     }
 }
+
+/** The profile-link rows, shared by the three dots menu and Image settings: one setting, two doors. */
+@Composable
+internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.ProfileSite) -> Unit): List<@Composable () -> Unit> {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val rows = mutableListOf<@Composable () -> Unit>()
+    rows += {
+        SwitchSettingRow(
+            icon = Icons.Filled.PersonSearch,
+            title = stringResource(R.string.profile_ask),
+            summary = stringResource(R.string.profile_ask_hint),
+            checked = ask,
+            onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryProfileAsk(context, on) } }
+        )
+    }
+    com.hazel.android.gallery.ProfileSite.entries.forEach { site ->
+        rows += {
+            val sections by remember(site) { SettingsRepository.getGalleryProfileSections(context, site) }
+                .collectAsState(initial = com.hazel.android.gallery.ProfileSection.defaults(site))
+            ValueSettingRow(
+                icon = Icons.Filled.AccountCircle,
+                title = stringResource(R.string.profile_sections_title, site.label),
+                value = sections.map { stringResource(it.label) }.joinToString(", "),
+                onClick = { onOpen(site) }
+            )
+        }
+    }
+    return rows
+}
+
+/** The search options sheet's fixed height, as a share of the screen. */
+private const val SHEET_HEIGHT_SHARE = 0.72f

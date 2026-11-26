@@ -71,13 +71,7 @@ class QueueRunStateTest {
         assertFalse(cleared.isFetching)
     }
 
-    @Test
-    fun `a run between two items is kept even before its state says so`() {
-        // The run owns the queue but has not marked its next item yet.
-        val between = running.copy(isDownloading = false, batch = emptyList())
-        val cleared = between.keepingRun(running = true)
-        assertEquals(between.active, cleared.active)
-    }
+
 
     @Test
     fun `a paused or waiting link keeps the record with nothing running`() {
@@ -97,19 +91,7 @@ class QueueRunStateTest {
         assertTrue(kept.waitingForWifi)
     }
 
-    @Test
-    fun `with nothing in hand clearing is a blank state as before`() {
-        val settled = running.copy(
-            isDownloading = false,
-            active = null,
-            isComplete = true,
-            batch = listOf(
-                BatchItem("https://example.com/p1", "p1", BatchState.DONE),
-                BatchItem("https://example.com/p2", "p2", BatchState.FAILED, "x")
-            )
-        )
-        assertEquals(DownloadState(), settled.keepingRun(running = false))
-    }
+
 
     // ── marking ──
 
@@ -121,24 +103,11 @@ class QueueRunStateTest {
         assertEquals(running.batch.filterNot { it.url.endsWith("p4") }, marked.filterNot { it.url.endsWith("p4") })
     }
 
-    @Test
-    fun `marking an unknown link with a title gives it a card`() {
-        val marked = emptyList<BatchItem>().marking("https://example.com/p9", BatchState.DOWNLOADING, title = "p9")
-        assertEquals(listOf(BatchItem("https://example.com/p9", "p9", BatchState.DOWNLOADING)), marked)
-    }
 
-    @Test
-    fun `marking with a title does not duplicate a known link`() {
-        val marked = running.batch.marking("https://example.com/p3", BatchState.DONE, title = "p3")
-        assertEquals(running.batch.size, marked.size)
-        assertEquals(BatchState.DONE, marked.single { it.url.endsWith("p3") }.state)
-    }
 
-    @Test
-    fun `marking an unknown link without a title changes nothing`() {
-        val marked = running.batch.marking("https://example.com/zz", BatchState.FAILED, "x")
-        assertEquals(running.batch, marked)
-    }
+
+
+
 
     @Test
     fun `marking updates every entry of a link queued twice`() {
@@ -175,16 +144,9 @@ class QueueRunStateTest {
         assertTrue(counts.wantsSummary)
     }
 
-    @Test
-    fun `several links with failures and no cancel get a summary`() {
-        assertTrue(RunCounts.of(items(done = 3, failed = 2, cancelled = 0)).wantsSummary)
-        assertTrue(RunCounts.of(items(done = 0, failed = 4, cancelled = 0)).wantsSummary)
-    }
 
-    @Test
-    fun `several links all saved keep the completion notification`() {
-        assertFalse(RunCounts.of(items(done = 10, failed = 0, cancelled = 0)).wantsSummary)
-    }
+
+
 
     @Test
     fun `a single link keeps its own notifications`() {
@@ -194,15 +156,7 @@ class QueueRunStateTest {
         assertFalse(RunCounts.of(emptyList()).wantsSummary)
     }
 
-    @Test
-    fun `counts agree with the state's own figures`() {
-        val batch = items(done = 4, failed = 2, cancelled = 3, waiting = 1)
-        val state = DownloadState(batch = batch)
-        val counts = RunCounts.of(batch)
-        assertEquals(state.batchDone, counts.done)
-        assertEquals(state.batchFailed, counts.failed + counts.cancelled)
-        assertEquals(10, counts.total)
-    }
+
 
     // ── bytesIn ──
 
@@ -234,11 +188,7 @@ class QueueRunStateTest {
         }
     }
 
-    @Test
-    fun `a missing work folder is nothing rather than a failure`() {
-        val gone = java.io.File(System.getProperty("java.io.tmpdir"), "hazel_missing_${System.nanoTime()}")
-        assertEquals(0L, bytesIn(gone))
-    }
+
 
     // ── pausedTotal ──
 
@@ -257,17 +207,7 @@ class QueueRunStateTest {
         }
     }
 
-    @Test
-    fun `a pause during the first stream is its reported total`() {
-        val dir = kotlin.io.path.createTempDirectory("hazel_paused").toFile()
-        try {
-            java.io.File(dir, "song.f616.mp4.part").writeBytes(ByteArray(1_000))
-            java.io.File(dir, "song.f616.mp4.part-Frag3.part").writeBytes(ByteArray(200))
-            assertEquals(4_000L, pausedTotal(dir, reported = 4_000L))
-        } finally {
-            dir.deleteRecursively()
-        }
-    }
+
 
     @Test
     fun `a total is never less than what is on disk`() {

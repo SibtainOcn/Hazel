@@ -26,11 +26,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ContentCut
-import androidx.compose.material.icons.outlined.Cookie
-import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material.icons.outlined.PictureInPictureAlt
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -75,7 +74,7 @@ enum class WhatsNewCard { APPEARANCE, HIGHLIGHTS }
  * installs never see it: the getting-started guide records the id as seen when it closes.
  */
 object WhatsNew {
-    const val RELEASE_ID = "1.2.17"
+    const val RELEASE_ID = "1.2.18"
     val cards: List<WhatsNewCard> = listOf(WhatsNewCard.HIGHLIGHTS)
 
     /** Null while either stored value is still loading, so nothing is decided early. */
@@ -233,11 +232,10 @@ private class Highlight(val icon: ImageVector, val shape: Shape, @StringRes val 
 @Composable
 private fun HighlightsStep() {
     val items = listOf(
-        Highlight(Icons.Outlined.PhotoLibrary, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_gallery_title, R.string.whats_new_gallery_desc),
-        Highlight(Icons.Outlined.ImageSearch, MaterialShapes.Cookie6Sided.toShape(), R.string.whats_new_search_title, R.string.whats_new_search_desc),
-        Highlight(Icons.Outlined.ContentCut, MaterialShapes.Pentagon.toShape(), R.string.whats_new_trim_title, R.string.whats_new_trim_desc),
-        Highlight(Icons.Outlined.PictureInPictureAlt, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_player_title, R.string.whats_new_player_desc),
-        Highlight(Icons.Outlined.Cookie, MaterialShapes.Sunny.toShape(), R.string.whats_new_accounts_title, R.string.whats_new_accounts_desc)
+        Highlight(Icons.Outlined.PhotoLibrary, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_stories_title, R.string.whats_new_stories_desc),
+        Highlight(Icons.Outlined.PlayCircle, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_videos_title, R.string.whats_new_videos_desc),
+        Highlight(Icons.Outlined.Share, MaterialShapes.Pentagon.toShape(), R.string.whats_new_share_title, R.string.whats_new_share_desc),
+        Highlight(Icons.Outlined.Palette, MaterialShapes.Sunny.toShape(), R.string.whats_new_looks_title, R.string.whats_new_looks_desc)
     )
     Column(modifier = Modifier.fillMaxWidth()) {
         StepTitle(stringResource(R.string.whats_new_highlights_title))

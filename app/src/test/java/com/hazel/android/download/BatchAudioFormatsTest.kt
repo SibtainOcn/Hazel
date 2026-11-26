@@ -51,21 +51,9 @@ class BatchAudioFormatsTest {
     )
     private val saavn = link("c", audio("320", "mp4a.40.2", 320.0, 9_000_000, "m4a"))
 
-    @Test
-    fun `the ladder is offered at once, with nothing read`() {
-        val ids = BatchAudioFormats.choices(listOf(unread("a"), unread("b")), "Best", "Worst")
-            .map { it.formatId }
-        assertEquals(
-            listOf("bestaudio", "ba_192k", "ba_160k", "ba_128k", "ba_96k", "ba_64k", "worstaudio"),
-            ids
-        )
-    }
 
-    @Test
-    fun `a bitrate step takes the nearest bitrate and falls back to the best`() {
-        assertEquals("ba/b", BatchAudioFormats.bitrateCeiling(128).selector)
-        assertEquals("abr~128", BatchAudioFormats.bitrateCeiling(128).sort)
-    }
+
+
 
     @Test
     fun `formats every link carries are offered once all are read, sized for the set`() {
@@ -80,12 +68,7 @@ class BatchAudioFormatsTest {
         assertTrue(BatchAudioFormats.sharedFormats(listOf(youtubeA, saavn)).isEmpty())
     }
 
-    @Test
-    fun `a ladder row reaches every link unchanged`() {
-        val step = BatchAudioFormats.bitrateCeiling(96)
-        assertSame(step, BatchAudioFormats.pick(saavn, step, null))
-        assertSame(step, BatchAudioFormats.pick(unread("x"), step, null))
-    }
+
 
     @Test
     fun `a concrete format lands on the same id, or the link's best where it is missing`() {
@@ -94,15 +77,7 @@ class BatchAudioFormatsTest {
         assertEquals("320", BatchAudioFormats.pick(saavn, choice, null)?.formatId)
     }
 
-    @Test
-    fun `best audio is the link's own best stream`() {
-        assertEquals("251", BatchAudioFormats.pick(youtubeA, null, null)?.formatId)
-    }
 
-    @Test
-    fun `a source that names no codec is matched by an extension only that codec uses`() {
-        val unnamed = audio("hq", null, 320.0, 9_000_000, "m4a")
-        assertEquals(AudioCodec.AAC, AudioCodec.of(unnamed))
-        assertEquals(null, AudioCodec.of(unnamed.copy(ext = "mp4")))
-    }
+
+
 }

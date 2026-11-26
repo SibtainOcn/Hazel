@@ -15,6 +15,8 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.EmptyState
 import com.hazel.android.ui.components.ArrivingCard
@@ -154,7 +156,7 @@ import androidx.compose.material.icons.filled.PlayArrow
  */
 @Composable
 fun DownloadScreen(
-    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
+    pendingShares: List<com.hazel.android.HazelActivity.SharedLink> = emptyList(),
     pendingFailure: com.hazel.android.download.FailureNotice? = null,
     onPendingFailureConsumed: () -> Unit = {},
     onSharesConsumed: () -> Unit = {},
@@ -482,6 +484,7 @@ fun DownloadScreen(
                 // Words searched for stay in the bar, as a link read does.
                 url = state.searchQuery.ifBlank { state.url },
                 shineProgress = searchBarShine.value,
+                fetching = if (state.isFetching && state.fetchDone >= 0) state.fetchDone to state.fetchCount else null,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
@@ -1054,10 +1057,38 @@ internal fun UrlSearchBar(
     onOpenSearch: () -> Unit,
     shineProgress: Float = 0f,
     onMenuOpen: () -> Unit = {},
+    /** Links read so far and how many, while several pasted links are read; null otherwise. */
+    fetching: Pair<Int, Int>? = null,
     modifier: Modifier = Modifier
 ) {
     // The field and its menu as one connected group: round on the outside, tight where they meet.
     val fieldShape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp)
+    // While links are read the shine sweeps on repeat; read only at draw time, so the bar
+    // itself doesn't recompose every frame.
+    val sweep = if (fetching != null) {
+        val loop = androidx.compose.animation.core.rememberInfiniteTransition(label = "fetchShine")
+        loop.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+                tween(FETCH_SWEEP_MS, easing = androidx.compose.animation.core.LinearEasing)
+            ),
+            label = "fetchSweep"
+        )
+    } else null
+    // The mark springs once each time a link's results land, and once more when all are in.
+    val pop = remember { Animatable(1f) }
+    var wasFetching by remember { mutableStateOf(false) }
+    LaunchedEffect(fetching) {
+        val landed = if (fetching != null) {
+            wasFetching = true
+            fetching.first > 0
+        } else wasFetching.also { wasFetching = false }
+        if (!landed) return@LaunchedEffect
+        pop.snapTo(1f)
+        pop.animateTo(1.18f, androidx.compose.animation.core.spring(stiffness = androidx.compose.animation.core.Spring.StiffnessHigh))
+        pop.animateTo(1f, androidx.compose.animation.core.spring(dampingRatio = 0.4f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow))
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -1067,7 +1098,7 @@ internal fun UrlSearchBar(
     Surface(
         onClick = onOpenSearch,
         modifier = Modifier
-            .refreshShine(shineProgress, fieldShape)
+            .refreshShine({ sweep?.value ?: shineProgress }, fieldShape)
             .weight(1f)
             .fillMaxHeight(),
         shape = fieldShape,
@@ -1079,30 +1110,51 @@ internal fun UrlSearchBar(
                 .padding(start = 8.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // The accent eased a quarter toward the bar, so it reads tonal beside it; while
+            // fetching it turns to the softer accent tint and holds the count.
+            val markFill by androidx.compose.animation.animateColorAsState(
+                if (fetching != null) com.hazel.android.ui.theme.accentTint()
+                else androidx.compose.ui.graphics.lerp(
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                    0.25f
+                ),
+                label = "searchMark"
+            )
             Box(
                 modifier = Modifier
                     .size(38.dp)
+                    .graphicsLayer { scaleX = pop.value; scaleY = pop.value }
                     .clip(MaterialShapes.Cookie7Sided.toShape())
-                    // The accent eased a quarter toward the bar, so it reads tonal beside it.
-                    .background(androidx.compose.ui.graphics.lerp(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.surfaceContainerHighest,
-                        0.25f
-                    )),
+                    .background(markFill),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
-                    contentDescription = null,
-                    modifier = Modifier.size(19.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+                if (fetching != null) {
+                    // Sized in dp: the count has to fit the 38 dp cookie at any font size.
+                    val countSize = with(androidx.compose.ui.platform.LocalDensity.current) { 12.dp.toSp() }
+                    Text(
+                        "${fetching.first}/${fetching.second}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = countSize, letterSpacing = 0.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = com.hazel.android.ui.theme.accentInk(),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = null,
+                        modifier = Modifier.size(19.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                url.ifBlank { stringResource(R.string.download_search_hint) },
+                if (fetching != null) stringResource(R.string.search_fetching)
+                else url.ifBlank { stringResource(R.string.download_search_hint) },
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (url.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (url.isBlank() && fetching == null) MaterialTheme.colorScheme.onSurfaceVariant
                 else MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1486,6 +1538,9 @@ private val LIST_BOTTOM_ROOM = 96.dp
  * 2 cards stand in below already-loaded results while remaining playlist items continue loading.
  */
 private const val INCREMENTAL_SKELETON_COUNT = 2
+
+/** One pass of the search bar shine while several links are read. */
+private const val FETCH_SWEEP_MS = 1600
 
 /** Dark pill drawn over the thumbnail. */
 @Composable

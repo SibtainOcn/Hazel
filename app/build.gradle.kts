@@ -191,8 +191,8 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = 10217990
-        versionName = "1.2.17"
+        versionCode = 10218990
+        versionName = "1.2.18"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -506,11 +506,10 @@ tasks.withType<Test>().configureEach {
 
 // ── Robolectric's Android jars on CI ──
 // Robolectric's own Maven fetch has no retry and failed on CI runners, so on CI Gradle
-// resolves the jars (API 24 and 35 for Robolectric 4.17) and Robolectric reads them offline.
+// resolves the jars (API 35 for Robolectric 4.17) and Robolectric reads them offline.
 // A Robolectric update or a new test API level needs its jar added here.
 // One configuration per jar, or Gradle keeps only the newer version.
 val robolectricAndroidAll = listOf(
-    "7.0.0_r1-robolectric-r1-i7",
     "15-robolectric-13954326-i7"
 ).map { version ->
     configurations.create("robolectricAndroidAll_" + version.replace(Regex("[^A-Za-z0-9]"), "_")) {

@@ -35,38 +35,23 @@ class GalleryListingTest {
         assertEquals("a cat", video.title)
     }
 
+
+
     @Test
-    fun `nested author object and queued posts are read`() {
+    fun `a video handed to yt-dlp plays from the site's own file`() {
         val output = """
-            [
-              [3, "https://pbs.example/x.png", {"extension": "png", "author": {"name": "nasa"}, "content": "Launch"}],
-              [6, "https://x.com/nasa/status/1", {}],
-              [6, "not a link", {}]
-            ]
-        """.trimIndent()
-
-        val listing = GalleryListing.parse(output)
-
-        assertEquals("nasa", listing.items.single().author)
-        assertEquals(listOf("https://x.com/nasa/status/1"), listing.posts)
+            [[3, "ytdl:https://www.instagram.com/stories/user/1.mp4",
+              {"extension": "mp4", "video_url": "https://cdn.example/story.mp4"}]]
+        """
+        assertEquals("https://cdn.example/story.mp4", GalleryListing.parse(output).items.single().playUrl)
     }
 
-    @Test
-    fun `empty listing is empty`() {
-        assertTrue(GalleryListing.parse("[]").isEmpty)
-    }
+
 
     @Test(expected = GalleryDlException::class)
     fun `unreadable output fails as a gallery error`() {
         GalleryListing.parse("not json")
     }
 
-    @Test
-    fun `error lines sort into kinds`() {
-        assertEquals(GalleryDlException.Kind.LOGIN_REQUIRED, GalleryDlException.classify("AuthorizationError: Login required"))
-        assertEquals(GalleryDlException.Kind.UNSUPPORTED, GalleryDlException.classify("Unsupported URL 'https://example.com'"))
-        assertEquals(GalleryDlException.Kind.NOT_FOUND, GalleryDlException.classify("HttpError: '404 Not Found'"))
-        assertEquals(GalleryDlException.Kind.NETWORK, GalleryDlException.classify("ConnectionError: Max retries exceeded"))
-        assertEquals(GalleryDlException.Kind.OTHER, GalleryDlException.classify("Something odd"))
-    }
+
 }

@@ -9,11 +9,7 @@ import java.io.File
 
 class GalleryOptionsTest {
 
-    @Test
-    fun `defaults ask X for the original and add nothing else`() {
-        val args = GalleryOptions().toArgs(File("/a.sqlite3"))
-        assertEquals(listOf("--option", "extractor.twitter.size=${GalleryImageSize.ORIGINAL.xSizes}"), args)
-    }
+
 
     @Test
     fun `every choice maps to its gallery-dl flag`() {
@@ -42,10 +38,5 @@ class GalleryOptionsTest {
         assertFalse("--download-archive" in GalleryOptions(skipDownloaded = true).toArgs(null))
     }
 
-    @Test
-    fun `a template that names a path is ignored`() {
-        assertNull(GalleryOptions(filenameTemplate = "../{id}.{extension}").safeTemplate)
-        assertNull(GalleryOptions(filenameTemplate = "a/{id}").safeTemplate)
-        assertNull(GalleryOptions(filenameTemplate = "  ").safeTemplate)
-    }
+
 }

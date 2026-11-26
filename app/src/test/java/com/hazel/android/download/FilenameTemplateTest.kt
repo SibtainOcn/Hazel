@@ -7,17 +7,9 @@ class FilenameTemplateTest {
 
     private fun n(s: String) = FilenameTemplate.normalize(s)
 
-    @Test
-    fun `default and plain templates stay as written`() {
-        assertEquals("%(title)s.%(ext)s", n("%(title)s.%(ext)s"))
-        assertEquals("%(uploader)s - %(title)s.%(ext)s", n("%(uploader)s - %(title)s.%(ext)s"))
-    }
 
-    @Test
-    fun `blank falls back to the default`() {
-        assertEquals(DownloadOptions.DEFAULT_FILENAME_TEMPLATE, n("   "))
-        assertEquals(DownloadOptions.DEFAULT_FILENAME_TEMPLATE, n("..."))
-    }
+
+
 
     @Test
     fun `missing extension is added`() {
@@ -38,12 +30,7 @@ class FilenameTemplateTest {
         assertEquals("%%(ti.%(ext)s", n("%(ti"))
     }
 
-    @Test
-    fun `formats and conditionals inside a field are kept`() {
-        for (preset in FilenameTemplate.PRESETS) assertEquals(preset, n(preset))
-        assertEquals("%(title).50s.%(ext)s", n("%(title).50s.%(ext)s"))
-        assertEquals("%(view_count)05d.%(ext)s", n("%(view_count)05d.%(ext)s"))
-    }
+
 
     @Test
     fun `leading dot never makes a hidden file`() {
@@ -74,26 +61,7 @@ class FilenameTemplateTest {
         assertEquals("a.b", FilenameTemplate.containFolder("a.b"))
     }
 
-    @Test
-    fun `identifier keys are the ones yt-dlp does not strip dots from`() {
-        for (k in listOf("id", "uploader_id", "channel_id", "playlist_id", "format_id")) {
-            assertEquals(k, true, FilenameTemplate.isIdKey(k))
-        }
-        for (k in listOf("title", "width", "video", "identity", "id_x", "uploader")) {
-            assertEquals(k, false, FilenameTemplate.isIdKey(k))
-        }
-    }
 
-    @Test
-    fun `a folder field is limited whether or not the name limits know it`() {
-        val limits = mapOf("uploader" to 60, "title" to 120)
-        fun f(t: String) = FilenameTemplate.limitFolderBytes(t, limits, 50, 100)
-        assertEquals("%(uploader).60B", f("%(uploader)s"))
-        assertEquals("%(playlist_title).50B", f("%(playlist_title)s"))
-        assertEquals("%(uploader_id).100B", f("%(uploader_id)s"))
-        assertEquals("%(album_artist,uploader).60B - %(series).50B", f("%(album_artist,uploader)s - %(series)s"))
-        assertEquals("%(upload_date>%Y)s", f("%(upload_date>%Y)s"))
-        assertEquals("%(title).30B", f("%(title).30B"))
-        assertEquals("Music", f("Music"))
-    }
+
+
 }

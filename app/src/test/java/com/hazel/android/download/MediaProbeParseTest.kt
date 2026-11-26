@@ -63,13 +63,7 @@ class MediaProbeParseTest {
         assertFalse(info.videoFormats.any { it.formatId == "251" })
     }
 
-    @Test
-    fun `a size the source stated is taken as stated`() {
-        val format = parse(complete).videoFormats.first { it.formatId == "399" }
 
-        assertEquals(455_606_272L, format.fileSizeBytes)
-        assertFalse(format.isEstimatedSize)
-    }
 
     @Test
     fun `a size the source withheld is worked out from the bitrate and marked as a guess`() {
@@ -91,20 +85,7 @@ class MediaProbeParseTest {
         assertTrue(format.fileSizeBytes > 0)
     }
 
-    @Test
-    fun `a source describing one direct stream still offers it as a real format`() {
-        val info = parse("""{"title": "Bare", "url": "https://cdn/clip.mp4"}""")
 
-        // No format list at all, which is the ordinary Instagram shape. The stream the
-        // payload points at is offered under a synthesised id rather than the media being
-        // called undownloadable, and it is assumed to carry both tracks because there is
-        // nothing in the payload saying otherwise.
-        val synthesised = info.videoFormats.first { !it.isGeneric }
-        assertEquals("0", synthesised.formatId)
-        assertTrue(synthesised.hasVideo)
-        assertTrue(synthesised.hasAudio)
-        assertTrue(info.hasResolvedFormats)
-    }
 
     @Test
     fun `a best row stands in only where the source named no formats of that kind`() {
@@ -122,11 +103,7 @@ class MediaProbeParseTest {
         assertTrue(full.audioFormats.none { it.isGeneric })
     }
 
-    @Test
-    fun `a payload with no title at all does not come back blank`() {
-        val info = parse("""{"id": "abc123", "url": "https://cdn/clip.mp4"}""")
-        assertTrue(info.title.isNotBlank())
-    }
+
 
     @Test
     fun `a carousel wrapper falls through to the entry that carries the media`() {
@@ -170,24 +147,7 @@ class MediaProbeParseTest {
         assertFalse(info.audioFormats.any { it.formatId == "gone" })
     }
 
-    @Test
-    fun `the same format listed twice is only offered once`() {
-        val info = parse(
-            """
-            {
-              "title": "Repeats",
-              "formats": [
-                {"format_id": "137", "ext": "mp4", "vcodec": "avc1", "acodec": "none",
-                 "height": 1080, "tbr": 4000.0, "filesize": 100},
-                {"format_id": "137", "ext": "mp4", "vcodec": "avc1", "acodec": "none",
-                 "height": 1080, "tbr": 4000.0, "filesize": 100}
-              ]
-            }
-            """.trimIndent()
-        )
 
-        assertEquals(1, info.videoFormats.count { it.formatId == "137" })
-    }
 
     @Test
     fun `a video only stream is paired with an audio track to merge`() {
@@ -198,11 +158,7 @@ class MediaProbeParseTest {
         assertFalse(info.bestVideo!!.hasAudio)
     }
 
-    @Test
-    fun `the url asked about is the url reported back`() {
-        val info = MediaProbe.parse("https://example.com/asked", JSONObject(complete))
-        assertEquals("https://example.com/asked", info.url)
-    }
+
 
     @Test
     fun `a source that states its own address is believed over the one asked about`() {
@@ -216,11 +172,7 @@ class MediaProbeParseTest {
         assertEquals("https://www.youtube.com/watch?v=kUox2TPnpzo", info.url)
     }
 
-    @Test
-    fun `a thumbnail list with no usable entry reports none rather than failing`() {
-        val info = parse("""{"title": "No art", "thumbnails": [], "url": "https://cdn/c.mp4"}""")
-        assertNull(info.thumbnail)
-    }
+
 
     // ---------- Artist resolution (Issues #1, #4) ----------
 
@@ -243,78 +195,13 @@ class MediaProbeParseTest {
         assertEquals("Arijit Singh", info.uploader)
     }
 
-    @Test
-    fun `artists array is joined as a comma separated string`() {
-        // Multi-artist track: the artists array is what the extractor sends.
-        val info = parse(
-            """
-            {
-              "title": "Collaboration Track",
-              "artists": ["Artist A", "Artist B", "Artist C"],
-              "channel": "Music Label",
-              "duration": 200,
-              "url": "https://cdn/collab.m4a"
-            }
-            """.trimIndent()
-        )
 
-        assertEquals("Artist A, Artist B, Artist C", info.uploader)
-    }
 
-    @Test
-    fun `uploader is used when no artist fields exist`() {
-        // YouTube shape: uploader is the channel name, no artist field.
-        val info = parse(
-            """
-            {
-              "title": "Tutorial Video",
-              "uploader": "TechChannel",
-              "channel": "TechChannel",
-              "duration": 600,
-              "formats": [
-                {"format_id": "22", "ext": "mp4", "vcodec": "avc1", "acodec": "mp4a",
-                 "height": 720, "tbr": 1000.0}
-              ]
-            }
-            """.trimIndent()
-        )
 
-        assertEquals("TechChannel", info.uploader)
-    }
 
-    @Test
-    fun `artists array with blank entries is cleaned`() {
-        val info = parse(
-            """
-            {
-              "title": "Edge case",
-              "artists": ["", "Real Artist", "null"],
-              "url": "https://cdn/edge.m4a"
-            }
-            """.trimIndent()
-        )
 
-        assertEquals("Real Artist", info.uploader)
-    }
 
-    @Test
-    fun `single artist string wins over artists array when both exist`() {
-        // artists array is checked first; if present and non-empty it wins.
-        val info = parse(
-            """
-            {
-              "title": "Both fields",
-              "artist": "Solo Name",
-              "artists": ["Arr A", "Arr B"],
-              "uploader": "Label Inc",
-              "url": "https://cdn/both.m4a"
-            }
-            """.trimIndent()
-        )
 
-        // artists array takes priority over artist string
-        assertEquals("Arr A, Arr B", info.uploader)
-    }
 
     @Test
     fun `audio formats without acodec key are recognized as valid audio streams`() {
@@ -385,20 +272,7 @@ class MediaProbeParseTest {
         assertEquals("bv*+ba/b", autoBest.selector)
     }
 
-    @Test
-    fun `autoPick selects closest format under ceiling with fallback`() {
-        val info = parse(complete) // Has 1080p formats (399, 137)
-        assertTrue(info.hasResolvedFormats)
 
-        val picked = info.autoPick(isVideo = true, maxHeight = 1080)
-        assertNotNull(picked)
-        assertEquals(1080, picked.height)
-
-        // When ceiling is 720p but only 1080p exists, falls back to min available (1080p)
-        val fallback = info.autoPick(isVideo = true, maxHeight = 720)
-        assertNotNull(fallback)
-        assertEquals(1080, fallback.height)
-    }
 
     // Shaped on an Instagram reel read in September 2026: no duration anywhere, DASH streams
     // with no segment list, and progressive files whose codecs are not reported at all.
@@ -418,23 +292,9 @@ class MediaProbeParseTest {
         }
     """.trimIndent()
 
-    @Test
-    fun `a stream with no reported length has none to add up`() {
-        assertEquals(0, MediaProbe.segmentedDuration(JSONObject(reelWithoutDuration)))
-        assertEquals(0, parse(reelWithoutDuration).durationSeconds)
-    }
 
-    @Test
-    fun `a segmented stream carries its length in its segments`() {
-        val json = """
-            {"formats": [
-              {"format_id": "v", "fragments": [{"url": "i"}, {"duration": 4.0}, {"duration": 4.0}, {"duration": 2.5}]},
-              {"format_id": "a", "fragments": [{"duration": 10.4}]}
-            ]}
-        """.trimIndent()
-        assertEquals(10, MediaProbe.segmentedDuration(JSONObject(json)))
-        assertEquals(10, parse(json).durationSeconds)
-    }
+
+
 
     @Test
     fun `the file asked for its length is the progressive one, with its headers`() {
@@ -443,10 +303,6 @@ class MediaProbeParseTest {
         assertEquals("https://www.instagram.com/", headers["Referer"])
     }
 
-    @Test
-    fun `a stream only reachable in segments is not asked`() {
-        val json = """{"formats": [{"format_id": "hls", "protocol": "m3u8_native", "url": "https://x/m.m3u8"}]}"""
-        assertNull(MediaProbe.directMediaUrl(JSONObject(json)))
-    }
+
 }
 

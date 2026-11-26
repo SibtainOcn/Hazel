@@ -54,11 +54,13 @@ object GalleryResultsStore {
                         .put("width", item.width).put("height", item.height)
                         .put("thumbnail", item.thumbnail.orEmpty()).put("postKey", item.postKey)
                         .put("postUrl", item.postUrl.orEmpty()).put("caption", item.caption)
+                        .put("playUrl", item.playUrl.orEmpty())
                 )
             }
             posts.put(
                 JSONObject().put("key", post.key).put("source", post.source)
                     .put("direct", post.direct).put("items", items)
+                    .put("section", post.section?.name.orEmpty())
             )
         }
         return JSONObject().put("query", saved.query).put("fromSearch", saved.fromSearch)
@@ -81,11 +83,15 @@ object GalleryResultsStore {
                     thumbnail = o.optString("thumbnail").takeIf { it.isNotBlank() },
                     postKey = o.optString("postKey"),
                     postUrl = o.optString("postUrl").takeIf { it.isNotBlank() },
-                    caption = o.optString("caption")
+                    caption = o.optString("caption"),
+                    playUrl = o.optString("playUrl").takeIf { it.startsWith("http") }
                 )
             }
             if (items.isEmpty()) null
-            else GalleryPost(post.optString("key"), post.optString("source"), items, post.optBoolean("direct"))
+            else GalleryPost(
+                post.optString("key"), post.optString("source"), items, post.optBoolean("direct"),
+                section = ProfileSection.entries.firstOrNull { it.name == post.optString("section") }
+            )
         }
         if (posts.isEmpty()) return null
         return Saved(root.optString("query"), root.optBoolean("fromSearch"), posts)

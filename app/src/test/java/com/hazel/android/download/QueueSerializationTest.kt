@@ -2,6 +2,9 @@ package com.hazel.android.download
 
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.QueuedDownload
+import com.hazel.android.data.FailedDownloadRepository
+import com.hazel.android.data.FailedDownload
+import com.hazel.android.data.toPlan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -29,6 +32,7 @@ class QueueSerializationTest {
             mergeAudioSizeBytes = 0L,
             treeUri = "",
             requiresSignIn = false,
+            pageUrl = "https://example.com/post/1",
             audioLanguage = null,
             options = DownloadOptions(audioContainer = "m4a"),
             paused = false
@@ -47,5 +51,16 @@ class QueueSerializationTest {
         assertEquals(queued.hasAudio, decoded?.hasAudio)
         assertEquals(queued.hasVideo, decoded?.hasVideo)
         assertEquals(queued.fileSizeBytes, decoded?.fileSizeBytes)
+        assertEquals(queued.pageUrl, decoded?.toPlan()?.info?.pageUrl)
+    }
+
+    @Test
+    fun `failed download survives a round trip`() {
+        val entry = FailedDownload(
+            id = 1L, url = "https://example.com/v", title = "t", author = "a", thumbnail = null, isVideo = true,
+            errorLog = "HTTP 403\nTrace", failedAt = 1700000000000L, queuedPayload = "{}", stoppedAt = "Stopped at: 100%"
+        )
+        assertEquals(listOf(entry), FailedDownloadRepository.decode(FailedDownloadRepository.encode(listOf(entry))))
+        assertTrue(FailedDownloadRepository.decode(" ").isEmpty())
     }
 }

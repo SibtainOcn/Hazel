@@ -19,11 +19,23 @@ data class GalleryItem(
     /** The post's own link, when the site gives one. */
     val postUrl: String? = null,
     /** The post's full text as its author wrote it (caption, description); blank when there is none. */
-    val caption: String = ""
+    val caption: String = "",
+    /** A web address a player can stream; null when the site gives none. */
+    val playUrl: String? = null
 ) {
     val isVideo: Boolean get() = extension.lowercase() in VIDEO_EXTENSIONS
 
+    /**
+     * The page gallery-dl hands to yt-dlp for this file (`ytdl:<page>`); null for a plain file
+     * and for Instagram's made-up `<post>/<n>.mp4`, which no reader opens.
+     */
+    val ytdlPage: String?
+        get() = url.takeIf { it.startsWith(YTDL_PREFIX) }?.removePrefix(YTDL_PREFIX)
+            ?.takeIf { it.startsWith("http") && !NUMBERED_FILE.containsMatchIn(it) }
+
     companion object {
+        private const val YTDL_PREFIX = "ytdl:"
+        private val NUMBERED_FILE = Regex("/\\d+\\.mp4$")
         val VIDEO_EXTENSIONS = setOf("mp4", "webm", "mov", "m4v", "mkv", "m3u8")
         val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "avif", "heic", "bmp")
     }
@@ -85,9 +97,18 @@ data class GalleryListing(
                 postUrl = postLinkOf(info),
                 caption = CAPTION_KEYS
                     .firstNotNullOfOrNull { key -> info.optString(key).trim().takeIf { it.isNotEmpty() && it != "null" } }
-                    ?.take(CAPTION_MAX).orEmpty()
+                    ?.take(CAPTION_MAX).orEmpty(),
+                playUrl = playUrlOf(url, info)
             )
         }
+
+        /**
+         * A file gallery-dl hands to yt-dlp is named `ytdl:<page>`, which no player reads; the
+         * site's own progressive file (Instagram's `video_url`) streams instead.
+         */
+        private fun playUrlOf(url: String, info: JSONObject): String? =
+            url.takeIf { it.startsWith("http") }
+                ?: info.optString("video_url").takeIf { it.startsWith("http") }
 
         /** The post's own page, from the site's fields; null when the site gives none (Pinterest search). */
         internal fun postLinkOf(info: JSONObject): String? {
@@ -115,7 +136,7 @@ data class GalleryListing(
         }
 
         // Pinterest search pins mostly leave title and description empty; their alt text reads as one.
-        private val TITLE_KEYS = listOf("title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
+        private val TITLE_KEYS = listOf("highlight_title", "title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
 
         private fun titleOf(info: JSONObject): String =
             TITLE_KEYS
@@ -151,16 +172,18 @@ data class GalleryListing(
  * One post of a result: its files, and the link whose `--range` their indexes count in. A [direct]
  * post has no link of its own, so its files are fetched from their own addresses.
  */
-data class GalleryPost(val key: String, val source: String, val items: List<GalleryItem>, val direct: Boolean = false) {
+data class GalleryPost(
+    val key: String,
+    val source: String,
+    val items: List<GalleryItem>,
+    val direct: Boolean = false,
+    /** The profile section this post was read from, when a profile was read by sections. */
+    val section: ProfileSection? = null
+) {
     val author: String get() = items.firstOrNull { it.author.isNotBlank() }?.author.orEmpty()
     val site: String get() = items.firstOrNull()?.site.orEmpty()
 
     companion object {
-        /**
-         * Splits the files read from [source] into posts, in the order they came, each counted
-         * from 1. A post with its own link is downloaded from it; one read from a [feed] (search,
-         * profile, several posts) without a link is fetched file by file, since the feed moves.
-         */
         /**
          * Single-file posts by one author gathered into one post, where the author first
          * appears. Posts with several files stay as they are. The gathered files come from
@@ -186,6 +209,11 @@ data class GalleryPost(val key: String, val source: String, val items: List<Gall
             }
         }
 
+        /**
+         * Splits the files read from [source] into posts, in the order they came, each counted
+         * from 1. A post with its own link is downloaded from it; one read from a [feed] (search,
+         * profile, several posts) without a link is fetched file by file, since the feed moves.
+         */
         fun group(source: String, items: List<GalleryItem>, feed: Boolean = false): List<GalleryPost> {
             if (items.isEmpty()) return emptyList()
             val groups = items.groupBy { it.postKey }

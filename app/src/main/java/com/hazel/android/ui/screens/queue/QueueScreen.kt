@@ -260,10 +260,10 @@ fun QueueScreen(
 
     // The link's own sheet, over the queue: it opens at once, fills as the link is read and
     // says so there if the read fails. The failure stays listed until a download settles it.
-    // A gallery-dl failure opens the Hazel Images sheet, so it is read by the engine that failed.
+    // A gallery-dl failure opens the Hazel Gallery sheet, so it is read by the engine that failed.
     fun reopen(item: FailedDownload) {
-        val target = if (GalleryDownloadRequest.isPayload(item.queuedPayload)) {
-            android.content.ComponentName(context, "com.hazel.android.${com.hazel.android.ui.share.ShareOverlayActivity.GALLERY_ALIAS}")
+        val target = if (GalleryDownloadRequest.isGallery(item.queuedPayload)) {
+            com.hazel.android.util.AppIcon.current(context).shareComponent(context, com.hazel.android.util.AppIcon.GALLERY)
         } else {
             android.content.ComponentName(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
         }

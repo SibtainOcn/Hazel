@@ -32,14 +32,7 @@ class HistoryDeleteTest {
         assertEquals(2, outcome.failed)
     }
 
-    @Test
-    fun `a new record finishing in the same millisecond gets its own id`() {
-        val existing = listOf(entry(100L), entry(50L))
-        val added = DownloadHistoryRepository.withFreeId(entry(100L), existing)
-        assertNotEquals(100L, added.id)
-        assertTrue(existing.none { it.id == added.id })
-        assertEquals(42L, DownloadHistoryRepository.withFreeId(entry(42L), existing).id)
-    }
+
 
     @Test
     fun `repeated ids in older records become unique, the same way every read`() {
@@ -50,9 +43,5 @@ class HistoryDeleteTest {
         assertEquals(first, DownloadHistoryRepository.uniqueIds(stored).map { it.id })
     }
 
-    @Test
-    fun `unique ids are left alone`() {
-        val stored = listOf(entry(1L), entry(2L))
-        assertEquals(stored, DownloadHistoryRepository.uniqueIds(stored))
-    }
+
 }

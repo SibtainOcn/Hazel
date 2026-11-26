@@ -1,6 +1,7 @@
 package com.hazel.android.ui.screens.more
 
 import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.AutoAwesome
 import com.hazel.android.ui.components.glassStyleLabel
 import com.hazel.android.ui.components.GlassStyleSwatch
@@ -48,6 +49,11 @@ import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.components.AccentPickerDialog
 import com.hazel.android.ui.theme.AccentColors
+import com.hazel.android.download.DownloadTurn
+import com.hazel.android.util.AppIcon
+import com.hazel.android.util.RestartActivity
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
 
 /**
  * Theme and accent color controls, moved off the top bar into their own screen.
@@ -68,6 +74,10 @@ fun AppearanceScreen(
     var accentPickerVisible by remember { mutableStateOf(false) }
     var glassPickerVisible by remember { mutableStateOf(false) }
     var resetVisible by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var appIcon by remember { mutableStateOf(AppIcon.current(context)) }
+    var iconPickerVisible by remember { mutableStateOf(false) }
+    var pendingIcon by remember { mutableStateOf<AppIcon?>(null) }
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
     SettingsScreen(title = stringResource(R.string.appearance_title), onBack = onBack) {
@@ -165,6 +175,18 @@ fun AppearanceScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable { accentPickerVisible = true }
                 )
+            },
+            {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.app_icon_title)) },
+                    supportingContent = { Text(stringResource(appIcon.label)) },
+                    leadingContent = {
+                        ShapedIcon(Icons.Outlined.Apps, MaterialShapes.Pentagon.toShape(), 40.dp)
+                    },
+                    trailingContent = { AppIconPreview(appIcon, 28.dp) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { iconPickerVisible = true }
+                )
             }
         ))
 
@@ -200,6 +222,48 @@ fun AppearanceScreen(
         )
     }
 
+    if (iconPickerVisible) {
+        SingleChoiceDialog(
+            title = stringResource(R.string.app_icon_title),
+            choices = AppIcon.entries.map { it to stringResource(it.label) },
+            selected = appIcon,
+            onSelect = { picked ->
+                iconPickerVisible = false
+                if (picked != appIcon) pendingIcon = picked
+            },
+            onDismiss = { iconPickerVisible = false },
+            leading = { AppIconPreview(it, 36.dp) }
+        )
+    }
+
+    pendingIcon?.let { picked ->
+        // A restart ends the process, so it waits while a download of either engine runs.
+        if (DownloadTurn.busy) {
+            ConfirmSettingDialog(
+                title = stringResource(R.string.app_icon_busy_title),
+                body = stringResource(R.string.app_icon_busy_body),
+                confirm = stringResource(R.string.format_sheet_ok),
+                onConfirm = { pendingIcon = null },
+                onDismiss = { pendingIcon = null }
+            )
+        } else {
+            ConfirmSettingDialog(
+                title = stringResource(R.string.app_icon_restart_title),
+                body = stringResource(R.string.app_icon_restart_body),
+                confirm = stringResource(R.string.app_icon_restart),
+                onConfirm = {
+                    pendingIcon = null
+                    val activity = context.findActivity()
+                    if (activity != null && !DownloadTurn.busy) {
+                        appIcon = picked
+                        RestartActivity.switchIcon(activity, picked)
+                    }
+                },
+                onDismiss = { pendingIcon = null }
+            )
+        }
+    }
+
     if (accentPickerVisible) {
         AccentPickerDialog(
             accentName = accentName,
@@ -207,4 +271,24 @@ fun AppearanceScreen(
             onDismiss = { accentPickerVisible = false }
         )
     }
+}
+
+/** The launcher icon itself, as the home screen draws it, for the App icon row and picker. */
+@Composable
+private fun AppIconPreview(icon: AppIcon, size: androidx.compose.ui.unit.Dp) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
+    val image = remember(icon, px) {
+        runCatching {
+            androidx.core.content.ContextCompat.getDrawable(context, icon.icon)
+                ?.toBitmap(px, px)?.asImageBitmap()
+        }.getOrNull()
+    }
+    image?.let { androidx.compose.foundation.Image(it, null, Modifier.size(size).clip(CircleShape)) }
+}
+
+private tailrec fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
+    is android.app.Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
