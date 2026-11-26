@@ -726,16 +726,16 @@
     <string name="whats_new_glass_title">Der neue Glas-Look</string>
     <string name="whats_new_glass_desc">Glaseffekt, neue Stile und Akzentfarben.</string>
     <string name="whats_new_highlights_title">In diesem Update</string>
-    <string name="whats_new_gallery_title">Galerie-Tab</string>
-    <string name="whats_new_gallery_desc">Fotos, Videos und Beschreibungen von Instagram, X, Pinterest und mehr speichern.</string>
-    <string name="whats_new_search_title">Bildersuche</string>
-    <string name="whats_new_search_desc">Sieben Seiten durchsuchen, auf Wunsch nach Autor gruppiert.</string>
-    <string name="whats_new_trim_title">Nach dem Download schneiden</string>
-    <string name="whats_new_trim_desc">Mit voller Geschwindigkeit laden, dann auf dem Handy schneiden.</string>
-    <string name="whats_new_player_title">Mini-Player überall</string>
-    <string name="whats_new_player_desc">Spielt auf jedem Tab und Bildschirm weiter.</string>
-    <string name="whats_new_accounts_title">Anmelde-Konten</string>
-    <string name="whats_new_accounts_desc">Anmeldung mit einem Tipp, mit dem Status jedes Kontos.</string>
+    <string name="whats_new_stories_title">Storys und Highlights</string>
+    <string name="whats_new_stories_desc">Storys, Highlights und Profilbereiche von Instagram und X speichern.</string>
+    <string name="whats_new_videos_title">Videos in der Galerie</string>
+    <string name="whats_new_videos_desc">Im Viewer abspielen und als Video oder Audio speichern.</string>
+    <string name="whats_new_share_title">Mit Hazel Gallery teilen</string>
+    <string name="whats_new_share_desc">Beiträge und Profile teilen und auswählen, was gespeichert wird.</string>
+    <string name="whats_new_search_title">Suche: Medien | Galerie</string>
+    <string name="whats_new_search_desc">Ein Schalter wählt die Engine, mit Anleitung.</string>
+    <string name="whats_new_looks_title">App-Symbol und Glasstile</string>
+    <string name="whats_new_looks_desc">Klassisches, weißes oder Glas-Symbol und fünf neue Stile.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

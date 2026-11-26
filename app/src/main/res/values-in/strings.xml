@@ -712,16 +712,16 @@
     <string name="whats_new_glass_title">Tampilan kaca baru</string>
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
     <string name="whats_new_highlights_title">Di pembaruan ini</string>
-    <string name="whats_new_gallery_title">Tab Galeri</string>
-    <string name="whats_new_gallery_desc">Simpan foto, video, dan keterangan dari Instagram, X, Pinterest, dan lainnya.</string>
-    <string name="whats_new_search_title">Pencarian gambar</string>
-    <string name="whats_new_search_desc">Cari di tujuh situs, hasil bisa dikelompokkan per pembuat.</string>
-    <string name="whats_new_trim_title">Potong setelah unduh</string>
-    <string name="whats_new_trim_desc">Unduh dengan kecepatan penuh, lalu potong di ponsel.</string>
-    <string name="whats_new_player_title">Pemutar mini di mana saja</string>
-    <string name="whats_new_player_desc">Tetap diputar di setiap tab dan layar.</string>
-    <string name="whats_new_accounts_title">Akun masuk</string>
-    <string name="whats_new_accounts_desc">Masuk sekali ketuk, dengan status setiap akun.</string>
+    <string name="whats_new_stories_title">Story dan sorotan</string>
+    <string name="whats_new_stories_desc">Simpan story, sorotan, dan bagian profil dari Instagram dan X.</string>
+    <string name="whats_new_videos_title">Video di Galeri</string>
+    <string name="whats_new_videos_desc">Putar di penampil dan simpan sebagai video atau audio.</string>
+    <string name="whats_new_share_title">Bagikan ke Hazel Gallery</string>
+    <string name="whats_new_share_desc">Bagikan postingan dan profil, lalu pilih yang disimpan.</string>
+    <string name="whats_new_search_title">Pencarian Media | Galeri</string>
+    <string name="whats_new_search_desc">Satu sakelar memilih mesin, dengan panduan.</string>
+    <string name="whats_new_looks_title">Ikon aplikasi dan gaya kaca</string>
+    <string name="whats_new_looks_desc">Ikon Klasik, Putih, atau Kaca, dan lima gaya baru.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

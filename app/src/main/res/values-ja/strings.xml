@@ -712,16 +712,16 @@
     <string name="whats_new_glass_title">新しいガラスの見た目</string>
     <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
     <string name="whats_new_highlights_title">このアップデートの内容</string>
-    <string name="whats_new_gallery_title">ギャラリータブ</string>
-    <string name="whats_new_gallery_desc">Instagram、X、Pinterest などから写真・動画・キャプションを保存。</string>
-    <string name="whats_new_search_title">画像検索</string>
-    <string name="whats_new_search_desc">7 つのサイトを検索。作者ごとにまとめることも可能。</string>
-    <string name="whats_new_trim_title">ダウンロード後にカット</string>
-    <string name="whats_new_trim_desc">フルスピードでダウンロードし、端末上でカット。</string>
-    <string name="whats_new_player_title">どこでもミニプレーヤー</string>
-    <string name="whats_new_player_desc">どのタブや画面でも再生を継続。</string>
-    <string name="whats_new_accounts_title">ログインアカウント</string>
-    <string name="whats_new_accounts_desc">ワンタップでログイン。各アカウントの状態も表示。</string>
+    <string name="whats_new_stories_title">ストーリーズとハイライト</string>
+    <string name="whats_new_stories_desc">Instagram と X のストーリーズ、ハイライト、プロフィールの各セクションを保存。</string>
+    <string name="whats_new_videos_title">ギャラリーの動画</string>
+    <string name="whats_new_videos_desc">ビューアで再生し、動画または音声で保存。</string>
+    <string name="whats_new_share_title">Hazel Gallery で共有</string>
+    <string name="whats_new_share_desc">投稿やプロフィールを共有して、保存するものを選択。</string>
+    <string name="whats_new_search_title">メディア | ギャラリー検索</string>
+    <string name="whats_new_search_desc">スイッチひとつでエンジンを選択。ガイド付き。</string>
+    <string name="whats_new_looks_title">アプリアイコンとガラススタイル</string>
+    <string name="whats_new_looks_desc">クラシック、ホワイト、ガラスのアイコンと 5 つの新スタイル。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>
