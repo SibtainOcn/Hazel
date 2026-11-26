@@ -75,7 +75,7 @@ class GallerySearchLayoutTest(private val locale: String) {
 
     @Test
     fun `site row marks the chosen site and switches on tap`() {
-        var site by mutableStateOf(GallerySearchSite.PINTEREST)
+        var site by mutableStateOf<GallerySearchSite?>(null)
         show { GallerySiteRow(selected = site, onSelect = { site = it }) }
         compose.onNodeWithText("Tumblr").performScrollTo().performClick()
         compose.waitForIdle()

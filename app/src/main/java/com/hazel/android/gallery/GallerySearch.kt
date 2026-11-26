@@ -14,11 +14,6 @@ enum class GallerySearchSite(val label: String, private val template: String) {
 
     fun urlFor(query: String): String =
         template.format(URLEncoder.encode(query.trim(), "UTF-8").replace("+", "%20"))
-
-    companion object {
-        val DEFAULT = PINTEREST
-        fun fromName(name: String?): GallerySearchSite = entries.firstOrNull { it.name == name } ?: DEFAULT
-    }
 }
 
 /** Which files of a post are kept. */

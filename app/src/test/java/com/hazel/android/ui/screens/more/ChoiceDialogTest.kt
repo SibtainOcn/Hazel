@@ -41,5 +41,6 @@ class ChoiceDialogTest {
         }
         compose.onNodeWithText("Choice 0").assertIsDisplayed()
         compose.onNodeWithText("Choice 1").assertIsDisplayed()
+        com.hazel.android.ui.saveScreen("choice-dialog-cookie-tick")
     }
 }

@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
 - Delete all cookies also clears saved site data and gallery-dl sessions.
 - Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
+- Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
+- Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
+- Search: an "i" button (also Info in Search options) opens a guide screen to what each side finds.
+- Search options: one fixed height for both tabs; rows scroll inside it.
+- Search opens on Media from Home and on Gallery from the Gallery tab.
+- Search: Search all is a cookie icon button; the field's search cookie also runs the search.
+- Image search site is picked only from the chips; the old Search on row is removed.
+- Choice dialogs and sheets mark the pick with a cookie check.
 ### Fixed
 - Gallery: videos play inside the viewer in Hazel's own player, with a seek bar and mute button; Instagram stories and reels no longer say no app can play them, and links only yt-dlp can read (Reddit) play too.
 - Gallery: videos in saved results or with expired links are read again as soon as they show, before Play.
