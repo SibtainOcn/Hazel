@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">Vidéos seulement</string>
     <string name="gallery_skip_reposts">Ignorer les republications</string>
     <string name="gallery_empty_title">Enregistrez publications, stories et à la une</string>
-    <string name="gallery_empty_hint">Collez un lien Instagram, X, Reddit, Pinterest et 1 500 autres sites</string>
+    <string name="gallery_empty_hint">Collez un lien Instagram, X, Pinterest et 1 500 autres sites</string>
     <string name="gallery_view">Voir</string>
     <string name="gallery_close">Fermer</string>
     <string name="gallery_under_maintenance">En maintenance</string>
@@ -736,7 +736,7 @@
     <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
     <string name="whats_new_highlights_title">Dans cette mise à jour</string>
     <string name="whats_new_gallery_title">Onglet Galerie</string>
-    <string name="whats_new_gallery_desc">Enregistrez photos, vidéos et légendes depuis Instagram, X, Pinterest, Reddit et plus.</string>
+    <string name="whats_new_gallery_desc">Enregistrez photos, vidéos et légendes depuis Instagram, X, Pinterest et plus.</string>
     <string name="whats_new_search_title">Recherche d’images</string>
     <string name="whats_new_search_desc">Cherchez sur sept sites, avec des résultats groupés par auteur si vous voulez.</string>
     <string name="whats_new_trim_title">Couper après téléchargement</string>
@@ -1288,8 +1288,8 @@
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
     <string name="guide_share_video">Vidéo, audio et reels. Choisissez qualité, coupe, SponsorBlock et plus, puis téléchargez</string>
     <string name="guide_share_gallery">Images, publications, reels, stories et à la une. Choisissez quoi garder, puis téléchargez</string>
-    <string name="guide_share_instant">Vidéo ou audio tout de suite, avec vos réglages enregistrés</string>
-    <string name="guide_share_instant_gallery">Publications, stories et à la une tout de suite, avec vos réglages enregistrés</string>
+    <string name="guide_share_instant">Vidéo ou audio directement, avec vos réglages enregistrés</string>
+    <string name="guide_share_instant_gallery">Publications, stories et à la une directement, avec vos réglages enregistrés</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>
     <string name="caption_saved">Légende téléchargée</string>

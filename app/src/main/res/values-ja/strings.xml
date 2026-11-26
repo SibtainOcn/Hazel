@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">動画のみ</string>
     <string name="gallery_skip_reposts">リポストを除く</string>
     <string name="gallery_empty_title">投稿、ストーリーズ、ハイライトを保存</string>
-    <string name="gallery_empty_hint">Instagram、X、Reddit、Pinterest など 1,500 以上のサイトのリンクを貼り付け</string>
+    <string name="gallery_empty_hint">Instagram、X、Pinterest など 1,500 以上のサイトのリンクを貼り付け</string>
     <string name="gallery_view">表示</string>
     <string name="gallery_close">閉じる</string>
     <string name="gallery_under_maintenance">メンテナンス中</string>
@@ -708,7 +708,7 @@
     <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
     <string name="whats_new_highlights_title">このアップデートの内容</string>
     <string name="whats_new_gallery_title">ギャラリータブ</string>
-    <string name="whats_new_gallery_desc">Instagram、X、Pinterest、Reddit などから写真・動画・キャプションを保存。</string>
+    <string name="whats_new_gallery_desc">Instagram、X、Pinterest などから写真・動画・キャプションを保存。</string>
     <string name="whats_new_search_title">画像検索</string>
     <string name="whats_new_search_desc">7 つのサイトを検索。作者ごとにまとめることも可能。</string>
     <string name="whats_new_trim_title">ダウンロード後にカット</string>
@@ -1254,8 +1254,8 @@
     <string name="guide_share_from_apps">どのアプリからでもリンクを共有</string>
     <string name="guide_share_video">動画、音声、リール。画質、カット、SponsorBlock などを選んでからダウンロード</string>
     <string name="guide_share_gallery">画像、投稿、リール、ストーリーズ、ハイライト。保存するものを選んでダウンロード</string>
-    <string name="guide_share_instant">保存した設定で動画や音声をすぐに保存</string>
-    <string name="guide_share_instant_gallery">保存した設定で投稿、ストーリーズ、ハイライトをすぐに保存</string>
+    <string name="guide_share_instant">保存した設定で動画や音声を直接保存</string>
+    <string name="guide_share_instant_gallery">保存した設定で投稿、ストーリーズ、ハイライトを直接保存</string>
     <string name="caption_copy">コピー</string>
     <string name="caption_save_text">テキストで保存</string>
     <string name="caption_saved">キャプションをダウンロードしました</string>

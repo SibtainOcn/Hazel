@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">Только видео</string>
     <string name="gallery_skip_reposts">Пропускать репосты</string>
     <string name="gallery_empty_title">Сохраняйте посты, истории и актуальное</string>
-    <string name="gallery_empty_hint">Вставьте ссылку из Instagram, X, Reddit, Pinterest и ещё 1500 сайтов</string>
+    <string name="gallery_empty_hint">Вставьте ссылку из Instagram, X, Pinterest и ещё 1500 сайтов</string>
     <string name="gallery_view">Открыть</string>
     <string name="gallery_close">Закрыть</string>
     <string name="gallery_under_maintenance">На обслуживании</string>
@@ -750,7 +750,7 @@
     <string name="whats_new_glass_desc">Эффект стекла, новые стили и акцентные цвета.</string>
     <string name="whats_new_highlights_title">В этом обновлении</string>
     <string name="whats_new_gallery_title">Вкладка Галерея</string>
-    <string name="whats_new_gallery_desc">Сохраняйте фото, видео и подписи из Instagram, X, Pinterest, Reddit и других.</string>
+    <string name="whats_new_gallery_desc">Сохраняйте фото, видео и подписи из Instagram, X, Pinterest и других.</string>
     <string name="whats_new_search_title">Поиск изображений</string>
     <string name="whats_new_search_desc">Поиск по семи сайтам, по желанию с группировкой по автору.</string>
     <string name="whats_new_trim_title">Обрезка после загрузки</string>
@@ -1304,8 +1304,8 @@
     <string name="guide_share_from_apps">Поделитесь ссылкой из любого приложения</string>
     <string name="guide_share_video">Видео, аудио и рилс. Выберите качество, обрезку, SponsorBlock и другое, затем скачайте</string>
     <string name="guide_share_gallery">Изображения, посты, рилс, истории и актуальное. Выберите, что сохранить, и скачайте</string>
-    <string name="guide_share_instant">Видео или аудио сразу, с сохранёнными настройками</string>
-    <string name="guide_share_instant_gallery">Посты, истории и актуальное сразу, с сохранёнными настройками</string>
+    <string name="guide_share_instant">Видео или аудио напрямую, с сохранёнными настройками</string>
+    <string name="guide_share_instant_gallery">Посты, истории и актуальное напрямую, с сохранёнными настройками</string>
     <string name="caption_copy">Копировать</string>
     <string name="caption_save_text">Сохранить как текст</string>
     <string name="caption_saved">Подпись скачана</string>

@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">Hanya video</string>
     <string name="gallery_skip_reposts">Lewati repost</string>
     <string name="gallery_empty_title">Simpan postingan, story, dan sorotan</string>
-    <string name="gallery_empty_hint">Tempel tautan dari Instagram, X, Reddit, Pinterest, dan 1.500 situs lain</string>
+    <string name="gallery_empty_hint">Tempel tautan dari Instagram, X, Pinterest, dan 1.500 situs lain</string>
     <string name="gallery_view">Lihat</string>
     <string name="gallery_close">Tutup</string>
     <string name="gallery_under_maintenance">Sedang dalam perbaikan</string>
@@ -708,7 +708,7 @@
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
     <string name="whats_new_highlights_title">Di pembaruan ini</string>
     <string name="whats_new_gallery_title">Tab Galeri</string>
-    <string name="whats_new_gallery_desc">Simpan foto, video, dan keterangan dari Instagram, X, Pinterest, Reddit, dan lainnya.</string>
+    <string name="whats_new_gallery_desc">Simpan foto, video, dan keterangan dari Instagram, X, Pinterest, dan lainnya.</string>
     <string name="whats_new_search_title">Pencarian gambar</string>
     <string name="whats_new_search_desc">Cari di tujuh situs, hasil bisa dikelompokkan per pembuat.</string>
     <string name="whats_new_trim_title">Potong setelah unduh</string>
@@ -1254,8 +1254,8 @@
     <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
     <string name="guide_share_video">Video, audio, dan reels. Pilih kualitas, potong, SponsorBlock, dan lainnya, lalu unduh</string>
     <string name="guide_share_gallery">Gambar, postingan, reels, story, dan sorotan. Pilih yang disimpan, lalu unduh</string>
-    <string name="guide_share_instant">Video atau audio langsung, dengan pengaturan tersimpan</string>
-    <string name="guide_share_instant_gallery">Postingan, story, dan sorotan langsung, dengan pengaturan tersimpan</string>
+    <string name="guide_share_instant">Video atau audio secara langsung, dengan pengaturan tersimpan</string>
+    <string name="guide_share_instant_gallery">Postingan, story, dan sorotan secara langsung, dengan pengaturan tersimpan</string>
     <string name="caption_copy">Salin</string>
     <string name="caption_save_text">Simpan sebagai teks</string>
     <string name="caption_saved">Keterangan diunduh</string>

@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">Só vídeos</string>
     <string name="gallery_skip_reposts">Pular reposts</string>
     <string name="gallery_empty_title">Salve posts, stories e destaques</string>
-    <string name="gallery_empty_hint">Cole um link do Instagram, X, Reddit, Pinterest e mais 1.500 sites</string>
+    <string name="gallery_empty_hint">Cole um link do Instagram, X, Pinterest e mais 1.500 sites</string>
     <string name="gallery_view">Ver</string>
     <string name="gallery_close">Fechar</string>
     <string name="gallery_under_maintenance">Em manutenção</string>
@@ -736,7 +736,7 @@
     <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
     <string name="whats_new_highlights_title">Nesta atualização</string>
     <string name="whats_new_gallery_title">Aba Galeria</string>
-    <string name="whats_new_gallery_desc">Salve fotos, vídeos e legendas do Instagram, X, Pinterest, Reddit e mais.</string>
+    <string name="whats_new_gallery_desc">Salve fotos, vídeos e legendas do Instagram, X, Pinterest e mais.</string>
     <string name="whats_new_search_title">Busca de imagens</string>
     <string name="whats_new_search_desc">Busque em sete sites, com resultados agrupados por autor se quiser.</string>
     <string name="whats_new_trim_title">Cortar após baixar</string>
@@ -1288,8 +1288,8 @@
     <string name="guide_share_from_apps">Compartilhe um link de qualquer app</string>
     <string name="guide_share_video">Vídeo, áudio e reels. Escolha qualidade, corte, SponsorBlock e mais, depois baixe</string>
     <string name="guide_share_gallery">Imagens, posts, reels, stories e destaques. Escolha o que salvar e baixe</string>
-    <string name="guide_share_instant">Vídeo ou áudio na hora, com suas configurações salvas</string>
-    <string name="guide_share_instant_gallery">Posts, stories e destaques na hora, com suas configurações salvas</string>
+    <string name="guide_share_instant">Vídeo ou áudio direto, com suas configurações salvas</string>
+    <string name="guide_share_instant_gallery">Posts, stories e destaques direto, com suas configurações salvas</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Salvar como texto</string>
     <string name="caption_saved">Legenda baixada</string>

@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">Solo vídeos</string>
     <string name="gallery_skip_reposts">Omitir reposts</string>
     <string name="gallery_empty_title">Guarda publicaciones, historias y destacadas</string>
-    <string name="gallery_empty_hint">Pega un enlace de Instagram, X, Reddit, Pinterest y 1500 sitios más</string>
+    <string name="gallery_empty_hint">Pega un enlace de Instagram, X, Pinterest y 1500 sitios más</string>
     <string name="gallery_view">Ver</string>
     <string name="gallery_close">Cerrar</string>
     <string name="gallery_under_maintenance">En mantenimiento</string>
@@ -736,7 +736,7 @@
     <string name="whats_new_glass_desc">Efecto cristal, nuevos estilos y colores de acento.</string>
     <string name="whats_new_highlights_title">En esta actualización</string>
     <string name="whats_new_gallery_title">Pestaña Galería</string>
-    <string name="whats_new_gallery_desc">Guarda fotos, vídeos y descripciones de Instagram, X, Pinterest, Reddit y más.</string>
+    <string name="whats_new_gallery_desc">Guarda fotos, vídeos y descripciones de Instagram, X, Pinterest y más.</string>
     <string name="whats_new_search_title">Búsqueda de imágenes</string>
     <string name="whats_new_search_desc">Busca en siete sitios, con resultados agrupados por autor si quieres.</string>
     <string name="whats_new_trim_title">Recortar tras descargar</string>
@@ -1288,8 +1288,8 @@
     <string name="guide_share_from_apps">Comparte un enlace desde cualquier app</string>
     <string name="guide_share_video">Video, audio y reels. Elige calidad, recorte, SponsorBlock y más, y descarga</string>
     <string name="guide_share_gallery">Imágenes, publicaciones, reels, historias y destacadas. Elige qué guardar y descarga</string>
-    <string name="guide_share_instant">Video o audio al instante, con tus ajustes guardados</string>
-    <string name="guide_share_instant_gallery">Publicaciones, historias y destacadas al instante, con tus ajustes guardados</string>
+    <string name="guide_share_instant">Video o audio directamente, con tus ajustes guardados</string>
+    <string name="guide_share_instant_gallery">Publicaciones, historias y destacadas directamente, con tus ajustes guardados</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Guardar como texto</string>
     <string name="caption_saved">Descripción descargada</string>

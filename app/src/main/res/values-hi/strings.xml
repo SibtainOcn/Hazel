@@ -63,7 +63,7 @@
     <string name="gallery_show_videos">सिर्फ़ वीडियो</string>
     <string name="gallery_skip_reposts">रीपोस्ट छोड़ें</string>
     <string name="gallery_empty_title">पोस्ट, स्टोरी और हाइलाइट सेव करें</string>
-    <string name="gallery_empty_hint">Instagram, X, Reddit, Pinterest और 1,500 और साइटों का लिंक पेस्ट करें</string>
+    <string name="gallery_empty_hint">Instagram, X, Pinterest और 1,500 और साइटों का लिंक पेस्ट करें</string>
     <string name="gallery_view">देखें</string>
     <string name="gallery_close">बंद करें</string>
     <string name="gallery_under_maintenance">रखरखाव जारी है</string>
@@ -722,7 +722,7 @@
     <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
     <string name="whats_new_highlights_title">इस अपडेट में</string>
     <string name="whats_new_gallery_title">गैलरी टैब</string>
-    <string name="whats_new_gallery_desc">Instagram, X, Pinterest, Reddit और अन्य से फ़ोटो, वीडियो और कैप्शन सेव करें।</string>
+    <string name="whats_new_gallery_desc">Instagram, X, Pinterest और अन्य से फ़ोटो, वीडियो और कैप्शन सेव करें।</string>
     <string name="whats_new_search_title">इमेज सर्च</string>
     <string name="whats_new_search_desc">सात साइटों पर खोजें, चाहें तो लेखक के अनुसार समूह में।</string>
     <string name="whats_new_trim_title">डाउनलोड के बाद ट्रिम</string>
@@ -1271,8 +1271,8 @@
     <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
     <string name="guide_share_video">वीडियो, ऑडियो और रील। क्वालिटी, कट, SponsorBlock और बहुत कुछ चुनें, फिर डाउनलोड करें</string>
     <string name="guide_share_gallery">इमेज, पोस्ट, रील, स्टोरी और हाइलाइट। क्या सेव करना है चुनें, फिर डाउनलोड करें</string>
-    <string name="guide_share_instant">वीडियो या ऑडियो तुरंत, आपकी सेव की गई सेटिंग्स के साथ</string>
-    <string name="guide_share_instant_gallery">पोस्ट, स्टोरी और हाइलाइट तुरंत, आपकी सेव की गई सेटिंग्स के साथ</string>
+    <string name="guide_share_instant">वीडियो या ऑडियो सीधे, आपकी सेव की गई सेटिंग्स के साथ</string>
+    <string name="guide_share_instant_gallery">पोस्ट, स्टोरी और हाइलाइट सीधे, आपकी सेव की गई सेटिंग्स के साथ</string>
     <string name="caption_copy">कॉपी करें</string>
     <string name="caption_save_text">टेक्स्ट के रूप में सेव करें</string>
     <string name="caption_saved">कैप्शन डाउनलोड हो गया</string>
