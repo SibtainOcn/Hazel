@@ -1,0 +1,47 @@
+name: Star history
+
+# Redraws the README star history chart daily and publishes star-history.svg on the
+# star-history branch. The branch is replaced on each run and holds a single commit.
+
+on:
+  schedule:
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: star-history
+  cancel-in-progress: true
+
+jobs:
+  chart:
+    name: Draw and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Draw the chart
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/stars/star_chart.py "$RUNNER_TEMP/chart" "${{ github.repository }}"
+
+      - name: Publish on the star-history branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: ${{ runner.temp }}/chart
+        run: |
+          git init -q -b star-history
+          git add star-history.svg
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Star history $(date -u +%F)"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" star-history
