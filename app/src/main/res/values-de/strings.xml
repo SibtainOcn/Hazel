@@ -714,6 +714,11 @@
     <string name="glass_style_forest">Wald</string>
     <string name="glass_style_ocean">Ozean</string>
     <string name="glass_style_mono">Mono</string>
+    <string name="glass_style_rose">Rosé</string>
+    <string name="glass_style_ember">Glut</string>
+    <string name="glass_style_lagoon">Lagune</string>
+    <string name="glass_style_dusk">Dämmerung</string>
+    <string name="glass_style_sand">Sand</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>
     <string name="whats_new_tag">Neu</string>
     <string name="whats_new_version">Version %1$s</string>

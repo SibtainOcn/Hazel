@@ -700,6 +700,11 @@
     <string name="glass_style_forest">森林</string>
     <string name="glass_style_ocean">海洋</string>
     <string name="glass_style_mono">单色</string>
+    <string name="glass_style_rose">玫瑰</string>
+    <string name="glass_style_ember">余烬</string>
+    <string name="glass_style_lagoon">泻湖</string>
+    <string name="glass_style_dusk">黄昏</string>
+    <string name="glass_style_sand">沙丘</string>
     <string name="guide_step_appearance_title">按你的喜好</string>
     <string name="whats_new_tag">新功能</string>
     <string name="whats_new_version">版本 %1$s</string>
