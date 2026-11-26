@@ -29,7 +29,6 @@
     <string name="gallery_empty_hint">Вставьте ссылку из Instagram, X, Reddit, Pinterest и ещё 1500 сайтов</string>
     <string name="gallery_view">Открыть</string>
     <string name="gallery_close">Закрыть</string>
-    <string name="gallery_no_player">Нет приложения для этого видео</string>
     <string name="gallery_under_maintenance">На обслуживании</string>
     <string name="gallery_image_size">Размер изображения</string>
     <string name="gallery_size_original">Оригинал</string>

@@ -29,7 +29,6 @@
     <string name="gallery_empty_hint">粘贴来自 Instagram、X、Reddit、Pinterest 等 1,500 多个网站的链接</string>
     <string name="gallery_view">查看</string>
     <string name="gallery_close">关闭</string>
-    <string name="gallery_no_player">没有应用可以播放此视频</string>
     <string name="gallery_under_maintenance">维护中</string>
     <string name="gallery_image_size">图片尺寸</string>
     <string name="gallery_size_original">原图</string>

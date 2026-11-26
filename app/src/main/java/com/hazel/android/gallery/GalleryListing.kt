@@ -19,7 +19,9 @@ data class GalleryItem(
     /** The post's own link, when the site gives one. */
     val postUrl: String? = null,
     /** The post's full text as its author wrote it (caption, description); blank when there is none. */
-    val caption: String = ""
+    val caption: String = "",
+    /** A web address a player can stream; null when the site gives none. */
+    val playUrl: String? = null
 ) {
     val isVideo: Boolean get() = extension.lowercase() in VIDEO_EXTENSIONS
 
@@ -85,9 +87,18 @@ data class GalleryListing(
                 postUrl = postLinkOf(info),
                 caption = CAPTION_KEYS
                     .firstNotNullOfOrNull { key -> info.optString(key).trim().takeIf { it.isNotEmpty() && it != "null" } }
-                    ?.take(CAPTION_MAX).orEmpty()
+                    ?.take(CAPTION_MAX).orEmpty(),
+                playUrl = playUrlOf(url, info)
             )
         }
+
+        /**
+         * A file gallery-dl hands to yt-dlp is named `ytdl:<page>`, which no player reads; the
+         * site's own progressive file (Instagram's `video_url`) streams instead.
+         */
+        private fun playUrlOf(url: String, info: JSONObject): String? =
+            url.takeIf { it.startsWith("http") }
+                ?: info.optString("video_url").takeIf { it.startsWith("http") }
 
         /** The post's own page, from the site's fields; null when the site gives none (Pinterest search). */
         internal fun postLinkOf(info: JSONObject): String? {

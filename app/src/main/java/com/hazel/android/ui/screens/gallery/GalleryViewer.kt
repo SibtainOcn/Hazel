@@ -1,9 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
 import com.hazel.android.ui.components.CaptionSheet
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -55,14 +51,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.ui.screens.download.SheetDownloadPill
@@ -240,7 +234,6 @@ fun GalleryViewer(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ViewerPage(item: GalleryItem, active: Boolean) {
-    val context = LocalContext.current
     var zoom by remember { mutableFloatStateOf(1f) }
     var pan by remember { mutableStateOf(Offset.Zero) }
     LaunchedEffect(active) {
@@ -279,23 +272,8 @@ private fun ViewerPage(item: GalleryItem, active: Boolean) {
                 }
         )
         if (item.isVideo) {
-            val noPlayer = stringResource(R.string.gallery_no_player)
-            ShapeIconButton(
-                onClick = {
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW).setDataAndType(item.url.toUri(), "video/*")
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        )
-                    } catch (_: ActivityNotFoundException) {
-                        Toast.makeText(context, noPlayer, Toast.LENGTH_SHORT).show()
-                    }
-                },
-                filled = true,
-                size = 64.dp
-            ) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.player_play), modifier = Modifier.size(32.dp))
-            }
+            val stream = item.playUrl ?: item.url.takeIf { it.startsWith("http") }
+            if (stream != null) GalleryVideo(url = stream, active = active)
         }
     }
 }
