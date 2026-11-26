@@ -24,6 +24,8 @@
     <string name="gallery_error_login">Sign in to this site under Cookies, then try again</string>
     <string name="gallery_error_sign_in_refused">The site turned away your saved sign-in. Sign in again under Cookies</string>
     <string name="gallery_error_unsupported">Gallery can\'t read this link</string>
+    <string name="gallery_links_skipped">Some links couldn\'t be read</string>
+    <string name="search_fetching">Fetching</string>
     <string name="gallery_error_not_found">This post is gone, private or empty</string>
     <string name="gallery_error_network">Couldn\'t connect. Check the network or proxy</string>
     <string name="gallery_error_setup">Gallery couldn\'t start on this device</string>

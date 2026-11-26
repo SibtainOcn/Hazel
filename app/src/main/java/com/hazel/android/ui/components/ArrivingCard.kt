@@ -18,8 +18,8 @@ import com.hazel.android.ui.motion.M3Motion
  * scrolls past as cards settling into place instead of a wall that redraws under the finger.
  */
 @Composable
-fun ArrivingCard(key: Any, shrink: ScrollShrink, content: @Composable () -> Unit) {
-    var shown by remember(key) { mutableStateOf(false) }
+fun ArrivingCard(key: Any, shrink: ScrollShrink, animate: Boolean = true, content: @Composable () -> Unit) {
+    var shown by remember(key) { mutableStateOf(!animate) }
     LaunchedEffect(key) { shown = true }
     val entrance by animateFloatAsState(
         targetValue = if (shown) 1f else 0f,

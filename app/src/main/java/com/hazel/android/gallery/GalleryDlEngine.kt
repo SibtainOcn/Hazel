@@ -16,6 +16,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -54,21 +55,72 @@ object GalleryDlEngine {
      * page, and the files of its first [postLimit] posts are read.
      */
     suspend fun list(context: Context, url: String, postLimit: Int? = null): GalleryListing {
-        val output = StringBuilder()
-        val args = if (postLimit == null) listOf("--dump-json")
-        else listOf("--resolve-json", "--post-range", "1-$postLimit", "--child-range", "1-$postLimit")
-        run(context, listOf(url), args) { line ->
-            if (output.length + line.length > LISTING_MAX_CHARS) {
-                throw GalleryDlException(GalleryDlException.Kind.OTHER, "listing too large")
-            }
-            output.append(line).append('\n')
-        }
+        val output = GalleryLinkOutput(listOf(url), LISTING_MAX_CHARS)
+        run(context, listOf(url), listArgs(postLimit)) { line -> output.feed(line) }
         // A download usually follows a read: have gallery-dl loaded for it.
         GallerySpare.warm(context)
-        val listing = GalleryListing.parse(output.toString())
+        return read(context, url, output.part(0)).getOrThrow()
+    }
+
+    /**
+     * Reads several links, one gallery-dl run per site (each with that site's sign-in), and
+     * hands [onLink] each link's listing or failure in turn, as soon as its part is read.
+     */
+    suspend fun listEach(
+        context: Context,
+        urls: List<String>,
+        postLimit: Int? = null,
+        onLink: suspend (url: String, result: Result<GalleryListing>) -> Unit
+    ) {
+        urls.distinct().groupBy { Uri.parse(it).host.orEmpty().lowercase().removePrefix("www.") }.values.forEach { group ->
+            coroutineScope {
+                val output = GalleryLinkOutput(group, LISTING_MAX_CHARS)
+                val closed = Channel<Int>(Channel.UNLIMITED)
+                val reading = async {
+                    try {
+                        run(context, group, listArgs(postLimit)) { line -> output.feed(line)?.let(closed::trySend) }
+                        null
+                    } catch (e: GalleryDlException) {
+                        e
+                    } finally {
+                        closed.close()
+                    }
+                }
+                val handed = BooleanArray(group.size)
+                for (index in closed) {
+                    handed[index] = true
+                    onLink(group[index], read(context, group[index], output.part(index)))
+                }
+                val failure = reading.await()
+                group.indices.filterNot { handed[it] }.forEach { index ->
+                    onLink(group[index], read(context, group[index], output.part(index), failure))
+                }
+            }
+        }
+        GallerySpare.warm(context)
+    }
+
+    private fun listArgs(postLimit: Int?): List<String> =
+        if (postLimit == null) listOf("--dump-json")
+        else listOf("--resolve-json", "--post-range", "1-$postLimit", "--child-range", "1-$postLimit")
+
+    /**
+     * The listing in [text], read off the main thread. Without one, the run's [failure] (an
+     * unreadable link makes the whole run exit with an error) or else an unsupported link.
+     */
+    private suspend fun read(
+        context: Context,
+        url: String,
+        text: String?,
+        failure: GalleryDlException? = null
+    ): Result<GalleryListing> = try {
+        if (text == null) throw failure ?: GalleryDlException(GalleryDlException.Kind.UNSUPPORTED, "no listing")
+        val listing = withContext(Dispatchers.Default) { GalleryListing.parse(text) }
         val error = listing.error
         if (error != null && listing.isEmpty) throw readError(context, url, error)
-        return listing
+        Result.success(listing)
+    } catch (e: GalleryDlException) {
+        Result.failure(e)
     }
 
     /**
@@ -185,7 +237,7 @@ object GalleryDlEngine {
                 val runtime = PythonRuntime.ready(app)
                 val command = buildList {
                     add(runtime.python.absolutePath)
-                    add("-m"); add("gallery_dl")
+                    add("-c"); add(RUN)
                     addAll(fixedOptions(app, runtime))
                     access.cookieFile?.let { add("--cookies"); add(it.absolutePath) }
                     access.userAgent.takeIf { access.hasCookies && it.isNotBlank() }?.let { add("--user-agent"); add(it) }
@@ -269,8 +321,9 @@ object GalleryDlEngine {
     private const val PROBE ="import gallery_dl, gallery_dl.extractor, gallery_dl.job, gallery_dl.version as v; print(v.__version__)"
     private const val PROBE_TIMEOUT_S = 60L
 
-    /** `python -m gallery_dl` at the head of every run's command; a spare gets what follows. */
+    /** `python -c RUN` at the head of every run's command; a spare gets what follows. */
     private const val COMMAND_PREFIX = 3
+    private const val RUN = GalleryLinkOutput.RUN_PREFIX + "sys.exit(gallery_dl.main())"
 
     private fun fixedOptions(context: Context, runtime: PythonRuntime): List<String> = listOf(
         "--config-ignore",

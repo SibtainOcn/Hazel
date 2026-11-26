@@ -12,6 +12,8 @@
     <string name="gallery_error_login">Melde dich unter Cookies bei dieser Seite an und versuche es erneut</string>
     <string name="gallery_error_sign_in_refused">Die Seite hat deine gespeicherte Anmeldung abgelehnt. Melde dich unter Cookies erneut an</string>
     <string name="gallery_error_unsupported">Galerie kann diesen Link nicht lesen</string>
+    <string name="gallery_links_skipped">Einige Links konnten nicht gelesen werden</string>
+    <string name="search_fetching">Wird abgerufen</string>
     <string name="gallery_error_not_found">Beitrag gelöscht, privat oder leer</string>
     <string name="gallery_error_network">Keine Verbindung. Netzwerk oder Proxy prüfen</string>
     <string name="gallery_error_setup">Galerie konnte auf diesem Gerät nicht starten</string>

@@ -61,4 +61,23 @@ class UrlSearchBarLayoutTest(private val qualifiers: String, private val fontSca
         assertTrue("hint overlaps the cookie", hint.positionOnScreen.x >= cookieEnd)
         assertTrue("hint runs off the screen", hint.positionOnScreen.x + hint.size.width <= metrics.widthPixels)
     }
+
+    @Test
+    fun `fetching count fits the cookie and the bar says fetching`() {
+        RuntimeEnvironment.setQualifiers(qualifiers)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+                    UrlSearchBar(url = "", onOpenSearch = {}, fetching = 12 to 15, modifier = Modifier.padding(horizontal = 16.dp))
+                }
+            }
+        }
+        compose.waitForIdle()
+        val density = context.resources.displayMetrics.density
+        compose.onNodeWithText(context.getString(R.string.search_fetching), useUnmergedTree = true).assertIsDisplayed()
+        val count = compose.onNodeWithText("12/15", useUnmergedTree = true).assertIsDisplayed().fetchSemanticsNode()
+        assertTrue("count spills out of the cookie", count.size.width <= 38 * density)
+    }
 }
