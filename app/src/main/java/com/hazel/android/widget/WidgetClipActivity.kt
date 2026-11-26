@@ -40,7 +40,7 @@ class WidgetClipActivity : Activity() {
             if (mode == Mode.SHEET) {
                 target.setClass(this, ShareOverlayActivity::class.java)
             } else {
-                target.setClassName(this, "com.hazel.android.${ShareOverlayActivity.INSTANT_ALIAS}")
+                target.setComponent(com.hazel.android.util.AppIcon.current(this).shareComponent(this, com.hazel.android.util.AppIcon.INSTANT))
                     .putExtra(ShareOverlayActivity.EXTRA_AUDIO_ONLY, mode == Mode.AUDIO)
             }
             runCatching { startActivity(target) }

@@ -872,6 +872,15 @@
     <string name="appearance_reset">Darstellung zurücksetzen</string>
     <string name="appearance_reset_title">Darstellung zurücksetzen?</string>
     <string name="appearance_reset_body">Design, Akzent und Glas werden wieder Dunkel, White und Wald.</string>
+    <string name="app_icon_title">App-Symbol</string>
+    <string name="app_icon_classic">Klassisch</string>
+    <string name="app_icon_white">Weiß</string>
+    <string name="app_icon_glass">Glas</string>
+    <string name="app_icon_restart_title">Hazel neu starten?</string>
+    <string name="app_icon_restart_body">Hazel startet neu, um sein Symbol auf dem Startbildschirm und im Teilen-Menü zu ändern. Manche Startbildschirme entfernen das alte Symbol; füge Hazel dann aus der App-Liste wieder hinzu.</string>
+    <string name="app_icon_restart">Neu starten</string>
+    <string name="app_icon_busy_title">Ein Download läuft</string>
+    <string name="app_icon_busy_body">Ändere das Symbol, wenn er fertig ist, damit der Download nicht abbricht.</string>
     <string name="processing_step_fetch">Laden</string>
     <string name="processing_step_merge">Zusammenführen</string>
     <string name="processing_step_extract">Extrahieren</string>

@@ -12,7 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.hazel.android.MainActivity
+import com.hazel.android.HazelActivity
 import com.hazel.android.R
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 
@@ -136,10 +136,10 @@ object DownloadNotificationHelper {
         message: String,
         signInUrl: String?
     ): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, HazelActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             // Home, where the failure dialog is shown, whichever tab the app was left on.
-            putExtra(MainActivity.EXTRA_NAVIGATE_TO, "download")
+            putExtra(HazelActivity.EXTRA_NAVIGATE_TO, "download")
             putExtra(EXTRA_FAILURE_MESSAGE, message)
             signInUrl?.let { putExtra(EXTRA_FAILURE_URL, it) }
         }
@@ -158,9 +158,9 @@ object DownloadNotificationHelper {
      * own request code, so one notification's tap target never overwrites another's.
      */
     private fun launchPendingIntent(context: Context, route: String): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, HazelActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(MainActivity.EXTRA_NAVIGATE_TO, route)
+            putExtra(HazelActivity.EXTRA_NAVIGATE_TO, route)
         }
         return PendingIntent.getActivity(
             context, ROUTE_REQUEST_BASE + ROUTES.indexOf(route), intent,

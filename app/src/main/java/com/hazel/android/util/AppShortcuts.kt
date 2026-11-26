@@ -1,6 +1,5 @@
 package com.hazel.android.util
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.DrawableRes
@@ -8,9 +7,8 @@ import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.hazel.android.MainActivity
+import com.hazel.android.HazelActivity
 import com.hazel.android.R
-import com.hazel.android.ui.share.ShareOverlayActivity
 
 /** Launcher long-press shortcuts and share-sheet targets (categories match res/xml/shortcuts.xml). */
 object AppShortcuts {
@@ -29,40 +27,43 @@ object AppShortcuts {
     fun publish(context: Context) {
         runCatching {
             val app = context.applicationContext
+            val icon = AppIcon.current(app)
             val launcher = jumps.map { jump ->
                 ShortcutInfoCompat.Builder(app, jump.id)
                     .setShortLabel(app.getString(jump.label))
                     .setIcon(IconCompat.createWithResource(app, jump.icon))
+                    .setActivity(icon.launcherComponent(app))
                     .setIntent(
-                        Intent(app, MainActivity::class.java)
+                        Intent(app, HazelActivity::class.java)
                             .setAction(Intent.ACTION_VIEW)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            .putExtra(MainActivity.EXTRA_NAVIGATE_TO, jump.route)
+                            .putExtra(HazelActivity.EXTRA_NAVIGATE_TO, jump.route)
                     )
                     .build()
             }
             val share = listOf(
-                shareTarget(app, "share_download", app.getString(R.string.share_label_video), ShareOverlayActivity::class.java.name),
-                shareTarget(app, "share_instant", app.getString(R.string.instant_label), "${app.packageName}.InstantShareActivity")
+                shareTarget(app, icon, "share_download", app.getString(R.string.share_label_video), AppIcon.VIDEO),
+                shareTarget(app, icon, "share_instant", app.getString(R.string.instant_label), AppIcon.INSTANT)
             )
             val max = ShortcutManagerCompat.getMaxShortcutCountPerActivity(app).coerceAtLeast(1)
             val wanted = (launcher + share).take(max)
+            // The launcher entry is part of what is compared, so a new app icon republishes.
             val current = ShortcutManagerCompat.getDynamicShortcuts(app)
-                .associate { it.id to it.shortLabel.toString() }
-            if (current == wanted.associate { it.id to it.shortLabel.toString() }) return@runCatching
+                .associate { it.id to "${it.shortLabel}|${it.activity?.className}" }
+            if (current == wanted.associate { it.id to "${it.shortLabel}|${it.activity?.className}" }) return@runCatching
             ShortcutManagerCompat.setDynamicShortcuts(app, wanted)
         }
     }
 
-    private fun shareTarget(context: Context, id: String, label: String, target: String) =
+    private fun shareTarget(context: Context, icon: AppIcon, id: String, label: String, target: String) =
         ShortcutInfoCompat.Builder(context, id)
             .setShortLabel(label)
-            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+            .setIcon(IconCompat.createWithResource(context, icon.icon))
             .setCategories(setOf(SHARE_CATEGORY))
-            .setActivity(ComponentName(context, MainActivity::class.java))
+            .setActivity(icon.launcherComponent(context))
             .setIntent(
                 Intent(Intent.ACTION_SEND)
-                    .setComponent(ComponentName(context.packageName, target))
+                    .setComponent(icon.shareComponent(context, target))
                     .setType("text/plain")
             )
             .setLongLived(true)

@@ -887,6 +887,15 @@
     <string name="appearance_reset">Restablecer apariencia</string>
     <string name="appearance_reset_title">¿Restablecer la apariencia?</string>
     <string name="appearance_reset_body">El tema, el acento y el cristal vuelven a oscuro, White y Bosque.</string>
+    <string name="app_icon_title">Icono de la app</string>
+    <string name="app_icon_classic">Clásico</string>
+    <string name="app_icon_white">Blanco</string>
+    <string name="app_icon_glass">Cristal</string>
+    <string name="app_icon_restart_title">¿Reiniciar Hazel?</string>
+    <string name="app_icon_restart_body">Hazel se reinicia para cambiar su icono en la pantalla de inicio y en el menú de compartir. Algunas pantallas de inicio quitan el icono anterior; vuelve a añadir Hazel desde la lista de apps.</string>
+    <string name="app_icon_restart">Reiniciar</string>
+    <string name="app_icon_busy_title">Hay una descarga en curso</string>
+    <string name="app_icon_busy_body">Cambia el icono cuando termine, para no cortar la descarga.</string>
     <string name="processing_step_fetch">Obtener</string>
     <string name="processing_step_merge">Unir</string>
     <string name="processing_step_extract">Extraer</string>

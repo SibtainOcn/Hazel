@@ -65,22 +65,74 @@
         android:theme="@style/Theme.Hazel">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".HazelActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:theme="@style/Theme.Hazel.Splash">
+            android:theme="@style/Theme.Hazel.Splash" />
 
-            <!-- Normal launcher -->
+        <!--
+            App icon: each icon has its own launcher entry and its own four share entries, and
+            exactly one set is on (AppIcon). Classic keeps the old MainActivity name, so home
+            screen icons and shortcuts made before keep working.
+        -->
+        <!-- Classic launcher -->
+        <activity-alias
+            android:name=".MainActivity"
+            android:targetActivity=".HazelActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
-        </activity>
+        </activity-alias>
+        <!-- White launcher -->
+        <activity-alias
+            android:name=".LauncherWhite"
+            android:targetActivity=".HazelActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_white">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts_white" />
+        </activity-alias>
+        <!-- Glass launcher -->
+        <activity-alias
+            android:name=".LauncherGlass"
+            android:targetActivity=".HazelActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_glass">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts_glass" />
+        </activity-alias>
+
+        <!-- Restarts Hazel after the icon changes, from a process of its own. -->
+        <activity
+            android:name=".util.RestartActivity"
+            android:exported="false"
+            android:process=":restart"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!--
             The share target. A link shared from another app opens its download sheet over
@@ -95,22 +147,55 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Hazel.Overlay"
             android:windowSoftInputMode="adjustResize"
-            android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout">
+            android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout" />
+
+        <!-- Hazel Video: the download sheet over the app the link came from. -->
+        <activity-alias
+            android:name=".VideoShareActivity"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:label="@string/share_label_video"
+            android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".VideoShareActivityWhite"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/share_label_video"
+            android:icon="@mipmap/ic_launcher_white">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".VideoShareActivityGlass"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/share_label_video"
+            android:icon="@mipmap/ic_launcher_glass">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
-        <!--
-            Hazel Instant: the second share target. It reads the shared link and downloads it
-            with the saved settings, showing only a small confirmation over the app.
-        -->
+        <!-- Instant Video: downloads the link at once with the saved settings. -->
         <activity-alias
             android:name=".InstantShareActivity"
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
+            android:enabled="true"
             android:label="@string/instant_label"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
@@ -119,12 +204,39 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
+        <activity-alias
+            android:name=".InstantShareActivityWhite"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/instant_label"
+            android:icon="@mipmap/ic_launcher_white">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".InstantShareActivityGlass"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/instant_label"
+            android:icon="@mipmap/ic_launcher_glass">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
-        <!-- Hazel Gallery: reads the shared link with gallery-dl and opens the gallery sheet. -->
+        <!-- Hazel Gallery: reads the link with gallery-dl and opens the gallery sheet. -->
         <activity-alias
             android:name=".GalleryShareActivity"
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
+            android:enabled="true"
             android:label="@string/share_label_gallery"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
@@ -133,14 +245,67 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
+        <activity-alias
+            android:name=".GalleryShareActivityWhite"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/share_label_gallery"
+            android:icon="@mipmap/ic_launcher_white">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".GalleryShareActivityGlass"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/share_label_gallery"
+            android:icon="@mipmap/ic_launcher_glass">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
-        <!-- Instant Gallery: queues the whole shared post with the saved gallery settings. -->
+        <!-- Instant Gallery: queues the shared post with the saved gallery settings. -->
         <activity-alias
             android:name=".InstantGalleryShareActivity"
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
+            android:enabled="true"
             android:label="@string/instant_gallery_label"
             android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".InstantGalleryShareActivityWhite"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/instant_gallery_label"
+            android:icon="@mipmap/ic_launcher_white">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".InstantGalleryShareActivityGlass"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:label="@string/instant_gallery_label"
+            android:icon="@mipmap/ic_launcher_glass">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
