@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.
 - Gallery: saved results reopen at once without replaying.
 - Gallery: carousels drop the duplicate item count tag.
+- Gallery: Instagram and X profile links ask which sections to fetch (stories, highlights, posts, reels, tagged; media, replies, likes), two at a time, with labels, highlight names and a sign-in row.
 - Gallery: a saved sign-in the site turns away now asks to sign in again instead of a generic read error.
 
 ## [1.2.17] - 2026-11-26

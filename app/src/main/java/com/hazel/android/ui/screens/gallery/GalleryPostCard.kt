@@ -67,6 +67,9 @@ internal fun GalleryPostCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val count = post.items.size
+    // A highlight is named after itself, not its author.
+    val highlight = post.section == com.hazel.android.gallery.ProfileSection.IG_HIGHLIGHTS
+    val heading = post.items.firstOrNull()?.title?.takeIf { highlight && it.isNotBlank() } ?: post.author.ifBlank { post.site }
     Surface(
         onClick = { onOpen(0) },
         modifier = modifier.fillMaxWidth(),
@@ -83,7 +86,7 @@ internal fun GalleryPostCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        post.author.firstOrNull()?.uppercase() ?: "#",
+                        heading.firstOrNull()?.uppercase() ?: "#",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = colors.onSurfaceVariant
@@ -92,7 +95,7 @@ internal fun GalleryPostCard(
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        post.author.ifBlank { post.site },
+                        heading,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -100,7 +103,8 @@ internal fun GalleryPostCard(
                     )
                     if (post.site.isNotBlank()) {
                         Text(
-                            post.site.replaceFirstChar { it.uppercase() },
+                            if (highlight) stringResource(R.string.profile_highlight_of, post.site.replaceFirstChar { it.uppercase() })
+                            else post.site.replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurfaceVariant,
                             maxLines = 1,
