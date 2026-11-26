@@ -62,7 +62,7 @@
     <string name="gallery_show_images">Images seulement</string>
     <string name="gallery_show_videos">Vidéos seulement</string>
     <string name="gallery_skip_reposts">Ignorer les republications</string>
-    <string name="gallery_empty_title">Enregistrez publications et albums</string>
+    <string name="gallery_empty_title">Enregistrez publications, stories et à la une</string>
     <string name="gallery_empty_hint">Collez un lien Instagram, X, Reddit, Pinterest et 1 500 autres sites</string>
     <string name="gallery_view">Voir</string>
     <string name="gallery_close">Fermer</string>
@@ -218,7 +218,7 @@
     <string name="guide_step2_title">Choix du format</string>
     <string name="guide_step4_title">Optimisation de batterie</string>
     <string name="guide_step5_title">Notifications</string>
-    <string name="guide_step_paste_link">Un lien, plusieurs ou une playlist entière. Vidéo, audio ou images.</string>
+    <string name="guide_step_paste_link">Un lien, plusieurs liens ou une playlist entière. Vidéo, audio, images, stories, à la une et légendes.</string>
     <string name="guide_step_pick_format">Touchez une carte pour choisir un format précis, avec taille et codec par qualité.</string>
     <string name="guide_step_battery_unrestricted">Réglez la batterie sur illimitée pour qu’Android n’arrête pas les téléchargements en arrière-plan.</string>
     <string name="guide_step_notifications">Recevez des notifications sur l\'avancement des téléchargements et les fichiers terminés en arrière-plan.</string>
@@ -1286,9 +1286,10 @@
     <string name="gallery_group_by_author_summary">Images seules d\'un auteur dans un carrousel</string>
     <string name="more_image_settings">Réglages des images</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
-    <string name="guide_share_video">Choisissez chaque option, puis téléchargez</string>
-    <string name="guide_share_gallery">Choisissez quoi enregistrer, puis téléchargez</string>
-    <string name="guide_share_instant">Télécharge aussitôt dans votre qualité enregistrée</string>
+    <string name="guide_share_video">Vidéo, audio et reels. Choisissez qualité, coupe, SponsorBlock et plus, puis téléchargez</string>
+    <string name="guide_share_gallery">Images, publications, reels, stories et à la une. Choisissez quoi garder, puis téléchargez</string>
+    <string name="guide_share_instant">Vidéo ou audio tout de suite, avec vos réglages enregistrés</string>
+    <string name="guide_share_instant_gallery">Publications, stories et à la une tout de suite, avec vos réglages enregistrés</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>
     <string name="caption_saved">Légende téléchargée</string>

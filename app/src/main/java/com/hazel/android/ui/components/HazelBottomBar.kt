@@ -54,9 +54,9 @@ data class BottomBarItem(
  *
  * The destinations are few and their icons are the ones every app uses for them, so a
  * label under each only doubled the bar's height. The label is still the icon's name for
- * accessibility services. Each tab has its own M3 shape behind its icon when chosen (a
- * cookie, a pentagon, a clover, a gem), morphing in from a circle with a spring, so moving
- * between tabs reads as one shape becoming another.
+ * accessibility services. The chosen tab's icon sits on an M3 shape, a 6-sided cookie and a
+ * 4-leaf clover in turn along the bar, morphing in from a circle with a spring; a press
+ * squeezes the tab and springs it back.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -87,6 +87,7 @@ fun HazelBottomBar(
                 label = "tabShape"
             )
             val tone = com.hazel.android.ui.theme.accentTint()
+            val interaction = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -95,40 +96,42 @@ fun HazelBottomBar(
                         selected = selected,
                         onClick = { onSelect(item) },
                         role = Role.Tab,
-                        interactionSource = remember { MutableInteractionSource() },
+                        interactionSource = interaction,
                         indication = null
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(INDICATOR_SIZE)
-                        .drawBehind {
-                            val g = grow.value
-                            if (g <= 0.001f) return@drawBehind
-                            val path = morph.toPath(g.coerceIn(0f, 1f)).asComposePath()
-                            path.transform(Matrix().apply { scale(size.width * g, size.height * g) })
-                            val inset = size.width * (1f - g) / 2f
-                            translate(inset, size.height * (1f - g) / 2f) { drawPath(path, tone) }
-                        }
-                )
-                Box {
-                    Icon(
-                        painter = painterResource(item.icon),
-                        contentDescription = stringResource(item.label),
-                        modifier = Modifier.size(ICON_SIZE),
-                        tint = if (selected) com.hazel.android.ui.theme.accentInk()
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
+                Box(Modifier.pressScale(interaction, pressed = TAB_PRESSED), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .size(INDICATOR_SIZE)
+                            .drawBehind {
+                                val g = grow.value
+                                if (g <= 0.001f) return@drawBehind
+                                val path = morph.toPath(g.coerceIn(0f, 1f)).asComposePath()
+                                path.transform(Matrix().apply { scale(size.width * g, size.height * g) })
+                                val inset = size.width * (1f - g) / 2f
+                                translate(inset, size.height * (1f - g) / 2f) { drawPath(path, tone) }
+                            }
                     )
-                    if (item.showDot) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(x = 3.dp, y = (-2).dp)
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.error)
+                    Box {
+                        Icon(
+                            painter = painterResource(item.icon),
+                            contentDescription = stringResource(item.label),
+                            modifier = Modifier.size(ICON_SIZE),
+                            tint = if (selected) com.hazel.android.ui.theme.accentInk()
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
                         )
+                        if (item.showDot) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 3.dp, y = (-2).dp)
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error)
+                            )
+                        }
                     }
                 }
             }
@@ -142,12 +145,8 @@ private val BAR_HEIGHT = HazelBottomBarHeight
 private val ICON_SIZE = 24.dp
 private val INDICATOR_SIZE = 46.dp
 
-/** Home, History, Queue, More, in the bar's order. */
+/** Two shapes in turn along the bar, so neighbouring tabs never share one. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-private val TabShapes = listOf(
-    MaterialShapes.Cookie6Sided,
-    MaterialShapes.Pentagon,
-    MaterialShapes.Clover4Leaf,
-    MaterialShapes.Gem
-)
+private val TabShapes = listOf(MaterialShapes.Cookie6Sided, MaterialShapes.Clover4Leaf)
+private const val TAB_PRESSED = 0.86f
 private const val UNSELECTED_ALPHA = 0.55f

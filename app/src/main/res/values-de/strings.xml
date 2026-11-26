@@ -62,7 +62,7 @@
     <string name="gallery_show_images">Nur Bilder</string>
     <string name="gallery_show_videos">Nur Videos</string>
     <string name="gallery_skip_reposts">Reposts überspringen</string>
-    <string name="gallery_empty_title">Beiträge und Alben speichern</string>
+    <string name="gallery_empty_title">Beiträge, Storys und Highlights speichern</string>
     <string name="gallery_empty_hint">Füge einen Link von Instagram, X, Reddit, Pinterest und 1.500 weiteren Seiten ein</string>
     <string name="gallery_view">Ansehen</string>
     <string name="gallery_close">Schließen</string>
@@ -213,7 +213,7 @@
     <string name="guide_step2_title">Formatauswahl</string>
     <string name="guide_step4_title">Akku-Optimierung</string>
     <string name="guide_step5_title">Benachrichtigungen</string>
-    <string name="guide_step_paste_link">Ein Link, mehrere oder eine ganze Playlist. Video, Audio oder Bilder.</string>
+    <string name="guide_step_paste_link">Ein Link, viele Links oder eine ganze Playlist. Video, Audio, Bilder, Storys, Highlights und Bildunterschriften.</string>
     <string name="guide_step_pick_format">Tippe auf eine Karte für ein genaues Format, mit Größe und Codec je Qualität.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, damit Android Hintergrund-Downloads nicht stoppt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
@@ -1269,9 +1269,10 @@
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
     <string name="more_image_settings">Bildeinstellungen</string>
     <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
-    <string name="guide_share_video">Alle Optionen wählen, dann laden</string>
-    <string name="guide_share_gallery">Auswählen, was gespeichert wird, dann laden</string>
-    <string name="guide_share_instant">Lädt sofort in deiner gespeicherten Qualität</string>
+    <string name="guide_share_video">Video, Audio und Reels. Qualität, Schnitt, SponsorBlock und mehr wählen, dann laden</string>
+    <string name="guide_share_gallery">Bilder, Beiträge, Reels, Storys und Highlights. Auswahl treffen, dann laden</string>
+    <string name="guide_share_instant">Video oder Audio sofort, mit deinen gespeicherten Einstellungen</string>
+    <string name="guide_share_instant_gallery">Beiträge, Storys und Highlights sofort, mit deinen gespeicherten Einstellungen</string>
     <string name="caption_copy">Kopieren</string>
     <string name="caption_save_text">Als Text speichern</string>
     <string name="caption_saved">Beschriftung heruntergeladen</string>
