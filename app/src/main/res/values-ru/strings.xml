@@ -742,6 +742,11 @@
     <string name="glass_style_forest">Лес</string>
     <string name="glass_style_ocean">Океан</string>
     <string name="glass_style_mono">Моно</string>
+    <string name="glass_style_rose">Роза</string>
+    <string name="glass_style_ember">Угли</string>
+    <string name="glass_style_lagoon">Лагуна</string>
+    <string name="glass_style_dusk">Сумерки</string>
+    <string name="glass_style_sand">Песок</string>
     <string name="guide_step_appearance_title">Настройте под себя</string>
     <string name="whats_new_tag">Что нового</string>
     <string name="whats_new_version">Версия %1$s</string>
