@@ -3241,7 +3241,7 @@ class DownloadViewModel : ViewModel() {
                 context,
                 HistoryEntry(
                     id = System.currentTimeMillis(),
-                    url = info.url,
+                    url = info.pageUrl ?: info.url,
                     title = info.title,
                     author = info.uploader,
                     thumbnail = info.thumbnail,

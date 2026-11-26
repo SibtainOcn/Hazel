@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">साइट ने आपका सहेजा गया साइन-इन ठुकरा दिया। Cookies में फिर से साइन इन करें</string>
     <string name="gallery_error_unsupported">गैलरी यह लिंक नहीं पढ़ सकती</string>
     <string name="gallery_links_skipped">कुछ लिंक पढ़े नहीं जा सके</string>
+    <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
     <string name="search_fetching">ला रहे हैं</string>
     <string name="gallery_error_not_found">यह पोस्ट हटाई गई, निजी है या खाली है</string>
     <string name="gallery_error_network">कनेक्ट नहीं हो सका। नेटवर्क या प्रॉक्सी जाँचें</string>

@@ -34,7 +34,9 @@ data class MediaInfo(
     /** Uploaded subtitle languages, as the `--sub-langs` keys the source names them by. */
     val subtitles: List<String> = emptyList(),
     /** Auto captions in the spoken language, by their `--sub-langs` key; translations are left out. */
-    val autoCaptions: List<String> = emptyList()
+    val autoCaptions: List<String> = emptyList(),
+    /** The post a site's file link ([url]) was taken from; history records it instead. */
+    val pageUrl: String? = null
 ) {
     /** Streaming now. */
     val isLive: Boolean get() = liveStatus == "is_live"

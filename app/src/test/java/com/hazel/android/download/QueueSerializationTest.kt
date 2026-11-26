@@ -2,6 +2,7 @@ package com.hazel.android.download
 
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.QueuedDownload
+import com.hazel.android.data.toPlan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -29,6 +30,7 @@ class QueueSerializationTest {
             mergeAudioSizeBytes = 0L,
             treeUri = "",
             requiresSignIn = false,
+            pageUrl = "https://example.com/post/1",
             audioLanguage = null,
             options = DownloadOptions(audioContainer = "m4a"),
             paused = false
@@ -47,5 +49,6 @@ class QueueSerializationTest {
         assertEquals(queued.hasAudio, decoded?.hasAudio)
         assertEquals(queued.hasVideo, decoded?.hasVideo)
         assertEquals(queued.fileSizeBytes, decoded?.fileSizeBytes)
+        assertEquals(queued.pageUrl, decoded?.toPlan()?.info?.pageUrl)
     }
 }
