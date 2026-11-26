@@ -95,6 +95,7 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.AccountState
 import com.hazel.android.data.CookieEntry
+import com.hazel.android.data.CookieImport
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SignInCheck
 import com.hazel.android.ui.components.DropdownMenu
@@ -152,7 +153,7 @@ fun CookiesScreen(onBack: () -> Unit) {
                     val (fileName, text) = withContext(Dispatchers.IO) {
                         (queryFileName(context, uri) ?: "cookies.txt") to
                             context.contentResolver.openInputStream(uri)?.use { stream ->
-                                stream.bufferedReader(Charsets.UTF_8).readText()
+                                CookieImport.readLimited(stream.bufferedReader(Charsets.UTF_8))
                             }.orEmpty()
                     }
                     val imported = text.isNotBlank() && CookieRepository.importText(context, text, fileName)

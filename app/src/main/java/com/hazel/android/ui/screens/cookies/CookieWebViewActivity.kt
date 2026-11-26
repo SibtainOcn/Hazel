@@ -584,6 +584,12 @@ class CookieWebViewActivity : ComponentActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configure(view: WebView) {
+        // A wrap-content height makes the WebView lay pages out at zero height: 100vh is 0 and
+        // sign-in forms sized by it (X, Instagram) collapse to nothing.
+        view.layoutParams = android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        )
         view.settings.apply {
             javaScriptEnabled = true
             javaScriptCanOpenWindowsAutomatically = true

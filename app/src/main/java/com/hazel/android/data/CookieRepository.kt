@@ -499,13 +499,10 @@ object CookieRepository {
 
     /**
      * Takes cookie text the user copied from elsewhere and stores it as a new entry.
-     * Anything that is not a Netscape cookie file is rejected rather than saved as junk.
+     * Takes a Netscape cookie file or a JSON export; anything else is rejected rather than saved as junk.
      */
     suspend fun importText(context: Context, text: String, title: String): Boolean {
-        val lines = text.lineSequence()
-            .map { it.trim() }
-            .filter { isCookieLine(it) }
-            .toList()
+        val lines = withContext(Dispatchers.Default) { CookieImport.toNetscapeLines(text) }
         if (lines.isEmpty()) return false
 
         // Group cookie lines by recognized site (from 1st column of Netscape line)
