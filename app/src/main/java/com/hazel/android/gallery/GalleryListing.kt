@@ -136,7 +136,7 @@ data class GalleryListing(
         }
 
         // Pinterest search pins mostly leave title and description empty; their alt text reads as one.
-        private val TITLE_KEYS = listOf("title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
+        private val TITLE_KEYS = listOf("highlight_title", "title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
 
         private fun titleOf(info: JSONObject): String =
             TITLE_KEYS
@@ -172,7 +172,14 @@ data class GalleryListing(
  * One post of a result: its files, and the link whose `--range` their indexes count in. A [direct]
  * post has no link of its own, so its files are fetched from their own addresses.
  */
-data class GalleryPost(val key: String, val source: String, val items: List<GalleryItem>, val direct: Boolean = false) {
+data class GalleryPost(
+    val key: String,
+    val source: String,
+    val items: List<GalleryItem>,
+    val direct: Boolean = false,
+    /** The profile section this post was read from, when a profile was read by sections. */
+    val section: ProfileSection? = null
+) {
     val author: String get() = items.firstOrNull { it.author.isNotBlank() }?.author.orEmpty()
     val site: String get() = items.firstOrNull()?.site.orEmpty()
 
