@@ -26,6 +26,8 @@
     <string name="search_guide_sign_in_title">登录</string>
     <string name="search_guide_sign_in_body">私密帖子、快拍、精选和喜欢需要先登录该网站。需要时 Hazel 会提示，你也可以随时在“更多”的 Cookie 中登录。</string>
     <string name="search_mode_media">媒体</string>
+    <string name="gallery_video_unavailable">无法获取此视频</string>
+    <string name="format_sheet_not_for_file">此文件不可用</string>
     <string name="profile_stories">快拍</string>
     <string name="profile_highlights">精选</string>
     <string name="profile_posts">帖子</string>
@@ -62,7 +64,6 @@
     <string name="gallery_empty_hint">粘贴来自 Instagram、X、Reddit、Pinterest 等 1,500 多个网站的链接</string>
     <string name="gallery_view">查看</string>
     <string name="gallery_close">关闭</string>
-    <string name="gallery_no_player">没有应用可以播放此视频</string>
     <string name="gallery_under_maintenance">维护中</string>
     <string name="gallery_image_size">图片尺寸</string>
     <string name="gallery_size_original">原图</string>
@@ -1033,9 +1034,9 @@
     <string name="home_empty_hint">粘贴来自 YouTube、SoundCloud、Instagram Reels 等 1,700 多个网站的链接</string>
     <string name="more_getting_started">入门指南</string>
     <string name="instant_label">Instant 视频</string>
-    <string name="instant_images_label">Instant 图片</string>
+    <string name="instant_gallery_label">Instant 图库</string>
     <string name="share_label_video">Hazel 视频</string>
-    <string name="share_label_images">Hazel 图片</string>
+    <string name="share_label_gallery">Hazel 图库</string>
     <string name="gallery_instant_settings">图库设置</string>
     <string name="shortcut_search">搜索</string>
     <string name="instant_started">已开始下载</string>
@@ -1250,7 +1251,7 @@
     <string name="more_image_settings">图片设置</string>
     <string name="guide_share_from_apps">从任意应用分享链接</string>
     <string name="guide_share_video">选择所有选项后下载</string>
-    <string name="guide_share_images">选择图片选项后下载</string>
+    <string name="guide_share_gallery">选择要保存的内容后下载</string>
     <string name="guide_share_instant">按已保存的画质立即下载</string>
     <string name="caption_copy">复制</string>
     <string name="caption_save_text">另存为文本</string>

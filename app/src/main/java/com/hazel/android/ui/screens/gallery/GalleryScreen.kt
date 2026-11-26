@@ -368,6 +368,26 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    internal val videoLinks = GalleryVideoLinks(viewModelScope, application)
+
+    /** A playable link for [item] of the results shown; see [GalleryVideoLinks.playableUrl]. */
+    suspend fun playableUrl(item: GalleryItem, failed: String? = null): String? {
+        val post = posts.firstOrNull { item in it.items } ?: return null
+        return videoLinks.playableUrl(post, item, failed)
+    }
+
+    /** Videos asked for whose read came back empty, for a toast; reset once shown. */
+    var videosMissed by mutableStateOf(0)
+        private set
+
+    fun videosMissed(count: Int) {
+        videosMissed += count
+    }
+
+    fun videosMissedShown() {
+        videosMissed = 0
+    }
+
     internal fun fail(url: String, e: Exception) {
         val log = (e as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: e.message.orEmpty()
         notice = GalleryNotice((e as? GalleryDlException)?.let { it.kind.message } ?: R.string.gallery_failed)
@@ -398,6 +418,9 @@ fun GalleryScreen(
     var logOpen by rememberSaveable { mutableStateOf(false) }
     var sheetFor by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     var postSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
+    // The post whose videos the yt-dlp sheet is open on, and the one file, or -1 for all of them.
+    var videoSheetPost by rememberSaveable { mutableStateOf<Int?>(null) }
+    var videoSheetFile by rememberSaveable { mutableStateOf(-1) }
 
     val currentPost = viewModel.posts.indexOf(viewModel.post)
 
@@ -412,12 +435,21 @@ fun GalleryScreen(
             searchBarShine.animateTo(1f, tween(durationMillis = 850, easing = FastOutSlowInEasing))
         }
     }
-    // A video in a post is read by yt-dlp and opens the video sheet on Home.
+    // A video opens yt-dlp's video sheet here, an image gallery-dl's item sheet.
     val openItem: (Int, Int) -> Unit = { postIndex, position ->
-        val post = viewModel.posts.getOrNull(postIndex)
-        val item = post?.items?.getOrNull(position)
-        if (item != null && item.isVideo) onVideoLinks(listOf(item.postUrl ?: post.source))
-        else sheetFor = postIndex to position
+        val item = viewModel.posts.getOrNull(postIndex)?.items?.getOrNull(position)
+        if (item != null && item.isVideo) {
+            videoSheetFile = position
+            videoSheetPost = postIndex
+        } else sheetFor = postIndex to position
+    }
+    // A post of videos only goes to yt-dlp's sheet for several links; anything with images to Download all.
+    val openPost: (Int?) -> Unit = { postIndex ->
+        val post = postIndex?.let(viewModel.posts::getOrNull)
+        if (post != null && post.items.all { it.isVideo }) {
+            videoSheetFile = -1
+            videoSheetPost = postIndex
+        } else postSheetFor = postIndex
     }
 
     LaunchedEffect(Unit) {
@@ -454,6 +486,13 @@ fun GalleryScreen(
         if (viewModel.skippedLinks > 0) {
             statusToast.show(skippedText, ok = false)
             viewModel.skippedLinksShown()
+        }
+    }
+    val videoMissedText = stringResource(R.string.gallery_video_unavailable)
+    LaunchedEffect(viewModel.videosMissed) {
+        if (viewModel.videosMissed > 0) {
+            statusToast.show(videoMissedText, ok = false)
+            viewModel.videosMissedShown()
         }
     }
     val links = viewModel.linkCount
@@ -533,7 +572,7 @@ fun GalleryScreen(
                                     GalleryPostCard(
                                         post = post,
                                         onOpen = { position -> viewing = i to position },
-                                        onDownloadAll = { postSheetFor = i }
+                                        onDownloadAll = { openPost(i) }
                                     )
                                 }
                             }
@@ -589,7 +628,7 @@ fun GalleryScreen(
                 )
             }
             if (viewModel.offersDownloadAll && !viewModel.busy) {
-                DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
+                DownloadAllButton(onClick = { openPost(currentPost.takeIf { it >= 0 }) })
             }
         }
         StatusToastHost(
@@ -638,10 +677,11 @@ fun GalleryScreen(
                 startIndex = places.indexOf(postIndex to start).coerceAtLeast(0),
                 onOpenSheet = { item ->
                     val (p, i) = places.getOrNull(items.indexOfFirst { it === item }) ?: return@GalleryViewer
-                    // A video goes to the video sheet on Home, so the viewer closes first.
+                    // The video sheet opens on the Gallery tab under the viewer, so the viewer closes first.
                     if (item.isVideo) viewing = null
                     openItem(p, i)
                 },
+                onRefresh = viewModel::playableUrl,
                 onDismiss = { viewing = null }
             )
         }
@@ -695,6 +735,7 @@ fun GalleryScreen(
             sheetFor = null
             viewing = null
             postSheetFor = null
+            videoSheetPost = null
         }
     }
 
@@ -712,11 +753,24 @@ fun GalleryScreen(
         )
     }
 
+    videoSheetPost?.let(viewModel.posts::getOrNull)?.let { post ->
+        val files = post.items.getOrNull(videoSheetFile)?.let(::listOf) ?: post.items.filter { it.isVideo }
+        GalleryVideoSheet(
+            post = post,
+            items = files,
+            links = viewModel.videoLinks,
+            onQueued = { videoSheetPost = null },
+            onMissed = viewModel::videosMissed,
+            onDismiss = { videoSheetPost = null }
+        )
+    }
+
     postSheetFor?.let(viewModel.posts::getOrNull)?.let { post ->
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { picks ->
+            postVideos = PostVideos(post, viewModel.videoLinks, viewModel::videosMissed),
+            onDownload = { picks, _ ->
                 postSheetFor = null
                 picks.forEach { viewModel.download(it.indexes, it.options, post, it.title, it.author) }
             },

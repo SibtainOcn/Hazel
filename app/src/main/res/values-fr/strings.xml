@@ -26,6 +26,8 @@
     <string name="search_guide_sign_in_title">Connexion</string>
     <string name="search_guide_sign_in_body">Les publications privées, stories, stories à la une et j\'aime demandent d\'être connecté à ce site. Hazel le demande quand il le faut, ou connectez-vous à tout moment depuis Cookies dans Plus.</string>
     <string name="search_mode_media">Médias</string>
+    <string name="gallery_video_unavailable">Impossible de récupérer cette vidéo</string>
+    <string name="format_sheet_not_for_file">Indisponible pour ce fichier</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">À la une</string>
     <string name="profile_posts">Publications</string>
@@ -62,7 +64,6 @@
     <string name="gallery_empty_hint">Collez un lien Instagram, X, Reddit, Pinterest et 1 500 autres sites</string>
     <string name="gallery_view">Voir</string>
     <string name="gallery_close">Fermer</string>
-    <string name="gallery_no_player">Aucune appli ne peut lire cette vidéo</string>
     <string name="gallery_under_maintenance">En maintenance</string>
     <string name="gallery_image_size">Taille de l\'image</string>
     <string name="gallery_size_original">Originale</string>
@@ -1065,9 +1066,9 @@
     <string name="home_empty_hint">Collez un lien de YouTube, SoundCloud, Instagram Reels et 1 700 autres sites</string>
     <string name="more_getting_started">Prise en main</string>
     <string name="instant_label">Instant Vidéo</string>
-    <string name="instant_images_label">Instant Images</string>
+    <string name="instant_gallery_label">Instant Galerie</string>
     <string name="share_label_video">Hazel Vidéo</string>
-    <string name="share_label_images">Hazel Images</string>
+    <string name="share_label_gallery">Hazel Galerie</string>
     <string name="gallery_instant_settings">Paramètres de la Galerie</string>
     <string name="shortcut_search">Rechercher</string>
     <string name="instant_started">Téléchargement lancé</string>
@@ -1284,7 +1285,7 @@
     <string name="more_image_settings">Réglages des images</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
     <string name="guide_share_video">Choisissez chaque option, puis téléchargez</string>
-    <string name="guide_share_images">Choisissez les options d\'image, puis téléchargez</string>
+    <string name="guide_share_gallery">Choisissez quoi enregistrer, puis téléchargez</string>
     <string name="guide_share_instant">Télécharge aussitôt dans votre qualité enregistrée</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>

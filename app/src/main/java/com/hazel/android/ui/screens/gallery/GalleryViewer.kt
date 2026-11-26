@@ -1,9 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
 import com.hazel.android.ui.components.CaptionSheet
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -55,14 +51,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.ui.screens.download.SheetDownloadPill
@@ -82,6 +76,8 @@ fun GalleryViewer(
     startIndex: Int,
     /** Opens the download sheet for the file in view. */
     onOpenSheet: (GalleryItem) -> Unit,
+    /** A fresh file link for a video, given the one that just failed; null when there is none. */
+    onRefresh: suspend (GalleryItem, String?) -> String? = { _, _ -> null },
     onDismiss: () -> Unit
 ) {
     if (items.isEmpty()) return
@@ -95,6 +91,8 @@ fun GalleryViewer(
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            // The player of the video in view, if one is playing, for the seek bar below.
+            var activePlayer by remember { mutableStateOf<androidx.media3.exoplayer.ExoPlayer?>(null) }
             HorizontalPager(state = pager, modifier = Modifier.fillMaxSize(), beyondViewportPageCount = 1) { page ->
                 val offset = (pager.currentPage - page) + pager.currentPageOffsetFraction
                 Box(
@@ -102,7 +100,10 @@ fun GalleryViewer(
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - offset.absoluteValue.coerceIn(0f, 1f) * 0.85f }
                 ) {
-                    items.getOrNull(page)?.let { ViewerPage(item = it, active = page == pager.currentPage) }
+                    items.getOrNull(page)?.let { item ->
+                        val active = page == pager.currentPage
+                        ViewerPage(item = item, active = active, onRefresh = onRefresh, onPlayer = { if (active || it == null) activePlayer = it })
+                    }
                 }
             }
 
@@ -155,6 +156,7 @@ fun GalleryViewer(
                     .navigationBarsPadding()
                     .padding(top = 12.dp, bottom = 12.dp)
             ) {
+                activePlayer?.let { VideoSeekRow(it, modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp)) }
                 // The single sheet's own Download pill: it opens that sheet for the file in view.
                 // It moves under the details only where they would not fit beside it.
                 SheetHeaderLayout(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -239,8 +241,11 @@ fun GalleryViewer(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ViewerPage(item: GalleryItem, active: Boolean) {
-    val context = LocalContext.current
+private fun ViewerPage(
+    item: GalleryItem,
+    active: Boolean,
+    onRefresh: suspend (GalleryItem, String?) -> String? = { _, _ -> null },
+    onPlayer: (androidx.media3.exoplayer.ExoPlayer?) -> Unit) {
     var zoom by remember { mutableFloatStateOf(1f) }
     var pan by remember { mutableStateOf(Offset.Zero) }
     LaunchedEffect(active) {
@@ -279,23 +284,9 @@ private fun ViewerPage(item: GalleryItem, active: Boolean) {
                 }
         )
         if (item.isVideo) {
-            val noPlayer = stringResource(R.string.gallery_no_player)
-            ShapeIconButton(
-                onClick = {
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW).setDataAndType(item.url.toUri(), "video/*")
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        )
-                    } catch (_: ActivityNotFoundException) {
-                        Toast.makeText(context, noPlayer, Toast.LENGTH_SHORT).show()
-                    }
-                },
-                filled = true,
-                size = 64.dp
-            ) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.player_play), modifier = Modifier.size(32.dp))
-            }
+            val direct = item.playUrl ?: item.url.takeIf { it.startsWith("http") }
+            val page = item.ytdlPage
+            GalleryVideo(direct = direct, page = page, active = active, refresh = { failed -> onRefresh(item, failed) }, onPlayer = onPlayer)
         }
     }
 }

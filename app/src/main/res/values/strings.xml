@@ -38,6 +38,8 @@
     <string name="search_guide_links_body">A link goes to the side that is on, Media or Gallery, as it is. Sources and sites are only for searching words, so they step back while a link is in the field.</string>
     <string name="search_guide_sign_in_title">Signing in</string>
     <string name="search_guide_sign_in_body">Private posts, stories, highlights and likes need you signed in to that site. Hazel asks when it is needed, or sign in any time from Cookies in More.</string>
+    <string name="gallery_video_unavailable">Couldn\'t get this video</string>
+    <string name="format_sheet_not_for_file">Not available for this file</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Posts</string>
@@ -74,7 +76,6 @@
     <string name="gallery_empty_hint">Paste a link from Instagram, X, Reddit, Pinterest and 1,500 more sites</string>
     <string name="gallery_view">View</string>
     <string name="gallery_close">Close</string>
-    <string name="gallery_no_player">No app can play this video</string>
     <string name="gallery_under_maintenance">Under maintenance</string>
     <string name="gallery_image_size">Image size</string>
     <string name="gallery_size_original">Original</string>
@@ -1131,9 +1132,9 @@
     <string name="home_empty_hint">Paste a link from YouTube, SoundCloud, Instagram Reels and 1,700 more sites</string>
     <string name="more_getting_started">Getting started</string>
     <string name="instant_label">Instant Video</string>
-    <string name="instant_images_label">Instant Images</string>
+    <string name="instant_gallery_label">Instant Gallery</string>
     <string name="share_label_video">Hazel Video</string>
-    <string name="share_label_images">Hazel Images</string>
+    <string name="share_label_gallery">Hazel Gallery</string>
     <string name="gallery_instant_settings">Gallery settings</string>
     <string name="shortcut_search">Search</string>
     <string name="instant_started">Download started</string>
@@ -1324,7 +1325,7 @@
     <string name="more_image_settings">Image settings</string>
     <string name="guide_share_from_apps">Share a link from any app</string>
     <string name="guide_share_video">Choose every option, then download</string>
-    <string name="guide_share_images">Choose image options, then download</string>
+    <string name="guide_share_gallery">Choose what to save, then download</string>
     <string name="guide_share_instant">Downloads at once in your saved quality</string>
     <string name="caption_copy">Copy</string>
     <string name="caption_save_text">Save as text</string>

@@ -3,7 +3,7 @@
 - **Image search across seven sites:** Pinterest, X, Bluesky, Tumblr, DeviantArt, Instagram and Pixiv, with an optional Group by author.
 - **Fullscreen image viewer:** swipe, zoom and save each file; posts with several files show as carousels with Download all.
 - **Captions:** view, copy, save as text, or write them into saved images.
-- Share a post to **Hazel Images** to pick what to save, or **Instant Images** to save it at once.
+- Share a post to **Hazel Gallery** to pick what to save, or **Instant Gallery** to save it at once.
 - Image downloads use the same Queue, History, Failed tab and sign-in as videos.
 - Image settings, a separate Gallery save folder, and gallery-dl updates under Software update.
 
