@@ -518,7 +518,7 @@ private fun SeekBar(
 
 /** The time under the finger while the bar is dragged, held above that point of the bar. */
 @Composable
-private fun ScrubTime(text: String, fraction: Float, modifier: Modifier = Modifier) {
+internal fun ScrubTime(text: String, fraction: Float, modifier: Modifier = Modifier) {
     Layout(
         content = {
             Surface(shape = RoundedCornerShape(8.dp), color = Color.Black.copy(alpha = 0.75f)) {
@@ -691,7 +691,7 @@ internal fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = M
     }
 }
 
-private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color, from: Float = 0f) {
+internal fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color, from: Float = 0f) {
     if (fraction <= from) return
     drawLine(
         color = color,

@@ -89,6 +89,8 @@ fun GalleryViewer(
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            // The player of the video in view, if one is playing, for the seek bar below.
+            var activePlayer by remember { mutableStateOf<androidx.media3.exoplayer.ExoPlayer?>(null) }
             HorizontalPager(state = pager, modifier = Modifier.fillMaxSize(), beyondViewportPageCount = 1) { page ->
                 val offset = (pager.currentPage - page) + pager.currentPageOffsetFraction
                 Box(
@@ -96,7 +98,10 @@ fun GalleryViewer(
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - offset.absoluteValue.coerceIn(0f, 1f) * 0.85f }
                 ) {
-                    items.getOrNull(page)?.let { ViewerPage(item = it, active = page == pager.currentPage) }
+                    items.getOrNull(page)?.let { item ->
+                        val active = page == pager.currentPage
+                        ViewerPage(item = item, active = active, onPlayer = { if (active || it == null) activePlayer = it })
+                    }
                 }
             }
 
@@ -149,6 +154,7 @@ fun GalleryViewer(
                     .navigationBarsPadding()
                     .padding(top = 12.dp, bottom = 12.dp)
             ) {
+                activePlayer?.let { VideoSeekRow(it, modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp)) }
                 // The single sheet's own Download pill: it opens that sheet for the file in view.
                 // It moves under the details only where they would not fit beside it.
                 SheetHeaderLayout(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -233,7 +239,7 @@ fun GalleryViewer(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ViewerPage(item: GalleryItem, active: Boolean) {
+private fun ViewerPage(item: GalleryItem, active: Boolean, onPlayer: (androidx.media3.exoplayer.ExoPlayer?) -> Unit) {
     var zoom by remember { mutableFloatStateOf(1f) }
     var pan by remember { mutableStateOf(Offset.Zero) }
     LaunchedEffect(active) {
@@ -272,8 +278,9 @@ private fun ViewerPage(item: GalleryItem, active: Boolean) {
                 }
         )
         if (item.isVideo) {
-            val stream = item.playUrl ?: item.url.takeIf { it.startsWith("http") }
-            if (stream != null) GalleryVideo(url = stream, active = active)
+            val direct = item.playUrl ?: item.url.takeIf { it.startsWith("http") }
+            val page = item.ytdlPage
+            if (direct != null || page != null) GalleryVideo(direct = direct, page = page, active = active, onPlayer = onPlayer)
         }
     }
 }
