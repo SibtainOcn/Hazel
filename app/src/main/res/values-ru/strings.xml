@@ -10,6 +10,7 @@
     <string name="gallery_failed">Не удалось прочитать пост</string>
     <string name="gallery_empty">В посте нет файлов</string>
     <string name="gallery_error_login">Войдите на этот сайт в разделе Cookies и повторите попытку</string>
+    <string name="gallery_error_sign_in_refused">Сайт отклонил сохранённый вход. Войдите заново в разделе Cookies</string>
     <string name="gallery_error_unsupported">Галерея не может прочитать эту ссылку</string>
     <string name="gallery_error_not_found">Пост удалён, скрыт или пуст</string>
     <string name="gallery_error_network">Нет подключения. Проверьте сеть или прокси</string>
@@ -165,6 +166,8 @@
     <string name="no_results_sign_in_title">Требуется вход</string>
     <string name="no_results_error_title">Не удалось прочитать ссылку</string>
     <string name="no_results_sign_in_body">Для доступа требуется аккаунт. Вход сохранит файлы cookie сайта и повторит попытку.</string>
+    <string name="no_results_sign_in_again_title">Войти заново</string>
+    <string name="no_results_sign_in_again_body">Сайт отклонил запрос, хотя вход сохранён. Возможно, он истёк. При повторном входе сохраняются свежие cookies и попытка повторяется.</string>
     <string name="no_results_continue_body">Не удалось прочитать сведения, но сама загрузка может сработать. Продолжение загрузит наилучшее доступное качество.</string>
     <string name="no_results_refused_body">Источник отклонил запрос.</string>
     <string name="no_results_gone_body">Это медиа недоступно. Возможно, его удалили или ссылка неверна.</string>

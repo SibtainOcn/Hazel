@@ -74,15 +74,14 @@ object GalleryDlEngine {
     /**
      * What a read that stopped on [error] means. Sites that turn away anonymous readers say so
      * in many ways (X's "Unavailable", Reddit's "blocked by network security"): without a
-     * sign-in for the site, anything that is not plainly gone or unsupported asks for one.
+     * sign-in for the site, anything that is not plainly gone or unsupported asks for one. With
+     * one, a refusal asks to sign in again.
      */
     private suspend fun readError(context: Context, url: String, error: Pair<String, String>): GalleryDlException {
         val (name, message) = error
         val detail = "$name: $message"
-        var kind = GalleryDlException.classifyError(name, message)
-        if (kind == GalleryDlException.Kind.OTHER && !CookieRepository.signsIn(context.applicationContext, listOf(url)).first()) {
-            kind = GalleryDlException.Kind.LOGIN_REQUIRED
-        }
+        val signedIn = CookieRepository.signsIn(context.applicationContext, listOf(url)).first()
+        val kind = GalleryDlException.withSignIn(GalleryDlException.classifyError(name, message), detail, signedIn)
         return GalleryDlException(kind, detail, log = detail)
     }
 
@@ -199,6 +198,10 @@ object GalleryDlEngine {
                 val secrets = listOfNotNull(access.cookieFile?.absolutePath)
                 try {
                     YtDlpEngine.shared { execute(app, runtime, command, running, job, secrets, onLine) }
+                } catch (e: GalleryDlException) {
+                    if (!access.hasCookies) throw e
+                    val kind = GalleryDlException.withSignIn(e.kind, e.detail, signedIn = true)
+                    throw if (kind == e.kind) e else GalleryDlException(kind, e.detail, e, e.log)
                 } finally {
                     // A gallery-dl update fetched during this run goes live once nothing runs.
                     runCatching { GalleryDlUpdater.applyStagedUpdate(app) }

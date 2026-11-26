@@ -597,6 +597,7 @@ fun GalleryScreen(
 /** gallery-dl's own reading of a failure, in the terms of the shared failure dialog. */
 internal fun dialogKind(kind: GalleryDlException.Kind): FailureKind = when (kind) {
     GalleryDlException.Kind.LOGIN_REQUIRED -> FailureKind.SIGN_IN
+    GalleryDlException.Kind.SIGN_IN_REFUSED -> FailureKind.SIGN_IN_AGAIN
     GalleryDlException.Kind.UNSUPPORTED -> FailureKind.UNSUPPORTED
     GalleryDlException.Kind.NOT_FOUND -> FailureKind.GONE
     GalleryDlException.Kind.NETWORK, GalleryDlException.Kind.SETUP, GalleryDlException.Kind.OTHER -> FailureKind.OTHER

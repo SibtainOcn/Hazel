@@ -242,7 +242,10 @@ object GalleryQueue {
                         stoppedAt = if (entries.isNotEmpty()) app.getString(com.hazel.android.R.string.gallery_saved_before_failure, entries.size) else null
                     )
                 )
-                val signIn = if (failure?.kind == GalleryDlException.Kind.LOGIN_REQUIRED) siteRootOf(request.url) else null
+                val signIn = when (failure?.kind) {
+                    GalleryDlException.Kind.LOGIN_REQUIRED, GalleryDlException.Kind.SIGN_IN_REFUSED -> siteRootOf(request.url)
+                    else -> null
+                }
                 DownloadNotificationHelper.showError(app, reason, title, signInUrl = signIn, recorded = true)
             }
         } finally {

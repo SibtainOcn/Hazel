@@ -22,6 +22,7 @@
     <string name="gallery_failed">Could not read this post</string>
     <string name="gallery_empty">No files in this post</string>
     <string name="gallery_error_login">Sign in to this site under Cookies, then try again</string>
+    <string name="gallery_error_sign_in_refused">The site turned away your saved sign-in. Sign in again under Cookies</string>
     <string name="gallery_error_unsupported">Gallery can\'t read this link</string>
     <string name="gallery_error_not_found">This post is gone, private or empty</string>
     <string name="gallery_error_network">Couldn\'t connect. Check the network or proxy</string>
@@ -167,6 +168,8 @@
     <string name="no_results_sign_in_title">Sign-in needed</string>
     <string name="no_results_error_title">Could not read this link</string>
     <string name="no_results_sign_in_body">The source wants an account before it will hand this over. Signing in saves cookies for the site and tries again.</string>
+    <string name="no_results_sign_in_again_title">Sign in again</string>
+    <string name="no_results_sign_in_again_body">The site turned away this request even with your saved sign-in. It may have expired. Signing in again saves fresh cookies and tries again.</string>
     <string name="no_results_continue_body">The details could not be read, but the download itself may still work. Going ahead offers the best available quality.</string>
     <string name="no_results_refused_body">The source refused the request.</string>
     <string name="no_results_gone_body">This media isn\'t available. It may have been removed or deleted, or the link may be wrong.</string>

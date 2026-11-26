@@ -10,6 +10,7 @@
     <string name="gallery_failed">Não foi possível ler esta postagem</string>
     <string name="gallery_empty">Nenhum arquivo nesta postagem</string>
     <string name="gallery_error_login">Entre neste site em Cookies e tente de novo</string>
+    <string name="gallery_error_sign_in_refused">O site recusou seu login salvo. Entre de novo em Cookies</string>
     <string name="gallery_error_unsupported">A Galeria não consegue ler este link</string>
     <string name="gallery_error_not_found">Postagem removida, privada ou vazia</string>
     <string name="gallery_error_network">Sem conexão. Verifique a rede ou o proxy</string>
@@ -160,6 +161,8 @@
     <string name="no_results_sign_in_title">É preciso entrar</string>
     <string name="no_results_error_title">Não foi possível ler este link</string>
     <string name="no_results_sign_in_body">A fonte exige uma conta antes de entregar isto. Ao entrar, os cookies do site são salvos e a tentativa é refeita.</string>
+    <string name="no_results_sign_in_again_title">Entrar de novo</string>
+    <string name="no_results_sign_in_again_body">O site recusou este pedido mesmo com seu login salvo. Ele pode ter expirado. Entrar de novo salva cookies novos e tenta outra vez.</string>
     <string name="no_results_continue_body">Os detalhes não puderam ser lidos, mas o download em si ainda pode funcionar. Seguir em frente oferece a melhor qualidade disponível.</string>
     <string name="no_results_refused_body">A fonte recusou o pedido.</string>
     <string name="no_results_gone_body">Esta mídia não está disponível. Pode ter sido removida ou apagada, ou o link pode estar errado.</string>
