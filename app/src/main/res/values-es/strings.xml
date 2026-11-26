@@ -509,7 +509,6 @@
     <string name="cookies_toast_no_data">El portapapeles no contiene datos de cookies</string>
     <string name="cookies_toast_file_no_data">El archivo no contiene datos de cookies válidos</string>
     <string name="cookies_toast_import_failed">Error al importar el archivo de cookies</string>
-    <string name="cookies_toast_nothing_to_export">No hay nada que exportar</string>
     <string name="cookies_toast_exported">Copiado al portapapeles</string>
     <string name="cookies_toast_entry_copied">Copiado al portapapeles</string>
     <string name="cookies_use_title">Usar cookies</string>

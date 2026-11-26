@@ -497,7 +497,6 @@
     <string name="cookies_toast_no_data">In der Zwischenablage stehen keine Cookie-Daten</string>
     <string name="cookies_toast_file_no_data">Datei enthält keine gültigen Cookie-Daten</string>
     <string name="cookies_toast_import_failed">Fehler beim Importieren der Cookie-Datei</string>
-    <string name="cookies_toast_nothing_to_export">Nichts zum Exportieren da</string>
     <string name="cookies_toast_exported">In die Zwischenablage kopiert</string>
     <string name="cookies_toast_entry_copied">In die Zwischenablage kopiert</string>
     <string name="cookies_use_title">Cookies verwenden</string>

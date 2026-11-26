@@ -497,7 +497,6 @@
     <string name="cookies_toast_no_data">क्लिपबोर्ड में कुकी डेटा नहीं है</string>
     <string name="cookies_toast_file_no_data">फ़ाइल में कोई मान्य कुकी डेटा नहीं है</string>
     <string name="cookies_toast_import_failed">कुकी फ़ाइल आयात करने में विफल</string>
-    <string name="cookies_toast_nothing_to_export">भेजने के लिए कुछ नहीं है</string>
     <string name="cookies_toast_exported">क्लिपबोर्ड में कॉपी हुआ</string>
     <string name="cookies_toast_entry_copied">क्लिपबोर्ड में कॉपी हुआ</string>
     <string name="cookies_use_title">कुकीज़ इस्तेमाल करें</string>

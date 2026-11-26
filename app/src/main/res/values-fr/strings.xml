@@ -509,7 +509,6 @@
     <string name="cookies_toast_no_data">Le presse-papiers ne contient aucun cookie</string>
     <string name="cookies_toast_file_no_data">Le fichier ne contient aucune donnée de cookie valide</string>
     <string name="cookies_toast_import_failed">Échec de l\'importation du fichier de cookies</string>
-    <string name="cookies_toast_nothing_to_export">Rien à exporter</string>
     <string name="cookies_toast_exported">Copié dans le presse-papiers</string>
     <string name="cookies_toast_entry_copied">Copié dans le presse-papiers</string>
     <string name="cookies_use_title">Utiliser les cookies</string>

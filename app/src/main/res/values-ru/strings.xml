@@ -521,7 +521,6 @@
     <string name="cookies_toast_no_data">В буфере обмена нет данных cookie</string>
     <string name="cookies_toast_file_no_data">Файл не содержит действительных данных cookie</string>
     <string name="cookies_toast_import_failed">Не удалось импортировать файл cookie</string>
-    <string name="cookies_toast_nothing_to_export">Нечего экспортировать</string>
     <string name="cookies_toast_exported">Скопировано в буфер обмена</string>
     <string name="cookies_toast_entry_copied">Скопировано в буфер обмена</string>
     <string name="cookies_use_title">Использовать cookie</string>

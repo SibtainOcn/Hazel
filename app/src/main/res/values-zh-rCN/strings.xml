@@ -485,7 +485,6 @@
     <string name="cookies_toast_no_data">剪贴板里没有 Cookie 数据</string>
     <string name="cookies_toast_file_no_data">文件中不包含有效的 Cookie 数据</string>
     <string name="cookies_toast_import_failed">导入 Cookie 文件失败</string>
-    <string name="cookies_toast_nothing_to_export">没有可导出的内容</string>
     <string name="cookies_toast_exported">已复制到剪贴板</string>
     <string name="cookies_toast_entry_copied">已复制到剪贴板</string>
     <string name="cookies_use_title">使用 Cookie</string>

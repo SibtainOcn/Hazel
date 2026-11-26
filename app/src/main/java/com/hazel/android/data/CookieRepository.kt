@@ -223,6 +223,8 @@ object CookieRepository {
             context.cacheDir.listFiles { _, name -> name.startsWith("cookies") }?.forEach {
                 runCatching { it.delete() }
             }
+            // gallery-dl keeps its own sessions and tokens here.
+            listOf("", "-journal", "-wal", "-shm").forEach { runCatching { File(context.cacheDir, "gallery-dl.sqlite3$it").delete() } }
         }
         writeCookieFile(context, explicitEntries = emptyList(), explicitUseCookies = false)
         InfoCache.clear()
@@ -491,10 +493,10 @@ object CookieRepository {
         return CookieSummary(site = site, count = cookies.size, expiresAt = expiries.maxOrNull())
     }
 
-    /** Whole cookie file as text, for copying out. */
-    suspend fun exportText(context: Context): String = withContext(Dispatchers.IO) {
-        writeCookieFile(context)
-        runCatching { cookieFile(context).readText() }.getOrDefault("")
+    /** [entries] as one Netscape cookie file, for copying or saving out. */
+    fun exportText(entries: List<CookieEntry>): String = buildString {
+        append("# Netscape HTTP Cookie File\n")
+        entries.forEach { entry -> entry.content.lineSequence().filter { isCookieLine(it) }.forEach { append(it.trim()).append('\n') } }
     }
 
     /**

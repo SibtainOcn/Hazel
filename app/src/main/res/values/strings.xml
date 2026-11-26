@@ -509,7 +509,7 @@
     <string name="cookies_menu">More</string>
     <string name="cookies_menu_import_file">Import from file</string>
     <string name="cookies_menu_import">Import from clipboard</string>
-    <string name="cookies_menu_export">Export to clipboard</string>
+    <string name="cookies_menu_export">Export cookies</string>
     <string name="cookies_menu_delete_all">Delete all</string>
     <!-- The label given to a set of cookies pasted in from the clipboard. -->
     <string name="cookies_imported_title">Imported cookies</string>
@@ -517,8 +517,14 @@
     <string name="cookies_toast_no_data">Clipboard holds no cookie data</string>
     <string name="cookies_toast_file_no_data">File contains no valid cookie data</string>
     <string name="cookies_toast_import_failed">Failed to import cookie file</string>
-    <string name="cookies_toast_nothing_to_export">Nothing to export</string>
     <string name="cookies_toast_exported">Copied to clipboard</string>
+    <string name="cookies_toast_saved_file">Cookies saved</string>
+    <string name="cookies_toast_export_failed">Could not save the file</string>
+    <string name="cookies_export_title">Export cookies</string>
+    <string name="cookies_export_body">Choose the accounts to export as a Netscape cookie file. Anyone with this file can use these sign-ins.</string>
+    <string name="cookies_export_copy">Copy</string>
+    <string name="cookies_export_save">Save as file</string>
+    <string name="cookies_quick_signed_in">Signed in</string>
     <string name="cookies_toast_entry_copied">Copied to clipboard</string>
     <string name="cookies_use_title">Use cookies</string>
     <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
@@ -531,6 +537,14 @@
     <string name="cookies_field_title">Title</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Save</string>
+    <string name="cookies_help_title">Sign-in page not working?</string>
+    <string name="cookies_help_body">Some sites block sign-in inside apps. Sign in from a browser and bring the cookies here.</string>
+    <string name="cookies_help_step_browser">Sign in to the site in Firefox</string>
+    <string name="cookies_help_step_export">Export its cookies with an add-on such as Cookie-Editor</string>
+    <string name="cookies_help_step_import">Paste or pick the export under Import</string>
+    <string name="cookies_help_get_addon">Get Cookie-Editor</string>
+    <string name="cookies_help_no_browser">No browser to open the link</string>
+    <string name="cookie_webview_help">Can\'t sign in here?</string>
     <string name="cookies_description">Sign in once for age-restricted, private and members-only downloads.</string>
     <string name="cookies_section_general">General</string>
     <string name="cookies_add_sign_in">Sign in to a site</string>

@@ -485,7 +485,6 @@
     <string name="cookies_toast_no_data">クリップボードにCookieデータがありません</string>
     <string name="cookies_toast_file_no_data">ファイルに有効なCookieデータが含まれていません</string>
     <string name="cookies_toast_import_failed">Cookieファイルのインポートに失敗しました</string>
-    <string name="cookies_toast_nothing_to_export">エクスポートするデータがありません</string>
     <string name="cookies_toast_exported">クリップボードにコピーしました</string>
     <string name="cookies_toast_entry_copied">クリップボードにコピーしました</string>
     <string name="cookies_use_title">Cookieを使用</string>

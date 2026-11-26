@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Refresh
@@ -199,6 +200,7 @@ class CookieWebViewActivity : ComponentActivity() {
         var desktopMode by remember { mutableStateOf(false) }
         var textZoom by remember { mutableIntStateOf(100) }
         var menuOpen by remember { mutableStateOf(false) }
+        var helpOpen by remember { mutableStateOf(false) }
         var saving by remember { mutableStateOf(false) }
         // Solid once the site has set its login cookie; sites not known are always solid.
         var signedIn by remember { mutableStateOf(false) }
@@ -226,6 +228,8 @@ class CookieWebViewActivity : ComponentActivity() {
                 it.reload()
             }
         }
+
+        if (helpOpen) SignInHelpDialog(onDismiss = { helpOpen = false })
 
         Scaffold(
             containerColor = scheme.background,
@@ -309,6 +313,12 @@ class CookieWebViewActivity : ComponentActivity() {
                                 webView?.settings?.textZoom = size
                                 popup?.settings?.textZoom = size
                             }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_help)) },
+                                icon = Icons.Outlined.Info,
+                                tone = MenuTone.Accent,
+                                onClick = { menuOpen = false; helpOpen = true }
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.cookie_webview_go_sign_in)) },
                                 icon = Icons.AutoMirrored.Filled.Login,

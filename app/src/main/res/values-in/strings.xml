@@ -485,7 +485,6 @@
     <string name="cookies_toast_no_data">Papan klip tidak berisi data cookie</string>
     <string name="cookies_toast_file_no_data">Berkas tidak berisi data cookie yang valid</string>
     <string name="cookies_toast_import_failed">Gagal mengimpor berkas cookie</string>
-    <string name="cookies_toast_nothing_to_export">Tidak ada yang bisa diekspor</string>
     <string name="cookies_toast_exported">Disalin ke papan klip</string>
     <string name="cookies_toast_entry_copied">Disalin ke papan klip</string>
     <string name="cookies_use_title">Gunakan cookie</string>
