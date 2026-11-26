@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">网站拒绝了已保存的登录。请在 Cookies 中重新登录</string>
     <string name="gallery_error_unsupported">图库无法读取此链接</string>
     <string name="gallery_links_skipped">部分链接无法读取</string>
+    <string name="search_mode_media">媒体</string>
     <string name="profile_stories">快拍</string>
     <string name="profile_highlights">精选</string>
     <string name="profile_posts">帖子</string>

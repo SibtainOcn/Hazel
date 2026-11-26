@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
+- Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
+- Search: an "i" button opens a short guide to what each side finds.
+
 ### Fixed
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.

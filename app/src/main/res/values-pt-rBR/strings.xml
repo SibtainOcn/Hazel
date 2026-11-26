@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">O site recusou seu login salvo. Entre de novo em Cookies</string>
     <string name="gallery_error_unsupported">A Galeria não consegue ler este link</string>
     <string name="gallery_links_skipped">Alguns links não puderam ser lidos</string>
+    <string name="search_mode_media">Mídia</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Destaques</string>
     <string name="profile_posts">Publicações</string>

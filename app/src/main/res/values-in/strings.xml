@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">Situs menolak login yang tersimpan. Masuk lagi di Cookies</string>
     <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
     <string name="gallery_links_skipped">Beberapa tautan tidak bisa dibaca</string>
+    <string name="search_mode_media">Media</string>
     <string name="profile_stories">Cerita</string>
     <string name="profile_highlights">Sorotan</string>
     <string name="profile_posts">Postingan</string>

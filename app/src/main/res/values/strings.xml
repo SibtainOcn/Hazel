@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--
          The app's own name. Marked non-translatable so it is never carried into a
          values-xx file: a brand name is the same word in every language, and this one
@@ -25,6 +25,19 @@
     <string name="gallery_error_sign_in_refused">The site turned away your saved sign-in. Sign in again under Cookies</string>
     <string name="gallery_error_unsupported">Gallery can\'t read this link</string>
     <string name="gallery_links_skipped">Some links couldn\'t be read</string>
+    <string name="search_mode_media">Media</string>
+    <string name="search_guide_title" tools:ignore="MissingTranslation">What Hazel can find</string>
+    <string name="search_guide_media_title" tools:ignore="MissingTranslation">Media · results on Home</string>
+    <string name="search_guide_media_body" tools:ignore="MissingTranslation">Videos and music. Search YouTube, YouTube Music, SoundCloud or Bandcamp, or paste a link from over 1,500 sites. Save as video or audio: one link, many links, or a whole playlist or channel.</string>
+    <string name="search_guide_gallery_title" tools:ignore="MissingTranslation">Gallery · results on the Gallery tab</string>
+    <string name="search_guide_gallery_body" tools:ignore="MissingTranslation">Photos, carousels, short videos and captions. Search words on Pinterest, X, Bluesky, Tumblr, DeviantArt, Pixiv or Instagram tags, or paste a link to a post, board or profile.</string>
+    <string name="search_guide_profiles_title" tools:ignore="MissingTranslation">Profiles</string>
+    <string name="search_guide_profiles_body" tools:ignore="MissingTranslation">An Instagram or X profile link asks what to fetch, two at a time: stories, highlights, posts, reels or tagged on Instagram; media, posts and replies, or likes on X. Each highlight comes as its own group.</string>
+    <string name="search_guide_links_title" tools:ignore="MissingTranslation">Pasted links</string>
+    <string name="search_guide_links_body" tools:ignore="MissingTranslation">A link goes to the side that is on, Media or Gallery, as it is. Sources and sites are only for searching words, so they step back while a link is in the field.</string>
+    <string name="search_guide_sign_in_title" tools:ignore="MissingTranslation">Signing in</string>
+    <string name="search_guide_sign_in_body" tools:ignore="MissingTranslation">Private posts, stories, highlights and likes need you signed in to that site. Hazel asks when it is needed, or sign in any time from Cookies in More.</string>
+    <string name="search_guide_ok" tools:ignore="MissingTranslation">Got it</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Posts</string>

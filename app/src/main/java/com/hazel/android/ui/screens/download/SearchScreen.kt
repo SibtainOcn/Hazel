@@ -103,6 +103,10 @@ import com.hazel.android.ui.components.AlertDialog
 import com.hazel.android.ui.components.pressCorner
 import com.hazel.android.ui.components.pressScale
 import com.hazel.android.ui.screens.gallery.GallerySiteRow
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.graphics.graphicsLayer
+import com.hazel.android.ui.components.PickChip
+import com.hazel.android.ui.components.rememberChipWave
 import com.hazel.android.ui.screens.more.groupShape
 import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.util.LinkKey
@@ -170,8 +174,12 @@ fun SearchScreen(
     val imageSearchSaved by remember(context) { SettingsRepository.getImageSearch(context) }.collectAsState(initial = imagesFirst)
     var imagesChosen by remember { mutableStateOf(if (imagesFirst) true else null) }
     val images = imagesChosen ?: imageSearchSaved
-    val gallerySite by remember(context) { SettingsRepository.getGallerySearchSite(context) }
-        .collectAsState(initial = GallerySearchSite.DEFAULT)
+    val gallerySite by remember(context) { SettingsRepository.getGallerySearchSitePicked(context) }
+        .collectAsState(initial = null)
+    // Bumped when words are searched in Gallery with no site picked: the site chips wave at once.
+    var nudge by remember { mutableIntStateOf(0) }
+    var guideOpen by remember { mutableStateOf(false) }
+    if (guideOpen) SearchGuideDialog(onDismiss = { guideOpen = false })
 
     fun chooseImages(on: Boolean) {
         imagesChosen = on
@@ -241,13 +249,19 @@ fun SearchScreen(
     }
 
     fun submitImages() {
-        keyboard?.hide()
         if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
-            onSearchImages(GalleryRequest.Search(text.trim(), gallerySite))
+            val site = gallerySite
+            if (site == null) {
+                nudge++
+            } else {
+                keyboard?.hide()
+                onSearchImages(GalleryRequest.Search(text.trim(), site))
+            }
             return
         }
         val links = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
         if (links.isEmpty()) return
+        keyboard?.hide()
         onSearchImages(GalleryRequest.Links(links))
     }
 
@@ -444,6 +458,8 @@ fun SearchScreen(
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
+                GuideButton(onClick = { guideOpen = true })
+                Spacer(modifier = Modifier.width(6.dp))
                 com.hazel.android.ui.components.SoftIconButton(
                     onClick = { menuOpen = true },
                     modifier = Modifier.padding(end = 8.dp)
@@ -536,42 +552,47 @@ fun SearchScreen(
             }
             }
 
-            // ── Where to search ──
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SearchSource.entries.forEach { option ->
-                    SourceChip(
-                        label = stringResource(option.labelRes),
-                        selected = !images && option == source,
-                        onClick = {
-                            if (images) chooseImages(false)
-                            scope.launch { SettingsRepository.setSearchSource(context, option) }
-                        }
-                    )
-                    if (option == SearchSource.YOUTUBE) {
-                        SourceChip(
-                            label = stringResource(R.string.search_source_images),
-                            selected = images,
-                            icon = Icons.Filled.Image,
-                            onClick = { if (!images) chooseImages(true) }
+            // ── Media or Gallery, then where to search ──
+            // Sources and sites only apply to words, so with a link they step back; while
+            // they apply, a wave runs across them now and then.
+            MediaGallerySwitch(
+                gallery = images,
+                onGallery = ::chooseImages,
+                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 10.dp)
+            )
+            val forLinks = queued.isNotEmpty() || isLinks(text)
+            val chipsAlpha by androidx.compose.animation.core.animateFloatAsState(if (forLinks) 0.38f else 1f, label = "chipsDim")
+            val wave = rememberChipWave(
+                active = !forLinks,
+                chips = if (images) GallerySearchSite.entries.size else SearchSource.entries.size,
+                nudge = nudge
+            )
+            if (images) {
+                GallerySiteRow(
+                    selected = gallerySite,
+                    onSelect = { site -> scope.launch { SettingsRepository.setGallerySearchSitePicked(context, site) } },
+                    modifier = Modifier.padding(bottom = 10.dp).graphicsLayer { alpha = chipsAlpha },
+                    wave = wave
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer { alpha = chipsAlpha }
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SearchSource.entries.forEachIndexed { index, option ->
+                        PickChip(
+                            label = stringResource(option.labelRes),
+                            selected = option == source,
+                            onClick = { scope.launch { SettingsRepository.setSearchSource(context, option) } },
+                            wave = { wave.at(index) }
                         )
                     }
                 }
-            }
-
-            // Links go to gallery-dl as they are: a site to search on only applies to words.
-            AnimatedVisibility(visible = images && queued.isEmpty() && !isLinks(text)) {
-                GallerySiteRow(
-                    selected = gallerySite,
-                    onSelect = { site -> scope.launch { SettingsRepository.setGallerySearchSite(context, site) } },
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -935,56 +956,3 @@ private val QUEUE_MAX_HEIGHT = 236.dp
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
 
-/**
- * A search source. The chosen one is an accent tab led by a small cookie; the rest are soft
- * pills.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun SourceChip(
-    label: String,
-    selected: Boolean,
-    icon: ImageVector = Icons.Filled.PlayArrow,
-    onClick: () -> Unit
-) {
-    val accent = MaterialTheme.colorScheme.primary
-    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-    // Pressed, the corners tighten and the chip squeezes; choosing one morphs pill to tab.
-    val resting by androidx.compose.animation.core.animateDpAsState(if (selected) 12.dp else 20.dp, label = "chip")
-    val radius by pressCorner(interaction, resting = resting, pressed = 8.dp)
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(radius),
-        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-        interactionSource = interaction,
-        modifier = Modifier
-            .pressScale(interaction)
-            .height(40.dp)
-            .semantics { this.selected = selected }
-    ) {
-        Row(
-            modifier = Modifier.padding(start = if (selected) 6.dp else 16.dp, end = if (selected) 14.dp else 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(MaterialShapes.Pentagon.toShape())
-                        .background(MaterialTheme.colorScheme.onPrimary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-                maxLines = 1
-            )
-        }
-    }
-}

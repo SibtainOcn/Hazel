@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">サイトが保存済みのサインインを拒否しました。Cookies でもう一度サインインしてください</string>
     <string name="gallery_error_unsupported">ギャラリーはこのリンクを読み込めません</string>
     <string name="gallery_links_skipped">読み込めなかったリンクがあります</string>
+    <string name="search_mode_media">メディア</string>
     <string name="profile_stories">ストーリーズ</string>
     <string name="profile_highlights">ハイライト</string>
     <string name="profile_posts">投稿</string>

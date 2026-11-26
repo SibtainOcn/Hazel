@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">Le site a refusé votre connexion enregistrée. Reconnectez-vous dans Cookies</string>
     <string name="gallery_error_unsupported">Galerie ne peut pas lire ce lien</string>
     <string name="gallery_links_skipped">Certains liens n\'ont pas pu être lus</string>
+    <string name="search_mode_media">Médias</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">À la une</string>
     <string name="profile_posts">Publications</string>

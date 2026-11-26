@@ -362,6 +362,16 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[GALLERY_SITE_KEY] = site.name }
     }
 
+    /** The site picked on the search screen for image word searches; null until one is picked. */
+    fun getGallerySearchSitePicked(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite?> =
+        context.dataStore.data.map { prefs ->
+            prefs[GALLERY_SITE_KEY]?.let { name -> com.hazel.android.gallery.GallerySearchSite.entries.firstOrNull { it.name == name } }
+        }
+
+    suspend fun setGallerySearchSitePicked(context: Context, site: com.hazel.android.gallery.GallerySearchSite?) {
+        context.dataStore.edit { prefs -> if (site == null) prefs.remove(GALLERY_SITE_KEY) else prefs[GALLERY_SITE_KEY] = site.name }
+    }
+
     fun getGalleryPostsPerSearch(context: Context): Flow<Int> =
         context.dataStore.data.map { prefs -> prefs[GALLERY_POSTS_KEY] ?: DEFAULT_GALLERY_POSTS }
 
