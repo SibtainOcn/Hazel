@@ -73,6 +73,7 @@ import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryPost
+import com.hazel.android.gallery.GalleryReading
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
 import com.hazel.android.gallery.queue.request
@@ -148,6 +149,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
 
+    /** Until the saved results are looked up, so the empty state doesn't flash before them. */
+    var restoring by mutableStateOf(true)
+        private set
+    /** The results on screen came back from the last session; they appear without arriving. */
+    var restored by mutableStateOf(false)
+        private set
+
     init {
         val app = getApplication<Application>()
         viewModelScope.launch {
@@ -158,7 +166,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 query = saved.query
                 fromSearch = saved.fromSearch
                 posts = saved.posts
+                restored = true
             }
+            restoring = false
             snapshotFlow { GalleryResultsStore.Saved(query, fromSearch, posts) }
                 .distinctUntilChangedBy { it.posts }
                 .drop(1)
@@ -175,6 +185,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
         lastRun = { handle(request) }
         posts = emptyList()
+        restored = false
+        restoring = false
         recordInHistory(request)
         when (request) {
             is GalleryRequest.Links -> {
@@ -210,14 +222,22 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         val links = urls.distinct()
         val read = arrayOfNulls<List<GalleryPost>>(links.size)
         val failures = mutableListOf<Throwable>()
-        GalleryDlEngine.listEach(app, links, postLimit = limit) { url, result ->
-            result.onSuccess { listing ->
-                val found = withContext(Dispatchers.Default) {
-                    read[links.indexOf(url)] = GalleryPost.group(url, listing.items)
-                    read.filterNotNull().flatten().let { if (byAuthor) GalleryPost.byAuthor(it) else it }
-                }
-                posts = found
-            }.onFailure { failures += it }
+        var handed = 0
+        val counted = links.size > 1
+        if (counted) GalleryReading.set(GalleryReading.Progress(0, links.size))
+        try {
+            GalleryDlEngine.listEach(app, links, postLimit = limit) { url, result ->
+                result.onSuccess { listing ->
+                    val found = withContext(Dispatchers.Default) {
+                        read[links.indexOf(url)] = GalleryPost.group(url, listing.items)
+                        read.filterNotNull().flatten().let { if (byAuthor) GalleryPost.byAuthor(it) else it }
+                    }
+                    posts = found
+                }.onFailure { failures += it }
+                if (counted) GalleryReading.set(GalleryReading.Progress(++handed, links.size))
+            }
+        } finally {
+            if (counted) GalleryReading.set(null)
         }
         if (posts.isEmpty()) failures.firstOrNull()?.let { throw it }
         if (failures.isNotEmpty() && posts.isNotEmpty()) skippedLinks = failures.size
@@ -376,6 +396,7 @@ fun GalleryScreen(
             when {
                 viewModel.busy && viewModel.posts.isEmpty() ->
                     ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
+                viewModel.restoring -> Spacer(modifier = Modifier.fillMaxWidth().weight(1f))
                 viewModel.posts.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
@@ -408,7 +429,7 @@ fun GalleryScreen(
                         gridItems(viewModel.posts.indices.toList(), columns, SkeletonSpacing, key = { "post-$it" }) { i ->
                             val post = viewModel.posts[i]
                             val single = post.items.singleOrNull()
-                            ArrivingCard(post.source to i, shrink) {
+                            ArrivingCard(post.source to i, shrink, animate = !viewModel.restored) {
                                 if (single != null) {
                                     GalleryCard(
                                         item = single,
@@ -429,7 +450,7 @@ fun GalleryScreen(
                     } else {
                         gridItems(viewModel.items.indices.toList(), columns, SkeletonSpacing, key = { viewModel.items[it].index }) { position ->
                             val item = viewModel.items[position]
-                            ArrivingCard(item.url, shrink) {
+                            ArrivingCard(item.url, shrink, animate = !viewModel.restored) {
                                 GalleryCard(
                                     item = item,
                                     total = viewModel.items.size,

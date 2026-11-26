@@ -253,30 +253,35 @@ fun AppNavigation(
     val homeTopBar: @Composable () -> Unit = {
         TopAppBar(
             title = {
-                // One tonal pill holding the bolt and the name; a tap opens Support.
-                Row(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable(role = Role.Button) {
-                            navController.navigate("sponsor") { launchSingleTop = true }
-                        }
-                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
-                        .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.update),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = com.hazel.android.ui.theme.accentInk()
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    // One tonal pill holding the bolt and the name; a tap opens Support.
+                    Row(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(role = Role.Button) {
+                                navController.navigate("sponsor") { launchSingleTop = true }
+                            }
+                            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                            .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.update),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = com.hazel.android.ui.theme.accentInk()
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        com.hazel.android.ui.screens.gallery.GalleryReadingPill(onOpen = { openTab(Screen.Gallery.route) })
+                    }
                 }
             },
             actions = {

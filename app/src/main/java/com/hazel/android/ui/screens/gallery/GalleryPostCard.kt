@@ -40,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -161,20 +160,6 @@ internal fun GalleryPostCard(
                             }
                         }
                     }
-                }
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = colors.primaryContainer,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
-                ) {
-                    Text(
-                        pluralStringResource(R.plurals.gallery_items, count, count),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onPrimaryContainer,
-                        maxLines = 1,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))

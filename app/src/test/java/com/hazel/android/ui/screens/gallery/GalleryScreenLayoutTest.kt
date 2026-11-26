@@ -170,7 +170,6 @@ class GalleryScreenLayoutTest(private val locale: String) {
         val width = context.resources.displayMetrics.widthPixels
         listOf(
             "spacebrief_with_a_long_name",
-            context.resources.getQuantityString(R.plurals.gallery_items, 4, 4),
             "1 / 4"
         ).forEach { text ->
             val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
