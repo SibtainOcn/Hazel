@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Appearance: App icon (Classic, White, Glass); the home screen and all four share targets follow it after a restart.
 - Cookies: Quick sign-in card on top, with a check on signed-in sites and help for sign-in pages that do not work.
 - Cookies: export chosen accounts to the clipboard or as a cookie file.
 - Cookies: delete chosen accounts from the menu.
 - Sign-in page: page zoom slider and a help item in the menu.
+- Appearance: App icon (Classic, White, Glass); the home screen and all four share targets follow it after a restart.
 ### Changed
 - Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
 - Bottom bar: the chosen tab sits on a 6-sided cookie or a 4-leaf clover in turn, and a tap springs the tab.
