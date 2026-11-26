@@ -10,6 +10,7 @@
     <string name="gallery_failed">Tidak dapat membaca postingan ini</string>
     <string name="gallery_empty">Tidak ada file di postingan ini</string>
     <string name="gallery_error_login">Masuk ke situs ini di Cookies, lalu coba lagi</string>
+    <string name="gallery_error_sign_in_refused">Situs menolak login yang tersimpan. Masuk lagi di Cookies</string>
     <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
     <string name="gallery_error_not_found">Postingan dihapus, privat, atau kosong</string>
     <string name="gallery_error_network">Tidak dapat terhubung. Periksa jaringan atau proxy</string>
@@ -150,6 +151,8 @@
     <string name="no_results_sign_in_title">Perlu masuk</string>
     <string name="no_results_error_title">Tidak dapat membaca tautan ini</string>
     <string name="no_results_sign_in_body">Sumber memerlukan akun sebelum dapat diakses. Masuk akan menyimpan cookie untuk situs tersebut dan mencoba lagi.</string>
+    <string name="no_results_sign_in_again_title">Masuk lagi</string>
+    <string name="no_results_sign_in_again_body">Situs menolak permintaan ini meski login tersimpan. Mungkin sudah kedaluwarsa. Masuk lagi akan menyimpan cookie baru dan mencoba lagi.</string>
     <string name="no_results_continue_body">Rincian tidak dapat dibaca, tetapi unduhan mungkin tetap berhasil. Melanjutkan akan menggunakan kualitas terbaik yang tersedia.</string>
     <string name="no_results_refused_body">Sumber menolak permintaan.</string>
     <string name="no_results_gone_body">Media ini tidak tersedia. Mungkin sudah dihapus, atau tautannya salah.</string>
