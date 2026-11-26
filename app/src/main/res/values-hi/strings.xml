@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">साइट ने आपका सहेजा गया साइन-इन ठुकरा दिया। Cookies में फिर से साइन इन करें</string>
     <string name="gallery_error_unsupported">गैलरी यह लिंक नहीं पढ़ सकती</string>
     <string name="gallery_links_skipped">कुछ लिंक पढ़े नहीं जा सके</string>
+    <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
     <string name="profile_stories">स्टोरीज़</string>
     <string name="profile_highlights">हाइलाइट्स</string>
     <string name="profile_posts">पोस्ट</string>

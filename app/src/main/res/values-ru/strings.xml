@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">Сайт отклонил сохранённый вход. Войдите заново в разделе Cookies</string>
     <string name="gallery_error_unsupported">Галерея не может прочитать эту ссылку</string>
     <string name="gallery_links_skipped">Некоторые ссылки не удалось прочитать</string>
+    <string name="gallery_video_unavailable">Не удалось получить это видео</string>
     <string name="profile_stories">Истории</string>
     <string name="profile_highlights">Актуальное</string>
     <string name="profile_posts">Публикации</string>

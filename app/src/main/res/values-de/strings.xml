@@ -13,6 +13,7 @@
     <string name="gallery_error_sign_in_refused">Die Seite hat deine gespeicherte Anmeldung abgelehnt. Melde dich unter Cookies erneut an</string>
     <string name="gallery_error_unsupported">Galerie kann diesen Link nicht lesen</string>
     <string name="gallery_links_skipped">Einige Links konnten nicht gelesen werden</string>
+    <string name="gallery_video_unavailable">Dieses Video konnte nicht geladen werden</string>
     <string name="profile_stories">Storys</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Beiträge</string>
