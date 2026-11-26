@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -33,6 +34,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -45,13 +48,17 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +70,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -118,6 +126,15 @@ import kotlinx.coroutines.launch
 class CookieWebViewActivity : ComponentActivity() {
 
     private var webView: WebView? = null
+
+    /** A window the page opened, such as a "Sign in with" popup, shown over the page. */
+    private var popup by mutableStateOf<WebView?>(null)
+
+    private val pageZoom = PageZoom()
+    private val popupZoom = PageZoom()
+
+    /** The menu's zoom value, for the window in view. */
+    private var zoomPercent by mutableIntStateOf(100)
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,14 +207,22 @@ class CookieWebViewActivity : ComponentActivity() {
         val scheme = MaterialTheme.colorScheme
 
         BackHandler(enabled = true) {
+            val child = popup
             val view = webView
-            if (view != null && view.canGoBack()) view.goBack() else finish()
+            when {
+                child != null -> if (child.canGoBack()) child.goBack() else closePopup()
+                view != null && view.canGoBack() -> view.goBack()
+                else -> finish()
+            }
         }
+
+        // A popup that signed in leaves its cookie behind for the page.
+        LaunchedEffect(popup) { if (popup == null) signedIn = hasLoginCookie(siteKey) }
 
         fun setDesktop(on: Boolean) {
             desktopMode = on
             webView?.let {
-                applyDesktopMode(it, on)
+                applyIdentity(it, on)
                 it.reload()
             }
         }
@@ -251,7 +276,7 @@ class CookieWebViewActivity : ComponentActivity() {
                             else Text(stringResource(R.string.cookie_webview_save), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         }
                     }
-                    ShapeIconButton(onClick = { loadFailed = false; webView?.reload() }, size = 46.dp, shape = MaterialShapes.Cookie6Sided.toShape()) {
+                    ShapeIconButton(onClick = { loadFailed = false; (popup ?: webView)?.reload() }, size = 46.dp, shape = MaterialShapes.Cookie6Sided.toShape()) {
                         Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.cookie_webview_reload))
                     }
                     Box {
@@ -275,9 +300,14 @@ class CookieWebViewActivity : ComponentActivity() {
                                 trailingIcon = { MenuValue(stringResource(if (desktopMode) R.string.cookie_webview_on else R.string.cookie_webview_off)) },
                                 onClick = { menuOpen = false; setDesktop(!desktopMode) }
                             )
-                            TextSizeRow(textZoom) { size ->
+                            SliderRow(Icons.Filled.ZoomIn, stringResource(R.string.cookie_webview_page_zoom), zoomPercent, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP) { percent ->
+                                val zoom = if (popup != null) popupZoom else pageZoom
+                                zoom.factorFor(percent)?.let { (popup ?: webView)?.zoomBy(it) }
+                            }
+                            SliderRow(Icons.Filled.FormatSize, stringResource(R.string.cookie_webview_text_size), textZoom, TEXT_MIN, TEXT_MAX, TEXT_STEP) { size ->
                                 textZoom = size
                                 webView?.settings?.textZoom = size
+                                popup?.settings?.textZoom = size
                             }
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.cookie_webview_go_sign_in)) },
@@ -314,7 +344,7 @@ class CookieWebViewActivity : ComponentActivity() {
             }
         ) { innerPadding ->
             val background = scheme.background.toArgb()
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding).imePadding()) {
                 if (browserReady) AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { context ->
@@ -338,11 +368,13 @@ class CookieWebViewActivity : ComponentActivity() {
                                     view: WebView?,
                                     request: android.webkit.WebResourceRequest?
                                 ): Boolean {
-                                    val target = request?.url?.toString()
-                                    if (SignInBrowser.opensInPage(target)) return false
-                                    // An "open the app" link: show the web page it stands for.
-                                    SignInBrowser.webFallback(target)?.let { view?.loadUrl(it) }
-                                    return true
+                                    return !keepsInPage(view, request)
+                                }
+
+                                override fun onScaleChanged(view: WebView?, oldScale: Float, newScale: Float) {
+                                    super.onScaleChanged(view, oldScale, newScale)
+                                    pageZoom.scaled(newScale)
+                                    showZoom()
                                 }
 
                                 override fun onPageStarted(view: WebView?, startedUrl: String?, favicon: android.graphics.Bitmap?) {
@@ -385,6 +417,11 @@ class CookieWebViewActivity : ComponentActivity() {
 
                                 override fun onPageFinished(view: WebView?, finishedUrl: String?) {
                                     super.onPageFinished(view, finishedUrl)
+                                    view?.let {
+                                        allowZoom(it)
+                                        @Suppress("DEPRECATION") pageZoom.startAt(it.scale)
+                                        showZoom()
+                                    }
                                     firstPaint = true
                                     finishedUrl?.let { currentUrl = it }
                                     signedIn = hasLoginCookie(siteKey)
@@ -395,12 +432,35 @@ class CookieWebViewActivity : ComponentActivity() {
                                     progress = newProgress
                                     if (newProgress >= 100) firstPaint = true
                                 }
+
+                                override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
+                                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                                    if (transport == null) return false
+                                    // One at a time: sign-in flows often open theirs from a script, not a tap.
+                                    closePopup()
+                                    val child = popupView(background, desktopMode, textZoom)
+                                    transport.webView = child
+                                    resultMsg.sendToTarget()
+                                    popup = child
+                                    showZoom()
+                                    return true
+                                }
                             }
                             webView = this
                             loadUrl(firstPage)
                         }
                     }
                 )
+                popup?.let { child ->
+                    Surface(modifier = Modifier.fillMaxSize(), color = scheme.background) {
+                        Column {
+                            IconButton(onClick = ::closePopup) {
+                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.no_results_close))
+                            }
+                            key(child) { AndroidView(factory = { child }, modifier = Modifier.fillMaxSize()) }
+                        }
+                    }
+                }
                 // Over the page rather than above it, so the page is not resized while it loads.
                 if (firstPaint && progress in 1..99 && !loadFailed) {
                     LinearProgressIndicator(
@@ -457,22 +517,30 @@ class CookieWebViewActivity : ComponentActivity() {
         }
     }
 
-    /** Text size as a slider inside the menu, so a page can be sized while it stays in view. */
+    /** A percent slider inside the menu, so a page can be sized while it stays in view. */
     @Composable
-    private fun TextSizeRow(size: Int, onChange: (Int) -> Unit) {
+    private fun SliderRow(icon: ImageVector, label: String, value: Int, min: Int, max: Int, step: Int, onChange: (Int) -> Unit) {
+        // Follows the finger; the page's own answer replaces it once it comes back.
+        var shown by remember(value) { mutableIntStateOf(value) }
         val scheme = MaterialTheme.colorScheme
         Column(modifier = Modifier.widthIn(min = 240.dp).padding(horizontal = 16.dp, vertical = 6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.FormatSize, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(stringResource(R.string.cookie_webview_text_size), modifier = Modifier.weight(1f))
-                MenuValue("$size%")
+                Text(label, modifier = Modifier.weight(1f))
+                MenuValue("$shown%")
             }
             Slider(
-                value = size.toFloat(),
-                onValueChange = { onChange((it / TEXT_STEP).roundToInt() * TEXT_STEP) },
-                valueRange = TEXT_MIN.toFloat()..TEXT_MAX.toFloat(),
-                steps = (TEXT_MAX - TEXT_MIN) / TEXT_STEP - 1
+                value = shown.coerceIn(min, max).toFloat(),
+                onValueChange = {
+                    val next = (it / step).roundToInt() * step
+                    if (next != shown) {
+                        shown = next
+                        onChange(next)
+                    }
+                },
+                valueRange = min.toFloat()..max.toFloat(),
+                steps = (max - min) / step - 1
             )
         }
     }
@@ -524,6 +592,10 @@ class CookieWebViewActivity : ComponentActivity() {
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
+            // As Chrome: the page's own viewport sets its width; one without is zoomed out to fit.
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            setSupportMultipleWindows(true)
             if (Build.VERSION.SDK_INT >= 26) safeBrowsingEnabled = true
         }
         applyIdentity(view, desktop = false)
@@ -538,18 +610,9 @@ class CookieWebViewActivity : ComponentActivity() {
     }
 
     /**
-     * Some sites only offer the sign-in form to a desktop browser, so the user agent can be
-     * switched to one. The wide page is zoomed out to fit the screen and can be pinched.
+     * The user agent and its matching Client Hints, as a mobile or desktop Chrome. Some sites
+     * only offer the sign-in form to a desktop browser.
      */
-    private fun applyDesktopMode(view: WebView, desktop: Boolean) {
-        applyIdentity(view, desktop)
-        view.settings.apply {
-            useWideViewPort = desktop
-            loadWithOverviewMode = desktop
-        }
-    }
-
-    /** The user agent and its matching Client Hints, as a mobile or desktop Chrome. */
     private fun applyIdentity(view: WebView, desktop: Boolean) {
         val base = WebSettings.getDefaultUserAgent(view.context)
         view.settings.userAgentString =
@@ -559,7 +622,81 @@ class CookieWebViewActivity : ComponentActivity() {
         }
     }
 
+    /** Whether [request] stays in the browser; an "open the app" link shows the web page it stands for. */
+    private fun keepsInPage(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+        val target = request?.url?.toString()
+        if (SignInBrowser.opensInPage(target)) return true
+        SignInBrowser.webFallback(target)?.let { view?.loadUrl(it) }
+        return false
+    }
+
+    /** Lets the page be pinched where it turns zoom off, like Chrome's Force enable zoom. */
+    private fun allowZoom(view: WebView) = view.evaluateJavascript(ALLOW_ZOOM, null)
+
+    /** A window for a popup: the same browser as the page, closed by the page or the user. */
+    private fun popupView(background: Int, desktop: Boolean, textZoom: Int): WebView = WebView(this).apply {
+        configure(this)
+        applyIdentity(this, desktop)
+        settings.textZoom = textZoom
+        // Its own links open in it rather than in a window no one sees.
+        settings.setSupportMultipleWindows(false)
+        setBackgroundColor(background)
+        webViewClient = object : WebViewClient() {
+            override fun onReceivedHttpAuthRequest(
+                view: WebView?,
+                handler: android.webkit.HttpAuthHandler,
+                host: String?,
+                realm: String?
+            ) {
+                if (!WebViewProxy.answerAuth(handler, host)) super.onReceivedHttpAuthRequest(view, handler, host, realm)
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean =
+                !keepsInPage(view, request)
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                view?.let {
+                    allowZoom(it)
+                    @Suppress("DEPRECATION") popupZoom.startAt(it.scale)
+                    showZoom()
+                }
+            }
+
+            override fun onScaleChanged(view: WebView?, oldScale: Float, newScale: Float) {
+                super.onScaleChanged(view, oldScale, newScale)
+                popupZoom.scaled(newScale)
+                showZoom()
+            }
+
+            override fun onRenderProcessGone(view: WebView?, detail: android.webkit.RenderProcessGoneDetail?): Boolean {
+                if (view != null && view === popup) closePopup() else view?.destroy()
+                return true
+            }
+        }
+        webChromeClient = object : WebChromeClient() {
+            override fun onCloseWindow(window: WebView?) {
+                if (window != null && window === popup) closePopup()
+            }
+        }
+    }
+
+    private fun showZoom() {
+        zoomPercent = (if (popup != null) popupZoom else pageZoom).percent
+    }
+
+    private fun closePopup() {
+        val child = popup ?: return
+        popup = null
+        popupZoom.clear()
+        showZoom()
+        child.stopLoading()
+        (child.parent as? android.view.ViewGroup)?.removeView(child)
+        child.destroy()
+    }
+
     override fun onDestroy() {
+        closePopup()
         webView?.let {
             webView = null
             it.stopLoading()
@@ -617,6 +754,11 @@ class CookieWebViewActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val ALLOW_ZOOM = "(function(){var m=document.querySelector('meta[name=viewport]');if(!m)return;" +
+            "var c=(m.content||'').split(',').map(function(s){return s.trim();}).filter(function(s){" +
+            "return s&&!/^(user-scalable|maximum-scale|minimum-scale)\\s*=/i.test(s);});" +
+            "c.push('user-scalable=yes','maximum-scale=5');m.content=c.join(', ');})()"
+
         const val EXTRA_URL = "url"
         const val EXTRA_TITLE = "title"
         const val EXTRA_FROM_FAILURE = "from_failure"
@@ -628,6 +770,9 @@ class CookieWebViewActivity : ComponentActivity() {
         private const val TEXT_MIN = 50
         private const val TEXT_MAX = 200
         private const val TEXT_STEP = 10
+        private const val ZOOM_MIN = 50
+        private const val ZOOM_MAX = 300
+        private const val ZOOM_STEP = 10
         const val EXTRA_OPEN_ENTRY = "open_entry"
 
         /** Hosts a site keeps its login cookie on, besides its own key. */

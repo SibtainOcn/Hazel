@@ -1151,6 +1151,7 @@
     <string name="cookie_webview_on">An</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Textgröße</string>
+    <string name="cookie_webview_page_zoom">Seitenzoom</string>
     <string name="cookies_check">Anmeldung prüfen</string>
     <string name="cookies_check_button">Prüfen</string>
     <string name="cookies_check_failed">Website nicht erreichbar</string>

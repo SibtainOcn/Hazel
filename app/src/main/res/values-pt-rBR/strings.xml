@@ -1168,6 +1168,7 @@
     <string name="cookie_webview_on">Ligada</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Tamanho do texto</string>
+    <string name="cookie_webview_page_zoom">Zoom da página</string>
     <string name="cookies_check">Verificar login</string>
     <string name="cookies_check_button">Verificar</string>
     <string name="cookies_check_failed">Não foi possível acessar o site</string>

@@ -1151,6 +1151,7 @@
     <string name="cookie_webview_on">चालू</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">टेक्स्ट का आकार</string>
+    <string name="cookie_webview_page_zoom">पेज ज़ूम</string>
     <string name="cookies_check">साइन-इन जाँचें</string>
     <string name="cookies_check_button">जाँचें</string>
     <string name="cookies_check_failed">साइट तक नहीं पहुँच सके</string>

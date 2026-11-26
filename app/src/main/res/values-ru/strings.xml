@@ -1184,6 +1184,7 @@
     <string name="cookie_webview_on">Вкл</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Размер текста</string>
+    <string name="cookie_webview_page_zoom">Масштаб страницы</string>
     <string name="cookies_check">Проверить вход</string>
     <string name="cookies_check_button">Проверить</string>
     <string name="cookies_check_failed">Сайт недоступен</string>

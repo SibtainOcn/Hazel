@@ -1134,6 +1134,7 @@
     <string name="cookie_webview_on">オン</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">文字サイズ</string>
+    <string name="cookie_webview_page_zoom">ページのズーム</string>
     <string name="cookies_check">ログインを確認</string>
     <string name="cookies_check_button">確認</string>
     <string name="cookies_check_failed">サイトに接続できません</string>

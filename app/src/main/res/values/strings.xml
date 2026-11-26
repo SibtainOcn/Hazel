@@ -1208,6 +1208,7 @@
     <string name="cookie_webview_on">On</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Text size</string>
+    <string name="cookie_webview_page_zoom">Page zoom</string>
     <string name="cookies_check">Check sign-in</string>
     <string name="cookies_check_button">Check</string>
     <string name="cookies_check_failed">Could not reach the site</string>

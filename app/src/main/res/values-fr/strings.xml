@@ -1168,6 +1168,7 @@
     <string name="cookie_webview_on">Oui</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Taille du texte</string>
+    <string name="cookie_webview_page_zoom">Zoom de la page</string>
     <string name="cookies_check">Vérifier la connexion</string>
     <string name="cookies_check_button">Vérifier</string>
     <string name="cookies_check_failed">Site injoignable</string>

@@ -1134,6 +1134,7 @@
     <string name="cookie_webview_on">开</string>
     <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">文字大小</string>
+    <string name="cookie_webview_page_zoom">页面缩放</string>
     <string name="cookies_check">检查登录</string>
     <string name="cookies_check_button">检查</string>
     <string name="cookies_check_failed">无法连接网站</string>
