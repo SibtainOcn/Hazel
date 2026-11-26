@@ -246,15 +246,15 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write the release notes
-        # Kept short on purpose: what changed lives in docs/release-notes/<tag>.md, linked
-        # here at the tag, so the release page only says which APK to take. A beta has no
-        # notes file of its own and links the website's What's new page instead.
+        # Kept short on purpose: what changed lives in docs/release-notes/<tag>.md, shown on
+        # the website's What's new page under #<tag> and linked there, so the release page only
+        # says which APK to take. A beta has no notes file of its own and links the page itself.
         run: |
           cat > release-notes.md <<'NOTES'
           Most devices are arm64 - Not sure?
           Download the universal build, it works on everything
 
-          Wondering what's different? Here's [Hazel ${{ steps.version.outputs.version }} release notes.](${{ steps.version.outputs.prerelease == 'true' && 'https://sibtainocn.github.io/Hazel/hazel/whats-new.html' || format('https://github.com/SibtainOcn/Hazel/blob/{0}/docs/release-notes/{0}.md', steps.version.outputs.tag) }})
+          Wondering what's different? Here's [Hazel ${{ steps.version.outputs.version }} release notes.](${{ steps.version.outputs.prerelease == 'true' && 'https://sibtainocn.github.io/Hazel/hazel/whats-new.html' || format('https://sibtainocn.github.io/Hazel/hazel/whats-new.html#{0}', steps.version.outputs.tag) }})
 
           > 💡 **Note**: GitHub APKs have the in-app updater, so new releases are auto-detected and downloadable without visiting this page. F-Droid APKs don't, since F-Droid handles updates on its own.
 
