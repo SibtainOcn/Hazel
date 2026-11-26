@@ -712,15 +712,13 @@
     <string name="whats_new_glass_title">新しいガラスの見た目</string>
     <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
     <string name="whats_new_highlights_title">このアップデートの内容</string>
-    <string name="whats_new_stories_title">ストーリーズとハイライト</string>
+    <string name="whats_new_stories_title">新機能：ストーリーズとハイライト</string>
     <string name="whats_new_stories_desc">Instagram と X のストーリーズ、ハイライト、プロフィールの各セクションを保存。</string>
-    <string name="whats_new_videos_title">ギャラリーの動画</string>
+    <string name="whats_new_videos_title">修正：ストーリーズの動画を再生可能</string>
     <string name="whats_new_videos_desc">ビューアで再生し、動画または音声で保存。</string>
-    <string name="whats_new_share_title">Hazel Gallery で共有</string>
-    <string name="whats_new_share_desc">投稿やプロフィールを共有して、保存するものを選択。</string>
-    <string name="whats_new_search_title">メディア | ギャラリー検索</string>
-    <string name="whats_new_search_desc">スイッチひとつでエンジンを選択。ガイド付き。</string>
-    <string name="whats_new_looks_title">アプリアイコンとガラススタイル</string>
+    <string name="whats_new_share_title">修正：Hazel Gallery で共有</string>
+    <string name="whats_new_share_desc">共有した動画がダウンロードできなかった問題を修正。</string>
+    <string name="whats_new_looks_title">新機能：アプリアイコンとガラススタイル</string>
     <string name="whats_new_looks_desc">クラシック、ホワイト、ガラスのアイコンと 5 つの新スタイル。</string>
 
     <!-- AccentPickerDialog -->

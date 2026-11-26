@@ -754,15 +754,13 @@
     <string name="whats_new_glass_title">Новый стеклянный вид</string>
     <string name="whats_new_glass_desc">Эффект стекла, новые стили и акцентные цвета.</string>
     <string name="whats_new_highlights_title">В этом обновлении</string>
-    <string name="whats_new_stories_title">Истории и актуальное</string>
+    <string name="whats_new_stories_title">Новое: Истории и актуальное</string>
     <string name="whats_new_stories_desc">Сохраняйте истории, актуальное и разделы профилей Instagram и X.</string>
-    <string name="whats_new_videos_title">Видео в Галерее</string>
+    <string name="whats_new_videos_title">Исправлено: Видео из историй воспроизводятся</string>
     <string name="whats_new_videos_desc">Смотрите во встроенном просмотре и сохраняйте как видео или аудио.</string>
-    <string name="whats_new_share_title">Делитесь в Hazel Gallery</string>
-    <string name="whats_new_share_desc">Делитесь постами и профилями и выбирайте, что сохранить.</string>
-    <string name="whats_new_search_title">Поиск: Медиа | Галерея</string>
-    <string name="whats_new_search_desc">Один переключатель выбирает движок, есть подсказка.</string>
-    <string name="whats_new_looks_title">Значок и стили стекла</string>
+    <string name="whats_new_share_title">Исправлено: Делитесь в Hazel Gallery</string>
+    <string name="whats_new_share_desc">Раньше общие видео не скачивались; теперь сохраняются.</string>
+    <string name="whats_new_looks_title">Новое: Значок и стили стекла</string>
     <string name="whats_new_looks_desc">Классический, белый или стеклянный значок и пять новых стилей.</string>
 
     <!-- AccentPickerDialog -->

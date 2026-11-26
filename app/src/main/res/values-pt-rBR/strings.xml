@@ -740,15 +740,13 @@
     <string name="whats_new_glass_title">Um novo visual de vidro</string>
     <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
     <string name="whats_new_highlights_title">Nesta atualização</string>
-    <string name="whats_new_stories_title">Stories e destaques</string>
+    <string name="whats_new_stories_title">Novo: Stories e destaques</string>
     <string name="whats_new_stories_desc">Salve stories, destaques e seções de perfis do Instagram e do X.</string>
-    <string name="whats_new_videos_title">Vídeos na Galeria</string>
+    <string name="whats_new_videos_title">Corrigido: Vídeos dos stories reproduzíveis</string>
     <string name="whats_new_videos_desc">Assista no visualizador e salve como vídeo ou áudio.</string>
-    <string name="whats_new_share_title">Compartilhe com Hazel Gallery</string>
-    <string name="whats_new_share_desc">Compartilhe posts e perfis e escolha o que salvar.</string>
-    <string name="whats_new_search_title">Busca Mídia | Galeria</string>
-    <string name="whats_new_search_desc">Uma chave escolhe o mecanismo, com um guia.</string>
-    <string name="whats_new_looks_title">Ícone e estilos de vidro</string>
+    <string name="whats_new_share_title">Corrigido: Compartilhe com Hazel Gallery</string>
+    <string name="whats_new_share_desc">Antes os vídeos compartilhados não baixavam; agora são salvos.</string>
+    <string name="whats_new_looks_title">Novo: Ícone e estilos de vidro</string>
     <string name="whats_new_looks_desc">Ícone Clássico, Branco ou Vidro, e cinco estilos novos.</string>
 
     <!-- AccentPickerDialog -->

@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Share
@@ -236,7 +235,6 @@ private fun HighlightsStep() {
         Highlight(Icons.Outlined.PhotoLibrary, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_stories_title, R.string.whats_new_stories_desc),
         Highlight(Icons.Outlined.PlayCircle, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_videos_title, R.string.whats_new_videos_desc),
         Highlight(Icons.Outlined.Share, MaterialShapes.Pentagon.toShape(), R.string.whats_new_share_title, R.string.whats_new_share_desc),
-        Highlight(Icons.Outlined.ImageSearch, MaterialShapes.Cookie6Sided.toShape(), R.string.whats_new_search_title, R.string.whats_new_search_desc),
         Highlight(Icons.Outlined.Palette, MaterialShapes.Sunny.toShape(), R.string.whats_new_looks_title, R.string.whats_new_looks_desc)
     )
     Column(modifier = Modifier.fillMaxWidth()) {

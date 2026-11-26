@@ -740,15 +740,13 @@
     <string name="whats_new_glass_title">Un nouvel effet verre</string>
     <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
     <string name="whats_new_highlights_title">Dans cette mise à jour</string>
-    <string name="whats_new_stories_title">Stories et à la une</string>
+    <string name="whats_new_stories_title">Nouveau : Stories et à la une</string>
     <string name="whats_new_stories_desc">Enregistrez stories, à la une et sections de profil d\'Instagram et X.</string>
-    <string name="whats_new_videos_title">Vidéos dans Galerie</string>
+    <string name="whats_new_videos_title">Corrigé : Vidéos des stories lisibles</string>
     <string name="whats_new_videos_desc">Lisez-les dans la visionneuse et enregistrez en vidéo ou audio.</string>
-    <string name="whats_new_share_title">Partager vers Hazel Gallery</string>
-    <string name="whats_new_share_desc">Partagez publications et profils, puis choisissez quoi garder.</string>
-    <string name="whats_new_search_title">Recherche Média | Galerie</string>
-    <string name="whats_new_search_desc">Un interrupteur choisit le moteur, avec un guide.</string>
-    <string name="whats_new_looks_title">Icône et styles de verre</string>
+    <string name="whats_new_share_title">Corrigé : Partager vers Hazel Gallery</string>
+    <string name="whats_new_share_desc">Les vidéos partagées ne se téléchargeaient pas ; elles s\'enregistrent maintenant.</string>
+    <string name="whats_new_looks_title">Nouveau : Icône et styles de verre</string>
     <string name="whats_new_looks_desc">Icône classique, blanche ou verre, et cinq nouveaux styles.</string>
 
     <!-- AccentPickerDialog -->

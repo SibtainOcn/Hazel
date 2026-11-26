@@ -740,15 +740,13 @@
     <string name="whats_new_glass_title">Un nuevo aspecto de cristal</string>
     <string name="whats_new_glass_desc">Efecto cristal, nuevos estilos y colores de acento.</string>
     <string name="whats_new_highlights_title">En esta actualización</string>
-    <string name="whats_new_stories_title">Historias y destacadas</string>
+    <string name="whats_new_stories_title">Nuevo: Historias y destacadas</string>
     <string name="whats_new_stories_desc">Guarda historias, destacadas y secciones de perfiles de Instagram y X.</string>
-    <string name="whats_new_videos_title">Vídeos en Galería</string>
+    <string name="whats_new_videos_title">Corregido: Vídeos de historias reproducibles</string>
     <string name="whats_new_videos_desc">Reprodúcelos en el visor y guárdalos como vídeo o audio.</string>
-    <string name="whats_new_share_title">Comparte con Hazel Gallery</string>
-    <string name="whats_new_share_desc">Comparte publicaciones y perfiles y elige qué guardar.</string>
-    <string name="whats_new_search_title">Búsqueda Media | Galería</string>
-    <string name="whats_new_search_desc">Un interruptor elige el motor, con una guía.</string>
-    <string name="whats_new_looks_title">Icono y estilos de cristal</string>
+    <string name="whats_new_share_title">Corregido: Comparte con Hazel Gallery</string>
+    <string name="whats_new_share_desc">Antes los vídeos compartidos no se descargaban; ahora se guardan.</string>
+    <string name="whats_new_looks_title">Nuevo: Icono y estilos de cristal</string>
     <string name="whats_new_looks_desc">Icono clásico, blanco o de cristal, y cinco estilos nuevos.</string>
 
     <!-- AccentPickerDialog -->

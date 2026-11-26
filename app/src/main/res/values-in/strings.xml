@@ -712,15 +712,13 @@
     <string name="whats_new_glass_title">Tampilan kaca baru</string>
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
     <string name="whats_new_highlights_title">Di pembaruan ini</string>
-    <string name="whats_new_stories_title">Story dan sorotan</string>
+    <string name="whats_new_stories_title">Baru: Story dan sorotan</string>
     <string name="whats_new_stories_desc">Simpan story, sorotan, dan bagian profil dari Instagram dan X.</string>
-    <string name="whats_new_videos_title">Video di Galeri</string>
+    <string name="whats_new_videos_title">Diperbaiki: Video story bisa diputar</string>
     <string name="whats_new_videos_desc">Putar di penampil dan simpan sebagai video atau audio.</string>
-    <string name="whats_new_share_title">Bagikan ke Hazel Gallery</string>
-    <string name="whats_new_share_desc">Bagikan postingan dan profil, lalu pilih yang disimpan.</string>
-    <string name="whats_new_search_title">Pencarian Media | Galeri</string>
-    <string name="whats_new_search_desc">Satu sakelar memilih mesin, dengan panduan.</string>
-    <string name="whats_new_looks_title">Ikon aplikasi dan gaya kaca</string>
+    <string name="whats_new_share_title">Diperbaiki: Bagikan ke Hazel Gallery</string>
+    <string name="whats_new_share_desc">Sebelumnya video yang dibagikan gagal diunduh; kini tersimpan.</string>
+    <string name="whats_new_looks_title">Baru: Ikon aplikasi dan gaya kaca</string>
     <string name="whats_new_looks_desc">Ikon Klasik, Putih, atau Kaca, dan lima gaya baru.</string>
 
     <!-- AccentPickerDialog -->

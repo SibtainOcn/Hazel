@@ -726,15 +726,13 @@
     <string name="whats_new_glass_title">नया ग्लास लुक</string>
     <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
     <string name="whats_new_highlights_title">इस अपडेट में</string>
-    <string name="whats_new_stories_title">स्टोरी और हाइलाइट</string>
+    <string name="whats_new_stories_title">नया: स्टोरी और हाइलाइट</string>
     <string name="whats_new_stories_desc">Instagram और X से स्टोरी, हाइलाइट और प्रोफ़ाइल सेक्शन सेव करें।</string>
-    <string name="whats_new_videos_title">गैलरी में वीडियो</string>
+    <string name="whats_new_videos_title">ठीक किया: स्टोरी वीडियो अब चलते हैं</string>
     <string name="whats_new_videos_desc">व्यूअर में चलाएं और वीडियो या ऑडियो के रूप में सेव करें।</string>
-    <string name="whats_new_share_title">Hazel Gallery पर शेयर करें</string>
-    <string name="whats_new_share_desc">पोस्ट और प्रोफ़ाइल शेयर करें, फिर चुनें क्या सेव करना है।</string>
-    <string name="whats_new_search_title">मीडिया | गैलरी खोज</string>
-    <string name="whats_new_search_desc">एक स्विच इंजन चुनता है, गाइड के साथ।</string>
-    <string name="whats_new_looks_title">ऐप आइकन और ग्लास स्टाइल</string>
+    <string name="whats_new_share_title">ठीक किया: Hazel Gallery पर शेयर करें</string>
+    <string name="whats_new_share_desc">पहले शेयर किए गए वीडियो डाउनलोड नहीं होते थे; अब सेव होते हैं।</string>
+    <string name="whats_new_looks_title">नया: ऐप आइकन और ग्लास स्टाइल</string>
     <string name="whats_new_looks_desc">क्लासिक, सफ़ेद या ग्लास आइकन, और पांच नई स्टाइल।</string>
 
     <!-- AccentPickerDialog -->

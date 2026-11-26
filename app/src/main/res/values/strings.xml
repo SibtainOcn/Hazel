@@ -797,15 +797,13 @@
     <string name="whats_new_glass_title">A new glass look</string>
     <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
     <string name="whats_new_highlights_title">In this update</string>
-    <string name="whats_new_stories_title">Stories and highlights</string>
+    <string name="whats_new_stories_title">Feat: Stories and highlights</string>
     <string name="whats_new_stories_desc">Save stories, highlights and profile sections from Instagram and X.</string>
-    <string name="whats_new_videos_title">Videos in Gallery</string>
+    <string name="whats_new_videos_title">Fixed: Stories videos playable</string>
     <string name="whats_new_videos_desc">Play them in the viewer and save as video or audio.</string>
-    <string name="whats_new_share_title">Share to Hazel Gallery</string>
-    <string name="whats_new_share_desc">Share posts and profiles, then pick what to save.</string>
-    <string name="whats_new_search_title">Media | Gallery search</string>
-    <string name="whats_new_search_desc">One switch picks the engine, with a guide.</string>
-    <string name="whats_new_looks_title">App icon and glass styles</string>
+    <string name="whats_new_share_title">Fixed: Share to Hazel Gallery</string>
+    <string name="whats_new_share_desc">Shared videos failed to download before; they save now.</string>
+    <string name="whats_new_looks_title">Feat: App icon and glass styles</string>
     <string name="whats_new_looks_desc">Classic, White or Glass icon, and five new styles.</string>
 
     <!-- AccentPickerDialog -->
