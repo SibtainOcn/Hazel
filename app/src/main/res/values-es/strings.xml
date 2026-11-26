@@ -10,6 +10,7 @@
     <string name="gallery_failed">No se pudo leer esta publicación</string>
     <string name="gallery_empty">Esta publicación no tiene archivos</string>
     <string name="gallery_error_login">Inicia sesión en este sitio en Cookies y vuelve a intentarlo</string>
+    <string name="gallery_error_sign_in_refused">El sitio rechazó tu inicio de sesión guardado. Vuelve a iniciar sesión en Cookies</string>
     <string name="gallery_error_unsupported">Galería no puede leer este enlace</string>
     <string name="gallery_error_not_found">La publicación ya no existe, es privada o está vacía</string>
     <string name="gallery_error_network">Sin conexión. Revisa la red o el proxy</string>
@@ -160,6 +161,8 @@
     <string name="no_results_sign_in_title">Hace falta iniciar sesión</string>
     <string name="no_results_error_title">No se pudo leer este enlace</string>
     <string name="no_results_sign_in_body">La fuente pide una cuenta antes de entregar esto. Al iniciar sesión se guardan las cookies del sitio y se vuelve a intentar.</string>
+    <string name="no_results_sign_in_again_title">Volver a iniciar sesión</string>
+    <string name="no_results_sign_in_again_body">El sitio rechazó esta solicitud aun con tu inicio de sesión guardado. Puede que haya caducado. Al volver a iniciar sesión se guardan cookies nuevas y se intenta otra vez.</string>
     <string name="no_results_continue_body">No se pudieron leer los detalles, pero la descarga aún puede funcionar. Si sigues adelante, se ofrece la mejor calidad disponible.</string>
     <string name="no_results_refused_body">La fuente rechazó la petición.</string>
     <string name="no_results_gone_body">Este contenido no está disponible. Puede que se haya eliminado o que el enlace esté mal.</string>

@@ -10,6 +10,7 @@
     <string name="gallery_failed">Beitrag konnte nicht gelesen werden</string>
     <string name="gallery_empty">Keine Dateien in diesem Beitrag</string>
     <string name="gallery_error_login">Melde dich unter Cookies bei dieser Seite an und versuche es erneut</string>
+    <string name="gallery_error_sign_in_refused">Die Seite hat deine gespeicherte Anmeldung abgelehnt. Melde dich unter Cookies erneut an</string>
     <string name="gallery_error_unsupported">Galerie kann diesen Link nicht lesen</string>
     <string name="gallery_error_not_found">Beitrag gelöscht, privat oder leer</string>
     <string name="gallery_error_network">Keine Verbindung. Netzwerk oder Proxy prüfen</string>
@@ -155,6 +156,8 @@
     <string name="no_results_sign_in_title">Anmeldung nötig</string>
     <string name="no_results_error_title">Dieser Link ließ sich nicht lesen</string>
     <string name="no_results_sign_in_body">Die Quelle verlangt ein Konto, bevor sie das herausgibt. Beim Anmelden werden die Cookies der Seite gespeichert und es wird erneut versucht.</string>
+    <string name="no_results_sign_in_again_title">Erneut anmelden</string>
+    <string name="no_results_sign_in_again_body">Die Seite hat die Anfrage trotz deiner gespeicherten Anmeldung abgelehnt. Sie ist vielleicht abgelaufen. Beim erneuten Anmelden werden frische Cookies gespeichert und es wird erneut versucht.</string>
     <string name="no_results_continue_body">Die Details ließen sich nicht lesen, der Download selbst kann aber trotzdem klappen. Wer weitermacht, bekommt die beste verfügbare Qualität.</string>
     <string name="no_results_refused_body">Die Quelle hat die Anfrage abgelehnt.</string>
     <string name="no_results_gone_body">Dieses Medium ist nicht verfügbar. Es wurde vielleicht entfernt oder gelöscht, oder der Link stimmt nicht.</string>

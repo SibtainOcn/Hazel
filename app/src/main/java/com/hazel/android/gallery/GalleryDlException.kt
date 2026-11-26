@@ -16,6 +16,8 @@ class GalleryDlException(
     enum class Kind(@param:StringRes val message: Int) {
         /** The site wants a sign-in, or the saved one ran out. */
         LOGIN_REQUIRED(R.string.gallery_error_login),
+        /** The site turned the request away although a sign-in for it is saved. */
+        SIGN_IN_REFUSED(R.string.gallery_error_sign_in_refused),
         /** No part of gallery-dl reads this kind of link. */
         UNSUPPORTED(R.string.gallery_error_unsupported),
         /** The post is gone, private, or holds nothing to save. */
@@ -48,6 +50,18 @@ class GalleryDlException(
             }
         }
 
+        /**
+         * [kind] in the light of whether a sign-in for the site is saved. Without one, anything
+         * not plainly gone or unsupported asks for one; with one, a refusal means it stopped working.
+         */
+        fun withSignIn(kind: Kind, text: String, signedIn: Boolean): Kind = when {
+            !signedIn -> if (kind == Kind.OTHER) Kind.LOGIN_REQUIRED else kind
+            kind == Kind.LOGIN_REQUIRED -> Kind.SIGN_IN_REFUSED
+            kind == Kind.OTHER && REFUSED_SIGNS.any { it in text.lowercase() } -> Kind.SIGN_IN_REFUSED
+            else -> kind
+        }
+
+        private val REFUSED_SIGNS = listOf("400 bad request", "403 forbidden")
         private val LOGIN_SIGNS = listOf(
             "login required", "authorizationerror", "authentication", "401 unauthorized",
             "redirect to login", "cookies", "log in", "login"

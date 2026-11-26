@@ -10,6 +10,7 @@
     <string name="gallery_failed">无法读取此帖子</string>
     <string name="gallery_empty">此帖子中没有文件</string>
     <string name="gallery_error_login">请在 Cookies 中登录此网站后重试</string>
+    <string name="gallery_error_sign_in_refused">网站拒绝了已保存的登录。请在 Cookies 中重新登录</string>
     <string name="gallery_error_unsupported">图库无法读取此链接</string>
     <string name="gallery_error_not_found">帖子已删除、私密或为空</string>
     <string name="gallery_error_network">无法连接。请检查网络或代理</string>
@@ -150,6 +151,8 @@
     <string name="no_results_sign_in_title">需要登录</string>
     <string name="no_results_error_title">无法读取这个链接</string>
     <string name="no_results_sign_in_body">来源要求先有账号才肯交出内容。登录后会保存该站点的 Cookie 并重试。</string>
+    <string name="no_results_sign_in_again_title">重新登录</string>
+    <string name="no_results_sign_in_again_body">即使已保存登录，网站仍拒绝了此请求。登录可能已过期。重新登录会保存新的 Cookie 并重试。</string>
     <string name="no_results_continue_body">详细信息读取失败，但下载本身仍可能成功。继续的话会使用可得的最佳画质。</string>
     <string name="no_results_refused_body">来源拒绝了这次请求。</string>
     <string name="no_results_gone_body">此媒体不可用，可能已被移除或删除，或者链接有误。</string>
