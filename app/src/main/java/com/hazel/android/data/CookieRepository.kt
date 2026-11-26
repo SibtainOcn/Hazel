@@ -179,25 +179,22 @@ object CookieRepository {
             if (fields.size < 7) null else domainOf(line) to fields[5]
         }.toList()
 
-    suspend fun delete(context: Context, id: Long) {
+    suspend fun delete(context: Context, id: Long) = delete(context, setOf(id))
+
+    suspend fun delete(context: Context, ids: Set<Long>) {
         var remainingEntries: List<CookieEntry> = emptyList()
         var remainingUseCookies: Boolean = false
-        var deletedSite: String? = null
+        val deletedSites = mutableSetOf<String>()
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[COOKIES_KEY])
-            val deleted = existing.find { it.id == id }
-            if (deleted != null) {
-                val site = siteKeyOf(hostOf(deleted.url))
-                if (site != null) {
-                    deletedSite = site
-                } else {
-                    val firstDomain = deleted.content.lineSequence()
-                        .map { it.substringBefore('\t').trim().removePrefix(".") }
-                        .firstOrNull { it.isNotBlank() }
-                    deletedSite = firstDomain?.let { siteKeyOf(it) ?: it }
-                }
+            existing.filter { it.id in ids }.forEach { deleted ->
+                val site = siteKeyOf(hostOf(deleted.url)) ?: deleted.content.lineSequence()
+                    .map { it.substringBefore('\t').trim().removePrefix(".") }
+                    .firstOrNull { it.isNotBlank() }
+                    ?.let { siteKeyOf(it) ?: it }
+                site?.let(deletedSites::add)
             }
-            val remaining = existing.filter { it.id != id }
+            val remaining = existing.filter { it.id !in ids }
             prefs[COOKIES_KEY] = encode(remaining)
             if (remaining.isEmpty()) {
                 prefs[USE_COOKIES_KEY] = false
@@ -206,7 +203,7 @@ object CookieRepository {
             remainingUseCookies = prefs[USE_COOKIES_KEY] ?: false
         }
         withContext(Dispatchers.IO) {
-            deletedSite?.let { site ->
+            deletedSites.forEach { site ->
                 runCatching { File(context.cacheDir, "cookies-$site.txt").delete() }
             }
         }
@@ -223,6 +220,8 @@ object CookieRepository {
             context.cacheDir.listFiles { _, name -> name.startsWith("cookies") }?.forEach {
                 runCatching { it.delete() }
             }
+            // gallery-dl keeps its own sessions and tokens here.
+            listOf("", "-journal", "-wal", "-shm").forEach { runCatching { File(context.cacheDir, "gallery-dl.sqlite3$it").delete() } }
         }
         writeCookieFile(context, explicitEntries = emptyList(), explicitUseCookies = false)
         InfoCache.clear()
@@ -491,21 +490,18 @@ object CookieRepository {
         return CookieSummary(site = site, count = cookies.size, expiresAt = expiries.maxOrNull())
     }
 
-    /** Whole cookie file as text, for copying out. */
-    suspend fun exportText(context: Context): String = withContext(Dispatchers.IO) {
-        writeCookieFile(context)
-        runCatching { cookieFile(context).readText() }.getOrDefault("")
+    /** [entries] as one Netscape cookie file, for copying or saving out. */
+    fun exportText(entries: List<CookieEntry>): String = buildString {
+        append("# Netscape HTTP Cookie File\n")
+        entries.forEach { entry -> entry.content.lineSequence().filter { isCookieLine(it) }.forEach { append(it.trim()).append('\n') } }
     }
 
     /**
      * Takes cookie text the user copied from elsewhere and stores it as a new entry.
-     * Anything that is not a Netscape cookie file is rejected rather than saved as junk.
+     * Takes a Netscape cookie file or a JSON export; anything else is rejected rather than saved as junk.
      */
     suspend fun importText(context: Context, text: String, title: String): Boolean {
-        val lines = text.lineSequence()
-            .map { it.trim() }
-            .filter { isCookieLine(it) }
-            .toList()
+        val lines = withContext(Dispatchers.Default) { CookieImport.toNetscapeLines(text) }
         if (lines.isEmpty()) return false
 
         // Group cookie lines by recognized site (from 1st column of Netscape line)

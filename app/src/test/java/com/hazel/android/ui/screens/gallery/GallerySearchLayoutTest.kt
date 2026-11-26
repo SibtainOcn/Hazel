@@ -77,9 +77,9 @@ class GallerySearchLayoutTest(private val locale: String) {
     fun `site row marks the chosen site and switches on tap`() {
         var site by mutableStateOf(GallerySearchSite.PINTEREST)
         show { GallerySiteRow(selected = site, onSelect = { site = it }) }
-        compose.onNodeWithText("X").performScrollTo().performClick()
+        compose.onNodeWithText("Tumblr").performScrollTo().performClick()
         compose.waitForIdle()
-        assertEquals(GallerySearchSite.X, site)
+        assertEquals(GallerySearchSite.TUMBLR, site)
         val chosen = compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)).fetchSemanticsNodes()
         assertEquals(1, chosen.size)
         saveScreen("gallery-site-row-$locale")
