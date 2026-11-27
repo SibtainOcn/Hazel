@@ -1263,7 +1263,7 @@
     <string name="upd_gallerydl_auto_summary">ダウンロードしていない時に新しい版を入れる</string>
     <string name="gallery_group_by_author">投稿者ごとにまとめる</string>
     <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
-    <string name="more_image_settings">画像の設定</string>
+    <string name="more_image_settings">gallery-dl の設定</string>
     <string name="guide_share_from_apps">どのアプリからでもリンクを共有</string>
     <string name="guide_share_video">あらゆる動画、リール、音声。画質、カット、SponsorBlock などを選んでダウンロード</string>
     <string name="guide_share_gallery">画像、投稿、ストーリーズ、ハイライト、プロフィール。保存するものを選んでダウンロード</string>

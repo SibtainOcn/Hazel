@@ -1263,7 +1263,7 @@
     <string name="upd_gallerydl_auto_summary">Pasang versi baru saat tidak ada unduhan</string>
     <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
     <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
-    <string name="more_image_settings">Setelan gambar</string>
+    <string name="more_image_settings">Setelan gallery-dl</string>
     <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
     <string name="guide_share_video">Video, reel, atau audio apa pun. Pilih kualitas, potong, SponsorBlock, dan lainnya, lalu unduh</string>
     <string name="guide_share_gallery">Gambar, postingan, story, sorotan, dan profil. Pilih yang disimpan, lalu unduh</string>

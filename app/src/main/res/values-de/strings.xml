@@ -1280,7 +1280,7 @@
     <string name="upd_gallerydl_auto_summary">Neue Versionen installieren, wenn kein Download läuft</string>
     <string name="gallery_group_by_author">Nach Autor gruppieren</string>
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
-    <string name="more_image_settings">Bildeinstellungen</string>
+    <string name="more_image_settings">gallery-dl-Einstellungen</string>
     <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
     <string name="guide_share_video">Jedes Video, Reel oder Audio. Qualität, Schnitt, SponsorBlock und mehr wählen, dann laden</string>
     <string name="guide_share_gallery">Bilder, Beiträge, Storys, Highlights und Profile. Auswahl treffen, dann laden</string>
