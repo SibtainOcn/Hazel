@@ -377,12 +377,14 @@ fun SearchScreen(
             )
         }
 
+        val optionsPrefs = rememberSearchOptionsPrefs()
         if (menuOpen) {
             SearchOptionsSheet(
                 onClearResults = onClearResults,
                 onDismiss = { menuOpen = false },
                 imagesFirst = images,
-                onCleared = statusToast::show
+                onCleared = statusToast::show,
+                prefs = optionsPrefs
             )
         }
 

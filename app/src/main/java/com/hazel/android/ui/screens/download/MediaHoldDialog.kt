@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,15 +81,38 @@ fun MediaHoldDialog(
     onOpen: (() -> Unit)?,
     onProperties: (() -> Unit)?
 ) {
+    HoldDialog(info.title.ifBlank { info.url }, info.uploader, info.thumbnail, false, onDismiss, onPlay, onDownload, onOpen, onProperties)
+}
+
+/**
+ * The same hold card for any file: [fullScreen] names the main action Full screen instead
+ * of Play, for an image whose main action opens the viewer.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HoldDialog(
+    title: String,
+    subtitle: String,
+    thumbnail: String?,
+    fullScreen: Boolean,
+    onDismiss: () -> Unit,
+    onPlay: (() -> Unit)?,
+    onDownload: () -> Unit,
+    onOpen: (() -> Unit)?,
+    onProperties: (() -> Unit)?
+) {
     BasicAlertDialog(onDismissRequest = onDismiss) {
-        MediaHoldCard(info, onPlay, onDownload, onOpen, onProperties)
+        MediaHoldCard(title, subtitle, thumbnail, fullScreen, onPlay, onDownload, onOpen, onProperties)
     }
 }
 
 /** The hold dialog's card on its own, so it can be drawn outside a dialog window. */
 @Composable
 internal fun MediaHoldCard(
-    info: MediaInfo,
+    title: String,
+    subtitle: String,
+    thumbnail: String?,
+    fullScreen: Boolean,
     onPlay: (() -> Unit)?,
     onDownload: () -> Unit,
     onOpen: (() -> Unit)?,
@@ -109,9 +133,9 @@ internal fun MediaHoldCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 ArtworkPlaceholder(Modifier.matchParentSize())
-                if (info.thumbnail != null) {
+                if (thumbnail != null) {
                     AsyncImage(
-                        model = info.thumbnail,
+                        model = thumbnail,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -120,16 +144,16 @@ internal fun MediaHoldCard(
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                info.title.ifBlank { info.url },
+                title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
-            if (info.uploader.isNotBlank()) {
+            if (subtitle.isNotBlank()) {
                 Text(
-                    info.uploader,
+                    subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -138,7 +162,7 @@ internal fun MediaHoldCard(
                 )
             }
             Spacer(Modifier.height(20.dp))
-            HoldActions(onPlay, onDownload, onOpen, onProperties)
+            HoldActions(fullScreen, onPlay, onDownload, onOpen, onProperties)
         }
     }
 }
@@ -151,6 +175,7 @@ internal fun MediaHoldCard(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun HoldActions(
+    fullScreen: Boolean,
     onPlay: (() -> Unit)?,
     onDownload: () -> Unit,
     onOpen: (() -> Unit)?,
@@ -158,7 +183,10 @@ private fun HoldActions(
 ) {
     // Without a player the download is the main action, so the card always leads with one.
     val download = HoldItem(MaterialShapes.Cookie9Sided, Icons.Rounded.Download, R.string.format_sheet_download, onDownload)
-    val main = onPlay?.let { HoldItem(MaterialShapes.Pentagon, Icons.Rounded.PlayArrow, R.string.player_play, it) } ?: download
+    val main = onPlay?.let {
+        if (fullScreen) HoldItem(MaterialShapes.Pentagon, ImageVector.vectorResource(R.drawable.ic_fullscreen_item), R.string.player_fullscreen, it)
+        else HoldItem(MaterialShapes.Pentagon, Icons.Rounded.PlayArrow, R.string.player_play, it)
+    } ?: download
     val tiles = listOfNotNull(
         download.takeIf { onPlay != null },
         onOpen?.let { HoldItem(MaterialShapes.Sunny, Icons.AutoMirrored.Rounded.OpenInNew, R.string.sheet_link_open, it) },

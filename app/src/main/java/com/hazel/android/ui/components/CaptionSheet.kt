@@ -54,7 +54,12 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
+fun CaptionSheet(
+    caption: String,
+    title: String,
+    onDismiss: () -> Unit,
+    @androidx.annotation.StringRes heading: Int = R.string.gallery_caption
+) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -65,7 +70,7 @@ fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
             Text(
-                stringResource(R.string.gallery_caption),
+                stringResource(heading),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )

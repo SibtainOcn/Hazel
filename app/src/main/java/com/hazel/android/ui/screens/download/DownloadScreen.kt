@@ -472,11 +472,13 @@ fun DownloadScreen(
             // Home screen search bar. Its 3-dot opens the same search options sheet the full
             // SearchScreen opens, so the two entry points behave identically.
             var homeMenuOpen by remember { mutableStateOf(false) }
+            val optionsPrefs = rememberSearchOptionsPrefs()
             if (homeMenuOpen) {
                 SearchOptionsSheet(
                     onClearResults = downloadViewModel::clearResults,
                     onDismiss = { homeMenuOpen = false },
-                    onCleared = statusToast::show
+                    onCleared = statusToast::show,
+                    prefs = optionsPrefs
                 )
             }
 

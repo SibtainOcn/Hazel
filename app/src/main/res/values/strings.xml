@@ -536,6 +536,13 @@
     <string name="properties_name">Name</string>
     <string name="properties_section_media">Media</string>
     <string name="properties_section_again">Get it again</string>
+    <string name="properties_section_in_file">In the file</string>
+    <string name="properties_tag_description">Description</string>
+    <string name="properties_tag_artist">Artist</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Uploaded</string>
+    <string name="properties_tag_comment">Comment</string>
     <string name="properties_show_file">Show file</string>
     <string name="properties_share">Share</string>
     <string name="properties_copied">Copied</string>
@@ -1100,6 +1107,9 @@
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
     <string name="fetch_settings_play_audio">Audio language</string>
+    <string name="fetch_settings_play_background">Keep playing in background</string>
+    <string name="fetch_settings_play_background_summary">Plays on with a notification after you leave the app</string>
+    <string name="play_background_channel">Playback</string>
     <string name="player_audio_original">Original</string>
     <string name="player_audio_app_language">App language</string>
     <string name="player_audio_track">Audio track</string>

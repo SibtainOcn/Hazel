@@ -541,6 +541,13 @@
     <string name="properties_name">Имя</string>
     <string name="properties_section_media">Медиа</string>
     <string name="properties_section_again">Получить снова</string>
+    <string name="properties_section_in_file">В файле</string>
+    <string name="properties_tag_description">Описание</string>
+    <string name="properties_tag_artist">Исполнитель</string>
+    <string name="properties_tag_album">Альбом</string>
+    <string name="properties_tag_genre">Жанр</string>
+    <string name="properties_tag_date">Загружено</string>
+    <string name="properties_tag_comment">Комментарий</string>
     <string name="properties_show_file">Показать файл</string>
     <string name="properties_share">Поделиться</string>
     <string name="properties_copied">Скопировано</string>
@@ -1052,6 +1059,9 @@
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>
     <string name="fetch_settings_play_audio">Язык аудио</string>
+    <string name="fetch_settings_play_background">Воспроизводить в фоне</string>
+    <string name="fetch_settings_play_background_summary">Продолжает играть с уведомлением после выхода из приложения</string>
+    <string name="play_background_channel">Воспроизведение</string>
     <string name="player_audio_original">Оригинал</string>
     <string name="player_audio_app_language">Язык приложения</string>
     <string name="player_audio_track">Звуковая дорожка</string>

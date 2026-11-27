@@ -40,7 +40,7 @@ internal object GallerySpare {
             expiry?.cancel()
             s
         }
-        if (taken.key != key || !taken.process.isAlive) {
+        if (taken.key != key || !com.hazel.android.util.Processes.isAlive(taken.process)) {
             stop(taken)
             return null
         }
@@ -67,7 +67,7 @@ internal object GallerySpare {
         val key = GalleryDlEngine.importKey(context)
         synchronized(this) {
             val waiting = spare
-            if (waiting != null && waiting.key == key && waiting.process.isAlive) return
+            if (waiting != null && waiting.key == key && com.hazel.android.util.Processes.isAlive(waiting.process)) return
         }
         discard()
         val stderr = GalleryLogs.rawFile(GalleryLogs.dir(context))
@@ -92,7 +92,7 @@ internal object GallerySpare {
     }
 
     private fun stop(s: Spare) {
-        s.process.destroyForcibly()
+        com.hazel.android.util.Processes.kill(s.process)
         s.stderr.delete()
     }
 

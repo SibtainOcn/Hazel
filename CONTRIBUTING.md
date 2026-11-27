@@ -72,6 +72,10 @@ Fork the repository, clone your fork, and open it in the latest Android Studio. 
 - **Match the code around you**: naming, structure, comment style. No new dependency
   without discussing it first; each one has to build reproducibly for F-Droid.
 - **Never commit** keystores, passwords, tokens, cookies or personal data.
+- **Sheets and dialogs open at once.** Read the settings a sheet shows in the screen that
+  opens it (see `rememberSearchOptionsPrefs`), not inside the sheet, so it never waits on a
+  read before it can slide in. Heavy reads (files, network) run off the main thread after it
+  is shown.
 
 ### Checks to run before opening it
 
@@ -82,6 +86,7 @@ is not reviewed until it is green.
 python tools/strings/check.py resources       # strings.xml integrity
 python tools/strings/check.py translations    # translations correct, coverage report
 ./gradlew :app:testDebugUnitTest              # unit tests
+./gradlew :app:lintGithubDebug -PcrashLint    # crash checks
 ./gradlew :app:assembleDebug                  # it builds
 ```
 
@@ -96,7 +101,7 @@ attach before and after screenshots to the pull request.
 
 ### What happens after you open it
 
-1. CI runs: string checks, unit tests, and a full APK build.
+1. CI runs: string checks, unit tests, crash checks (lint's crash rules), and a full APK build.
 2. A maintainer reviews. Expect questions; answer them in the thread and push fixes to the
    same branch.
 3. Once approved and green, a maintainer merges it, usually as a squash.

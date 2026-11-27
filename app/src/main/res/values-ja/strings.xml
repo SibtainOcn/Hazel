@@ -505,6 +505,13 @@
     <string name="properties_name">名前</string>
     <string name="properties_section_media">メディア</string>
     <string name="properties_section_again">もう一度取得</string>
+    <string name="properties_section_in_file">ファイル内の情報</string>
+    <string name="properties_tag_description">説明</string>
+    <string name="properties_tag_artist">アーティスト</string>
+    <string name="properties_tag_album">アルバム</string>
+    <string name="properties_tag_genre">ジャンル</string>
+    <string name="properties_tag_date">アップロード日</string>
+    <string name="properties_tag_comment">コメント</string>
     <string name="properties_show_file">ファイルを表示</string>
     <string name="properties_share">共有</string>
     <string name="properties_copied">コピーしました</string>
@@ -1008,6 +1015,9 @@
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>
     <string name="fetch_settings_play_audio">音声の言語</string>
+    <string name="fetch_settings_play_background">バックグラウンドで再生を続ける</string>
+    <string name="fetch_settings_play_background_summary">アプリを離れても通知付きで再生を続けます</string>
+    <string name="play_background_channel">再生</string>
     <string name="player_audio_original">オリジナル</string>
     <string name="player_audio_app_language">アプリの言語</string>
     <string name="player_audio_track">音声トラック</string>

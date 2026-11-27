@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.OpenInFull
 import com.hazel.android.ui.components.CaptionSheet
 import com.hazel.android.util.CaptionMetadata
 import androidx.compose.material.icons.filled.PlayArrow
@@ -116,7 +115,13 @@ fun DownloadPropertiesSheet(
     }
     // The caption written into the image itself, read from the file on disk.
     var caption by remember(entry.id) { mutableStateOf<String?>(null) }
-    var captionOpen by remember { mutableStateOf(false) }
+    // Tags written into a video or audio file: its description, link, date and the like.
+    var tags by remember(entry.id) { mutableStateOf(com.hazel.android.util.FileTags()) }
+    // The long text open in full, with its heading.
+    var fullText by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    LaunchedEffect(entry.id, present) {
+        if (present && !entry.isImage) tags = com.hazel.android.util.FileTagReader.read(context, entry.fileUri)
+    }
     LaunchedEffect(entry.id, present) {
         if (present && entry.isImage) caption = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             runCatching {
@@ -155,7 +160,7 @@ fun DownloadPropertiesSheet(
                 Header(entry, present, facts)
                 StatTiles(entry, facts)
                 FileActions(entry, present)
-                Details(entry, facts, caption, onOpenCaption = { captionOpen = true }, onCopy = copy)
+                Details(entry, facts, caption, tags, onOpenText = { heading, text -> fullText = heading to text }, onCopy = copy)
                 if (entry.url.isNotBlank() && (onDownloadAgain != null || onFetchAgain != null)) {
                     AgainGroup(onDownloadAgain, onFetchAgain)
                 }
@@ -174,7 +179,7 @@ fun DownloadPropertiesSheet(
             }
         }
     }
-    caption?.takeIf { captionOpen }?.let { CaptionSheet(it, entry.title, onDismiss = { captionOpen = false }) }
+    fullText?.let { (heading, text) -> CaptionSheet(text, entry.title, onDismiss = { fullText = null }, heading = heading) }
 }
 
 private class PropertiesFeedback(val message: String)
@@ -359,25 +364,13 @@ private fun Details(
     entry: HistoryEntry,
     facts: MediaFacts,
     caption: String?,
-    onOpenCaption: () -> Unit,
+    tags: com.hazel.android.util.FileTags,
+    onOpenText: (heading: Int, text: String) -> Unit,
     onCopy: (String) -> Unit
 ) {
     val context = LocalContext.current
     val media = buildList<@Composable () -> Unit> {
-        caption?.let { text ->
-            add {
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenCaption),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Label(stringResource(R.string.gallery_caption))
-                        Text(text, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    }
-                    SquareIcon(Icons.Filled.OpenInFull, R.string.caption_view_full, onOpenCaption)
-                }
-            }
-        }
+        caption?.let { text -> add { TextPreviewRow(R.string.gallery_caption, text, onOpenText) } }
         entry.formatLabel.ifBlank { null }?.let { add { FactRow(stringResource(R.string.properties_quality), it) } }
         formatDuration(entry.durationSeconds.takeIf { it > 0 } ?: facts.durationSeconds).ifBlank { null }
             ?.let { add { FactRow(stringResource(R.string.properties_length), it) } }
@@ -413,25 +406,81 @@ private fun Details(
     val source = buildList<@Composable () -> Unit> {
         add { FactRow(stringResource(R.string.properties_downloaded), formatStamp(entry.completedAt)) }
         if (entry.url.isNotBlank()) add {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    entry.url.removePrefix("https://").removePrefix("http://").removePrefix("www."),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                SquareIcon(Icons.Filled.ContentCopy, R.string.sheet_link_copy) { onCopy(entry.url) }
-                Spacer(modifier = Modifier.width(6.dp))
-                SquareIcon(Icons.Filled.Public, R.string.docs_open_in_browser) { openInBrowser(context, entry.url) }
-            }
+            LinkRow(entry.url, onCopy = { onCopy(entry.url) }, onOpen = { openInBrowser(context, entry.url) })
+        }
+    }
+    val inFile = buildList<@Composable () -> Unit> {
+        tags.description.ifBlank { null }?.let { text -> add { TextPreviewRow(R.string.properties_tag_description, text, onOpenText) } }
+        tags.title.takeIf { it.isNotBlank() && it != entry.title }?.let { add { FactRow(stringResource(R.string.format_sheet_label_title), it) } }
+        tags.artist.ifBlank { null }?.let { add { FactRow(stringResource(R.string.properties_tag_artist), it) } }
+        tags.album.takeIf { it.isNotBlank() && it != tags.title }?.let { add { FactRow(stringResource(R.string.properties_tag_album), it) } }
+        tags.genre.ifBlank { null }?.let { add { FactRow(stringResource(R.string.properties_tag_genre), it) } }
+        tags.date.ifBlank { null }?.let { add { FactRow(stringResource(R.string.properties_tag_date), formatTagDate(it)) } }
+        tags.comment.ifBlank { null }?.let { text -> add { TextPreviewRow(R.string.properties_tag_comment, text, onOpenText) } }
+        tags.link.takeIf { it.isNotBlank() && it != entry.url }?.let { link ->
+            add { LinkRow(link, onCopy = { onCopy(link) }, onOpen = { openInBrowser(context, link) }) }
         }
     }
     Group(R.string.properties_section_media, media)
+    Group(R.string.properties_section_in_file, inFile)
     Group(R.string.properties_file, file)
     Group(R.string.properties_source, source)
+}
+
+/** A long text cut to two lines; a tap opens it in full in the caption sheet. */
+@Composable
+private fun TextPreviewRow(@StringRes heading: Int, text: String, onOpen: (Int, String) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable { onOpen(heading, text) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Drawn like the caption field of the gallery-dl item sheet: label, first line, expand.
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(heading), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty(),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        androidx.compose.material3.IconButton(onClick = { onOpen(heading, text) }) {
+            Icon(
+                androidx.compose.ui.res.painterResource(R.drawable.ic_expand_all),
+                contentDescription = stringResource(R.string.caption_view_full)
+            )
+        }
+    }
+}
+
+/** A web address on one line, with copy and open beside it. */
+@Composable
+private fun LinkRow(url: String, onCopy: () -> Unit, onOpen: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            url.removePrefix("https://").removePrefix("http://").removePrefix("www."),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        SquareIcon(Icons.Filled.ContentCopy, R.string.sheet_link_copy, onCopy)
+        Spacer(modifier = Modifier.width(6.dp))
+        SquareIcon(Icons.Filled.Public, R.string.docs_open_in_browser, onOpen)
+    }
+}
+
+private val TAG_DAY = Regex("^(\\d{4})-?(\\d{2})-?(\\d{2})")
+
+/** A tag date as yt-dlp writes it (20240131), in the phone's own date format; anything else as it is. */
+private fun formatTagDate(raw: String): String {
+    val (y, m, d) = TAG_DAY.find(raw.trim())?.destructured ?: return raw
+    return runCatching {
+        java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+            .format(java.util.GregorianCalendar(y.toInt(), m.toInt() - 1, d.toInt()).time)
+    }.getOrDefault(raw)
 }
 
 /** Rows joined into one rounded block, with tight corners between them. */

@@ -331,6 +331,7 @@ object SettingsRepository {
     private val PLAY_ENGINE_KEY = stringPreferencesKey("play_engine")
     private val PLAY_QUALITY_KEY = intPreferencesKey("play_quality")
     private val PLAY_AUDIO_KEY = stringPreferencesKey("play_audio_language")
+    private val PLAY_BACKGROUND_KEY = booleanPreferencesKey("play_in_background")
     private val SEARCH_SUGGESTIONS_KEY = booleanPreferencesKey("search_suggestions")
 
     val SEARCH_RESULT_COUNTS = listOf(10, 25, 50)
@@ -512,6 +513,14 @@ object SettingsRepository {
 
     suspend fun setPlayAudioLanguage(context: Context, language: String) {
         context.dataStore.edit { prefs -> prefs[PLAY_AUDIO_KEY] = language }
+    }
+
+    /** Whether Home's player keeps playing, with a media notification, once the app is left. Off by default. */
+    fun getPlayInBackground(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[PLAY_BACKGROUND_KEY] ?: false }
+
+    suspend fun setPlayInBackground(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[PLAY_BACKGROUND_KEY] = enabled }
     }
 
     /** Completions from Google while typing a search. Off unless turned on. */

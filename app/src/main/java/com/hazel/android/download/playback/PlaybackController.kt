@@ -1,5 +1,6 @@
 package com.hazel.android.download.playback
 
+import androidx.media3.common.C
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.compose.runtime.getValue
@@ -37,7 +38,9 @@ import kotlinx.coroutines.launch
 class PlaybackController(
     context: Context,
     private val scope: CoroutineScope,
-    val url: String
+    val url: String,
+    /** Title, author and artwork for the media notification and lock screen; null when none is shown. */
+    private val metadata: androidx.media3.common.MediaMetadata? = null
 ) {
     enum class Phase { LOADING, READY, FAILED }
 
@@ -86,6 +89,7 @@ class PlaybackController(
     private var engineWatch: Job? = null
     private var ticker: Job? = null
     private var released = false
+    private var quiet = false
     private var current: PlayableStream? = null
     /** The track picked in the player for this video, kept through reloads and retries. */
     private var pickedAudio: AudioTrack? = null
@@ -140,7 +144,7 @@ class PlaybackController(
                     if (player.duration > 0) durationMs = player.duration
                     onProgress?.invoke(positionMs)
                 }
-                delay(TICK_MS)
+                delay(if (quiet) QUIET_TICK_MS else TICK_MS)
             }
         }
         // A play engine picked while this player is open applies to it straight away.
@@ -174,7 +178,7 @@ class PlaybackController(
                 audioTrackId = stream.audioTrackId
                 PlayerFactory.applyCap(player, stream)
                 PlayerFactory.applyAudio(player, stream)
-                player.setMediaSource(PlayerFactory.sourceFor(stream), resumeAt)
+                player.setMediaSource(PlayerFactory.sourceFor(stream, metadata), resumeAt)
                 player.prepare()
             } catch (e: CancellationException) {
                 throw e
@@ -233,7 +237,7 @@ class PlaybackController(
         current = swapped
         audioTrackId = id
         attempt = 0
-        player.setMediaSource(PlayerFactory.sourceFor(swapped), player.currentPosition.coerceAtLeast(0L))
+        player.setMediaSource(PlayerFactory.sourceFor(swapped, metadata), player.currentPosition.coerceAtLeast(0L))
         player.prepare()
     }
 
@@ -255,6 +259,19 @@ class PlaybackController(
     fun seekBy(deltaMs: Long) {
         val end = durationMs.takeIf { it > 0 } ?: Long.MAX_VALUE
         seekTo((player.currentPosition + deltaMs).coerceIn(0L, end))
+    }
+
+    /**
+     * Playing on with the app out of sight: the picture is switched off, so no video is
+     * decoded (and an adaptive stream loads none) while nothing can show it, and the
+     * position is read less often. Undone when the app comes back.
+     */
+    fun playOutOfSight(away: Boolean) {
+        if (released || quiet == away) return
+        quiet = away
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, away)
+            .build()
     }
 
     fun mute(muted: Boolean) {
@@ -286,5 +303,6 @@ class PlaybackController(
 
     private companion object {
         const val TICK_MS = 200L
+        const val QUIET_TICK_MS = 1_000L
     }
 }

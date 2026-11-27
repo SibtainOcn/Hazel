@@ -96,28 +96,46 @@ import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.download.languageLabel
 import com.hazel.android.download.playback.AudioTrack
+import com.hazel.android.download.playback.BackgroundPlayback
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import kotlinx.coroutines.delay
 
 /**
  * A player for [url] that lives as long as the composable holding it, and pauses when the
- * app leaves the screen.
+ * app leaves the screen, unless [background] lends it to the playback service, which keeps
+ * it playing with a media notification showing [metadata].
  */
 @Composable
-fun rememberPlaybackController(url: String, startAtMs: Long = 0L): PlaybackController {
+fun rememberPlaybackController(
+    url: String,
+    startAtMs: Long = 0L,
+    background: Boolean = false,
+    metadata: () -> androidx.media3.common.MediaMetadata? = { null }
+): PlaybackController {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val controller = remember(url) {
-        PlaybackController(context, scope, url).also { it.start(startAtMs) }
+        PlaybackController(context, scope, url, metadata()).also { it.start(startAtMs) }
     }
     DisposableEffect(controller) {
         onDispose { controller.release() }
     }
+    if (background) {
+        DisposableEffect(controller) {
+            BackgroundPlayback.attach(context, controller.player)
+            onDispose { BackgroundPlayback.detach(context, controller.player) }
+        }
+    }
+    val keepPlaying by rememberUpdatedState(background)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, controller) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) controller.pause()
+            when (event) {
+                Lifecycle.Event.ON_STOP -> if (keepPlaying) controller.playOutOfSight(true) else controller.pause()
+                Lifecycle.Event.ON_START -> controller.playOutOfSight(false)
+                else -> Unit
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
