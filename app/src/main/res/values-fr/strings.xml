@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">Médias · résultats sur Accueil</string>
     <string name="search_guide_media_body">Vidéos et musique. Recherchez sur YouTube, YouTube Music, SoundCloud ou Bandcamp, ou collez un lien de plus de 1 500 sites. Enregistrez en vidéo ou en audio : un lien, plusieurs liens, ou toute une playlist ou une chaîne.</string>
     <string name="search_guide_gallery_title">Galerie · résultats dans l\'onglet Galerie</string>
-    <string name="search_guide_gallery_body">Photos, carrousels, courtes vidéos et légendes. Recherchez des mots sur Pinterest, Bluesky, Tumblr ou DeviantArt, ou collez le lien d\'une publication, d\'un tableau ou d\'un profil.</string>
+    <string name="search_guide_gallery_body">Images, publications, stories, à la une et profils. Colle un lien vers une publication, un tableau ou un profil, ou cherche des mots sur Pinterest, Bluesky, Tumblr ou DeviantArt. Pour les vidéos, utilise Médias.</string>
     <string name="search_guide_profiles_title">Profils</string>
     <string name="search_guide_profiles_body">Un lien de profil Instagram ou X demande quoi récupérer, deux à la fois : stories, à la une, publications, reels ou identifié sur Instagram ; médias, publications et réponses, ou j\'aime sur X. Chaque story à la une arrive comme un groupe à part.</string>
     <string name="search_guide_links_title">Liens collés</string>
-    <string name="search_guide_links_body">Un lien va tel quel du côté actif, Médias ou Galerie. Les sources et les sites ne servent qu\'à rechercher des mots, ils s\'effacent donc tant qu\'un lien est dans le champ.</string>
+    <string name="search_guide_links_body">Un lien va tel quel vers le côté actif. Vidéos, reels et audio : Médias. Images, stories, à la une et profils : Galerie. Si un côté échoue, essaie l’autre. Les sources et sites s’effacent tant qu’un lien est dans le champ.</string>
     <string name="search_guide_sign_in_title">Connexion</string>
     <string name="search_guide_sign_in_body">Les publications privées, stories, stories à la une et j\'aime demandent d\'être connecté à ce site. Hazel le demande quand il le faut, ou connectez-vous à tout moment depuis Cookies dans Plus.</string>
     <string name="search_mode_media">Médias</string>
@@ -218,7 +218,7 @@
     <string name="guide_step2_title">Choix du format</string>
     <string name="guide_step4_title">Optimisation de batterie</string>
     <string name="guide_step5_title">Notifications</string>
-    <string name="guide_step_paste_link">Un lien, plusieurs liens ou une playlist entière. Vidéo, audio, images, stories, à la une et légendes.</string>
+    <string name="guide_step_paste_link">Un lien, plusieurs liens ou une playlist entière. Vidéos et audio ici ; images, stories et à la une dans l’onglet Galerie.</string>
     <string name="guide_step_pick_format">Touchez une carte pour choisir un format précis, avec taille et codec par qualité.</string>
     <string name="guide_step_battery_unrestricted">Réglez la batterie sur illimitée pour qu’Android n’arrête pas les téléchargements en arrière-plan.</string>
     <string name="guide_step_notifications">Recevez des notifications sur l\'avancement des téléchargements et les fichiers terminés en arrière-plan.</string>
@@ -1299,10 +1299,10 @@
     <string name="gallery_group_by_author_summary">Images seules d\'un auteur dans un carrousel</string>
     <string name="more_image_settings">Réglages des images</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
-    <string name="guide_share_video">Vidéo, audio et reels. Choisissez qualité, coupe, SponsorBlock et plus, puis téléchargez</string>
-    <string name="guide_share_gallery">Images, publications, reels, stories et à la une. Choisissez quoi garder, puis téléchargez</string>
-    <string name="guide_share_instant">Vidéo ou audio directement, avec vos réglages enregistrés</string>
-    <string name="guide_share_instant_gallery">Publications, stories et à la une directement, avec vos réglages enregistrés</string>
+    <string name="guide_share_video">N’importe quelle vidéo, reel ou audio. Choisis la qualité, la coupe, SponsorBlock et plus, puis télécharge</string>
+    <string name="guide_share_gallery">Images, publications, stories, à la une et profils. Choisis quoi garder, puis télécharge</string>
+    <string name="guide_share_instant">N’importe quelle vidéo ou audio directement, avec tes réglages enregistrés</string>
+    <string name="guide_share_instant_gallery">Images, stories et à la une directement, avec tes réglages enregistrés</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>
     <string name="caption_saved">Légende téléchargée</string>

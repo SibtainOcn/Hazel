@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">Medien · Ergebnisse auf Start</string>
     <string name="search_guide_media_body">Videos und Musik. Suche auf YouTube, YouTube Music, SoundCloud oder Bandcamp oder füge einen Link von über 1.500 Seiten ein. Als Video oder Audio speichern: ein Link, viele Links oder eine ganze Playlist oder ein Kanal.</string>
     <string name="search_guide_gallery_title">Galerie · Ergebnisse im Galerie-Tab</string>
-    <string name="search_guide_gallery_body">Fotos, Karussells, kurze Videos und Beschreibungen. Suche Wörter auf Pinterest, Bluesky, Tumblr oder DeviantArt oder füge einen Link zu einem Beitrag, einer Pinnwand oder einem Profil ein.</string>
+    <string name="search_guide_gallery_body">Bilder, Beiträge, Storys, Highlights und Profile. Füge einen Link zu einem Beitrag, einer Pinnwand oder einem Profil ein oder suche Wörter auf Pinterest, Bluesky, Tumblr oder DeviantArt. Für Videos nimm Medien.</string>
     <string name="search_guide_profiles_title">Profile</string>
     <string name="search_guide_profiles_body">Ein Instagram- oder X-Profillink fragt, was abgerufen werden soll, zwei auf einmal: Storys, Highlights, Beiträge, Reels oder Markiert auf Instagram; Medien, Beiträge und Antworten oder Gefällt mir auf X. Jedes Highlight kommt als eigene Gruppe.</string>
     <string name="search_guide_links_title">Eingefügte Links</string>
-    <string name="search_guide_links_body">Ein Link geht so, wie er ist, an die aktive Seite, Medien oder Galerie. Quellen und Seiten gelten nur für die Wortsuche, deshalb treten sie zurück, solange ein Link im Feld steht.</string>
+    <string name="search_guide_links_body">Ein Link geht so, wie er ist, an die aktive Seite. Videos, Reels und Audio: Medien. Bilder, Storys, Highlights und Profile: Galerie. Klappt eine Seite nicht, probiere die andere. Quellen und Seiten treten zurück, solange ein Link im Feld steht.</string>
     <string name="search_guide_sign_in_title">Anmelden</string>
     <string name="search_guide_sign_in_body">Private Beiträge, Storys, Highlights und Gefällt mir brauchen eine Anmeldung bei der Seite. Hazel fragt, wenn es nötig ist, oder melde dich jederzeit über Cookies unter Mehr an.</string>
     <string name="search_mode_media">Medien</string>
@@ -213,7 +213,7 @@
     <string name="guide_step2_title">Formatauswahl</string>
     <string name="guide_step4_title">Akku-Optimierung</string>
     <string name="guide_step5_title">Benachrichtigungen</string>
-    <string name="guide_step_paste_link">Ein Link, viele Links oder eine ganze Playlist. Video, Audio, Bilder, Storys, Highlights und Bildunterschriften.</string>
+    <string name="guide_step_paste_link">Ein Link, viele Links oder eine ganze Playlist. Videos und Audio hier, Bilder, Storys und Highlights im Galerie-Tab.</string>
     <string name="guide_step_pick_format">Tippe auf eine Karte für ein genaues Format, mit Größe und Codec je Qualität.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, damit Android Hintergrund-Downloads nicht stoppt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
@@ -1282,10 +1282,10 @@
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
     <string name="more_image_settings">Bildeinstellungen</string>
     <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
-    <string name="guide_share_video">Video, Audio und Reels. Qualität, Schnitt, SponsorBlock und mehr wählen, dann laden</string>
-    <string name="guide_share_gallery">Bilder, Beiträge, Reels, Storys und Highlights. Auswahl treffen, dann laden</string>
-    <string name="guide_share_instant">Video oder Audio direkt, mit deinen gespeicherten Einstellungen</string>
-    <string name="guide_share_instant_gallery">Beiträge, Storys und Highlights direkt, mit deinen gespeicherten Einstellungen</string>
+    <string name="guide_share_video">Jedes Video, Reel oder Audio. Qualität, Schnitt, SponsorBlock und mehr wählen, dann laden</string>
+    <string name="guide_share_gallery">Bilder, Beiträge, Storys, Highlights und Profile. Auswahl treffen, dann laden</string>
+    <string name="guide_share_instant">Jedes Video oder Audio direkt, mit deinen gespeicherten Einstellungen</string>
+    <string name="guide_share_instant_gallery">Bilder, Storys und Highlights direkt, mit deinen gespeicherten Einstellungen</string>
     <string name="caption_copy">Kopieren</string>
     <string name="caption_save_text">Als Text speichern</string>
     <string name="caption_saved">Beschriftung heruntergeladen</string>

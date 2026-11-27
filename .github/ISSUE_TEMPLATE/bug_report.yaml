@@ -3,6 +3,19 @@ description: Report an issue or unexpected behavior in Hazel
 title: "[Bug]: "
 labels: [bug]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Before you report
+        Hazel has two places for links. Most "not working" reports come from using the wrong one.
+
+        | Content | In the app | Share menu |
+        |---|---|---|
+        | Videos, reels and audio (most sites) | **Home** tab | **Hazel Video** (choose options) · **Instant Video** (saves at once) |
+        | Images, posts, stories, highlights and profiles | **Gallery** tab | **Hazel Gallery** (choose what to save) · **Instant Gallery** (saves at once) |
+
+        If a video fails on the Gallery tab, try it on Home first.
+
   - type: checkboxes
     id: checks
     attributes:
@@ -12,6 +25,40 @@ body:
           required: true
         - label: I searched open and closed tickets to ensure this is not a duplicate
           required: true
+        - label: I used the right place for this link (see the table above)
+          required: true
+        - label: I tried the same link in the other place, and it fails there too
+          required: true
+
+  - type: dropdown
+    id: entry
+    attributes:
+      label: Where did you use the link?
+      options:
+        - Home tab
+        - Gallery tab
+        - Search
+        - "Share: Hazel Video"
+        - "Share: Instant Video"
+        - "Share: Hazel Gallery"
+        - "Share: Instant Gallery"
+        - Other (explain in the summary)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: content
+    attributes:
+      label: What were you downloading?
+      options:
+        - Video or reel
+        - Audio
+        - Image or post
+        - Story or highlight
+        - Profile
+        - Not a download (app issue)
+    validations:
+      required: true
 
   - type: textarea
     id: description
@@ -37,10 +84,10 @@ body:
       label: Steps to Reproduce
       description: Provide clear, step-by-step instructions to replicate the behavior.
       placeholder: |
-        1. Launch Hazel
-        2. Paste the URL into the search field
-        3. Pick an audio format and start download
-        4. Observe the failure
+        1. Open the Home tab (or the share target you used)
+        2. Paste the link
+        3. Pick a format and start the download
+        4. Describe what happened
     validations:
       required: true
 
@@ -48,10 +95,10 @@ body:
     id: link
     attributes:
       label: Media URL
-      description: Provide the link tested if the issue involves a specific video or platform (omit private links).
+      description: The link that fails. Use a public link if you can; do not share private links.
       placeholder: https://...
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: settings
@@ -73,7 +120,7 @@ body:
       placeholder: |
         Device: Pixel 8
         Android version: 15
-        Hazel version: 1.0.8 (arm64-v8a)
+        Hazel version: 1.2.18 (arm64-v8a)
     validations:
       required: true
 
@@ -89,7 +136,7 @@ body:
     id: logs
     attributes:
       label: Error Trace & Logs
-      description: Paste relevant diagnostic output from the download card or crash reports.
+      description: Copy the log from the failed download in the Failed tab, or paste crash reports.
       render: text
     validations:
       required: false

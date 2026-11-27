@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Hazel provides a native mobile interface on top of `yt-dlp`. Because media downloads rely on this backend, Hazel cannot implement features that `yt-dlp` does not offer. Exposing existing `yt-dlp` capabilities through intuitive mobile controls or refining Hazel's UI/UX is always welcome.
+        Hazel provides a native mobile interface on top of `yt-dlp` (videos and audio) and `gallery-dl` (images, stories, highlights and profiles). Because downloads rely on these backends, Hazel cannot implement features that neither offers. Exposing existing `yt-dlp` or `gallery-dl` capabilities through intuitive mobile controls or refining Hazel's UI/UX is always welcome.
 
   - type: checkboxes
     id: checks
@@ -15,7 +15,7 @@ body:
       options:
         - label: I searched open and closed requests to confirm this idea is not already tracked
           required: true
-        - label: This capability is supported by yt-dlp, or pertains directly to Hazel's interface
+        - label: This capability is supported by yt-dlp or gallery-dl, or pertains directly to Hazel's interface
           required: true
 
   - type: textarea
@@ -48,6 +48,6 @@ body:
     id: context
     attributes:
       label: Additional Notes & References
-      description: Include relevant screenshots, UI sketches, or yt-dlp command arguments.
+      description: Include relevant screenshots, UI sketches, or yt-dlp / gallery-dl command arguments.
     validations:
       required: false

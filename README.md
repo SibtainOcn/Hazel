@@ -93,7 +93,7 @@ Hazel is a free, open-source downloader for Android built on **yt-dlp** and **ga
   <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
   <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
   <tr><td><b>Batch:</b> one link, many at once, or a whole playlist / channel.</td><td><b>Play first:</b> stream any result on its card with seek, double tap skip and full screen.</td></tr>
-  <tr><td><b>Share to Hazel:</b> from any app, <b>Hazel Video</b> or <b>Hazel Gallery</b> opens a sheet to choose; <b>Instant Video</b> or <b>Instant Gallery</b> saves at once with your saved settings, stories and highlights included.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. Quick, precise, or trim after download: the whole file at full speed, cut on your phone.</td></tr>
+  <tr><td><b>Share to Hazel:</b> from any app. Videos, reels and audio go to <b>Hazel Video</b> or <b>Instant Video</b>; images, stories, highlights and profiles go to <b>Hazel Gallery</b> or <b>Instant Gallery</b>. Instant saves at once with your saved settings.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. Quick, precise, or trim after download: the whole file at full speed, cut on your phone.</td></tr>
   <tr><td><b>Your format:</b> pick quality, container, audio track, and edit title / metadata.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
   <tr><td><b>Gallery:</b> stories, highlights, posts, reels and carousels from Instagram, X, Pinterest and more. A profile link asks which sections to save; image search and captions too.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
 </table>
@@ -105,6 +105,15 @@ Hazel is a free, open-source downloader for Android built on **yt-dlp** and **ga
   <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Updates:</b> Hazel on Stable, Beta or Nightly, with an optional notice and background download. yt-dlp updates on its own.</td></tr>
   <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, backup & restore, settings search.</td></tr>
 </table>
+
+## 🧭 Where each link goes
+
+| Content | In the app | Share menu |
+|---|---|---|
+| Videos, reels and audio (most sites) | **Home** tab | **Hazel Video** (choose options) · **Instant Video** (saves at once) |
+| Images, posts, stories, highlights and profiles | **Gallery** tab | **Hazel Gallery** (choose what to save) · **Instant Gallery** (saves at once) |
+
+If a link fails in one place, try the other before opening an issue.
 
 ## 📲 Screenshots
 

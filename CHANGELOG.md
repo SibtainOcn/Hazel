@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
+- Bug report form asks where the link was used and links to gallery-dl issues.
 
 ## [1.2.18] - 2026-11-27
 ### Added

@@ -6,6 +6,12 @@ contact_links:
   - name: "🌐 Website Extraction Failures"
     url: https://github.com/yt-dlp/yt-dlp/issues
     about: Report upstream extractor breakage directly to the yt-dlp project.
+  - name: "🖼️ Image and Gallery Site Failures"
+    url: https://github.com/mikf/gallery-dl/issues
+    about: Report gallery site breakage (images, stories, highlights) directly to the gallery-dl project.
   - name: "📋 Supported Extractor List"
     url: https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md
     about: Review platforms currently supported upstream by yt-dlp.
+  - name: "🗂️ Supported Gallery Sites"
+    url: https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md
+    about: Review image and gallery sites currently supported upstream by gallery-dl.

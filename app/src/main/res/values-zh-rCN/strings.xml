@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">媒体 · 结果在首页</string>
     <string name="search_guide_media_body">视频和音乐。在 YouTube、YouTube Music、SoundCloud 或 Bandcamp 上搜索，或粘贴来自 1,500 多个网站的链接。可存为视频或音频：一个链接、多个链接，或整个播放列表或频道。</string>
     <string name="search_guide_gallery_title">图库 · 结果在图库标签页</string>
-    <string name="search_guide_gallery_body">照片、轮播、短视频和说明文字。在 Pinterest、Bluesky、Tumblr 或 DeviantArt 中搜索关键词，或粘贴帖子、画板或主页的链接。</string>
+    <string name="search_guide_gallery_body">图片、帖子、快拍、精选和主页。粘贴帖子、图板或主页链接，或在 Pinterest、Bluesky、Tumblr、DeviantArt 上搜索关键词。视频请用媒体。</string>
     <string name="search_guide_profiles_title">主页</string>
     <string name="search_guide_profiles_body">Instagram 或 X 的主页链接会询问要获取什么，一次两项：Instagram 上的快拍、精选、帖子、Reels 或被标记；X 上的媒体、帖子和回复，或喜欢。每个精选单独成组。</string>
     <string name="search_guide_links_title">粘贴的链接</string>
-    <string name="search_guide_links_body">链接会原样发送到当前选中的一侧：媒体或图库。来源和网站只用于搜索关键词，所以输入框里有链接时它们会退到一旁。</string>
+    <string name="search_guide_links_body">链接会原样发送到当前开启的一侧。视频、短视频和音频：媒体。图片、快拍、精选和主页：图库。一侧失败时，试试另一侧。输入框里有链接时，来源和站点会暂时让开。</string>
     <string name="search_guide_sign_in_title">登录</string>
     <string name="search_guide_sign_in_body">私密帖子、快拍、精选和喜欢需要先登录该网站。需要时 Hazel 会提示，你也可以随时在“更多”的 Cookie 中登录。</string>
     <string name="search_mode_media">媒体</string>
@@ -208,7 +208,7 @@
     <string name="guide_step2_title">格式选择</string>
     <string name="guide_step4_title">电池优化</string>
     <string name="guide_step5_title">通知权限</string>
-    <string name="guide_step_paste_link">一个链接、多个链接或整个播放列表。视频、音频、图片、快拍、精选和说明文字。</string>
+    <string name="guide_step_paste_link">一个链接、多个链接或整个播放列表。视频和音频在这里；图片、快拍和精选在图库标签页。</string>
     <string name="guide_step_pick_format">点按卡片选择具体格式，每种画质都显示大小和编码。</string>
     <string name="guide_step_battery_unrestricted">将电池使用设为不受限制，以免 Android 停止后台下载。</string>
     <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
@@ -1265,10 +1265,10 @@
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
     <string name="more_image_settings">图片设置</string>
     <string name="guide_share_from_apps">从任意应用分享链接</string>
-    <string name="guide_share_video">视频、音频和 Reels。选择画质、剪辑、SponsorBlock 等，然后下载</string>
-    <string name="guide_share_gallery">图片、帖子、Reels、快拍和精选。选择要保存的内容，然后下载</string>
-    <string name="guide_share_instant">按已保存的设置直接下载视频或音频</string>
-    <string name="guide_share_instant_gallery">按已保存的设置直接下载帖子、快拍和精选</string>
+    <string name="guide_share_video">任意视频、短视频或音频。选择画质、剪辑、SponsorBlock 等，然后下载</string>
+    <string name="guide_share_gallery">图片、帖子、快拍、精选和主页。选择要保存的内容，然后下载</string>
+    <string name="guide_share_instant">任意视频或音频直接保存，使用你已保存的设置</string>
+    <string name="guide_share_instant_gallery">图片、快拍和精选直接保存，使用你已保存的设置</string>
     <string name="caption_copy">复制</string>
     <string name="caption_save_text">另存为文本</string>
     <string name="caption_saved">已下载说明文字</string>

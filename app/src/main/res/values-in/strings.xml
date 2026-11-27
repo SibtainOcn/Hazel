@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">Media · hasil di Beranda</string>
     <string name="search_guide_media_body">Video dan musik. Cari di YouTube, YouTube Music, SoundCloud, atau Bandcamp, atau tempel tautan dari lebih dari 1.500 situs. Simpan sebagai video atau audio: satu tautan, banyak tautan, atau seluruh playlist atau kanal.</string>
     <string name="search_guide_gallery_title">Galeri · hasil di tab Galeri</string>
-    <string name="search_guide_gallery_body">Foto, carousel, video pendek, dan keterangan. Cari kata di Pinterest, Bluesky, Tumblr, atau DeviantArt, atau tempel tautan ke postingan, papan, atau profil.</string>
+    <string name="search_guide_gallery_body">Gambar, postingan, story, sorotan, dan profil. Tempel tautan ke postingan, papan, atau profil, atau cari kata di Pinterest, Bluesky, Tumblr, atau DeviantArt. Untuk video, gunakan Media.</string>
     <string name="search_guide_profiles_title">Profil</string>
     <string name="search_guide_profiles_body">Tautan profil Instagram atau X menanyakan apa yang diambil, dua sekaligus: cerita, sorotan, postingan, reels, atau ditandai di Instagram; media, postingan dan balasan, atau suka di X. Setiap sorotan datang sebagai kelompoknya sendiri.</string>
     <string name="search_guide_links_title">Tautan yang ditempel</string>
-    <string name="search_guide_links_body">Tautan dikirim apa adanya ke sisi yang aktif, Media atau Galeri. Sumber dan situs hanya untuk mencari kata, jadi mereka mundur selama ada tautan di kolom.</string>
+    <string name="search_guide_links_body">Tautan dikirim apa adanya ke sisi yang aktif. Video, reel, dan audio: Media. Gambar, story, sorotan, dan profil: Galeri. Jika satu sisi gagal, coba sisi lain. Sumber dan situs mundur selama ada tautan di kolom.</string>
     <string name="search_guide_sign_in_title">Masuk</string>
     <string name="search_guide_sign_in_body">Postingan pribadi, cerita, sorotan, dan suka memerlukan kamu masuk ke situs itu. Hazel akan menanyakan saat diperlukan, atau masuk kapan saja dari Cookie di Lainnya.</string>
     <string name="search_mode_media">Media</string>
@@ -208,7 +208,7 @@
     <string name="guide_step2_title">Pilihan Format</string>
     <string name="guide_step4_title">Optimalisasi Baterai</string>
     <string name="guide_step5_title">Notifikasi</string>
-    <string name="guide_step_paste_link">Satu tautan, banyak tautan, atau seluruh playlist. Video, audio, gambar, story, sorotan, dan keterangan.</string>
+    <string name="guide_step_paste_link">Satu tautan, banyak tautan, atau seluruh playlist. Video dan audio di sini; gambar, story, dan sorotan di tab Galeri.</string>
     <string name="guide_step_pick_format">Ketuk kartu untuk memilih format tepat, dengan ukuran dan codec tiap kualitas.</string>
     <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batasan agar Android tidak menghentikan unduhan latar.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
@@ -1265,10 +1265,10 @@
     <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
     <string name="more_image_settings">Setelan gambar</string>
     <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
-    <string name="guide_share_video">Video, audio, dan reels. Pilih kualitas, potong, SponsorBlock, dan lainnya, lalu unduh</string>
-    <string name="guide_share_gallery">Gambar, postingan, reels, story, dan sorotan. Pilih yang disimpan, lalu unduh</string>
-    <string name="guide_share_instant">Video atau audio secara langsung, dengan pengaturan tersimpan</string>
-    <string name="guide_share_instant_gallery">Postingan, story, dan sorotan secara langsung, dengan pengaturan tersimpan</string>
+    <string name="guide_share_video">Video, reel, atau audio apa pun. Pilih kualitas, potong, SponsorBlock, dan lainnya, lalu unduh</string>
+    <string name="guide_share_gallery">Gambar, postingan, story, sorotan, dan profil. Pilih yang disimpan, lalu unduh</string>
+    <string name="guide_share_instant">Video atau audio apa pun langsung, dengan pengaturan tersimpan</string>
+    <string name="guide_share_instant_gallery">Gambar, story, dan sorotan langsung, dengan pengaturan tersimpan</string>
     <string name="caption_copy">Salin</string>
     <string name="caption_save_text">Simpan sebagai teks</string>
     <string name="caption_saved">Keterangan diunduh</string>

@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">Multimedia · resultados en Inicio</string>
     <string name="search_guide_media_body">Vídeos y música. Busca en YouTube, YouTube Music, SoundCloud o Bandcamp, o pega un enlace de más de 1500 sitios. Guarda como vídeo o audio: un enlace, varios enlaces o toda una lista o un canal.</string>
     <string name="search_guide_gallery_title">Galería · resultados en la pestaña Galería</string>
-    <string name="search_guide_gallery_body">Fotos, carruseles, vídeos cortos y descripciones. Busca palabras en Pinterest, Bluesky, Tumblr o DeviantArt, o pega un enlace a una publicación, un tablero o un perfil.</string>
+    <string name="search_guide_gallery_body">Imágenes, publicaciones, historias, destacadas y perfiles. Pega un enlace a una publicación, tablero o perfil, o busca palabras en Pinterest, Bluesky, Tumblr o DeviantArt. Para videos, usa Multimedia.</string>
     <string name="search_guide_profiles_title">Perfiles</string>
     <string name="search_guide_profiles_body">Un enlace a un perfil de Instagram o X pregunta qué obtener, dos a la vez: historias, destacadas, publicaciones, reels o etiquetadas en Instagram; multimedia, publicaciones y respuestas, o me gusta en X. Cada destacada llega como su propio grupo.</string>
     <string name="search_guide_links_title">Enlaces pegados</string>
-    <string name="search_guide_links_body">Un enlace va tal cual al lado que esté activo, Multimedia o Galería. Las fuentes y los sitios solo sirven para buscar palabras, así que se apartan mientras haya un enlace en el campo.</string>
+    <string name="search_guide_links_body">Un enlace va tal cual al lado que está activo. Videos, reels y audio: Multimedia. Imágenes, historias, destacadas y perfiles: Galería. Si un lado falla, prueba el otro. Fuentes y sitios se apartan mientras haya un enlace en el campo.</string>
     <string name="search_guide_sign_in_title">Iniciar sesión</string>
     <string name="search_guide_sign_in_body">Las publicaciones privadas, historias, destacadas y me gusta necesitan que inicies sesión en ese sitio. Hazel lo pide cuando hace falta, o inicia sesión cuando quieras desde Cookies en Más.</string>
     <string name="search_mode_media">Multimedia</string>
@@ -218,7 +218,7 @@
     <string name="guide_step2_title">Selección de formato</string>
     <string name="guide_step4_title">Optimización de batería</string>
     <string name="guide_step5_title">Notificaciones</string>
-    <string name="guide_step_paste_link">Un enlace, varios o una lista entera. Video, audio, imágenes, historias, destacadas y descripciones.</string>
+    <string name="guide_step_paste_link">Un enlace, muchos enlaces o una lista entera. Videos y audio aquí; imágenes, historias y destacadas en la pestaña Galería.</string>
     <string name="guide_step_pick_format">Toca una tarjeta para elegir un formato exacto, con tamaño y códec por calidad.</string>
     <string name="guide_step_battery_unrestricted">Pon el uso de batería sin restricciones para que Android no detenga las descargas en segundo plano.</string>
     <string name="guide_step_notifications">Recibe avisos sobre el progreso de descarga y archivos completados en segundo plano.</string>
@@ -1299,10 +1299,10 @@
     <string name="gallery_group_by_author_summary">Imágenes sueltas de un autor en un carrusel</string>
     <string name="more_image_settings">Ajustes de imágenes</string>
     <string name="guide_share_from_apps">Comparte un enlace desde cualquier app</string>
-    <string name="guide_share_video">Video, audio y reels. Elige calidad, recorte, SponsorBlock y más, y descarga</string>
-    <string name="guide_share_gallery">Imágenes, publicaciones, reels, historias y destacadas. Elige qué guardar y descarga</string>
-    <string name="guide_share_instant">Video o audio directamente, con tus ajustes guardados</string>
-    <string name="guide_share_instant_gallery">Publicaciones, historias y destacadas directamente, con tus ajustes guardados</string>
+    <string name="guide_share_video">Cualquier video, reel o audio. Elige calidad, recorte, SponsorBlock y más, y descarga</string>
+    <string name="guide_share_gallery">Imágenes, publicaciones, historias, destacadas y perfiles. Elige qué guardar y descarga</string>
+    <string name="guide_share_instant">Cualquier video o audio directamente, con tus ajustes guardados</string>
+    <string name="guide_share_instant_gallery">Imágenes, historias y destacadas directamente, con tus ajustes guardados</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Guardar como texto</string>
     <string name="caption_saved">Descripción descargada</string>
