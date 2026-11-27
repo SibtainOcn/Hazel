@@ -627,6 +627,7 @@
     <string name="media_open_unknown_location">इस फ़ाइल की जगह पता नहीं है</string>
     <string name="media_open_chooser">इससे खोलें</string>
     <string name="media_open_no_app">इस डिवाइस पर इसे खोलने वाला कुछ नहीं है</string>
+    <string name="media_open_no_app_here">Hazel यह फ़ाइल नहीं चला सकता</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">डाउनलोड रद्द हुआ</string>

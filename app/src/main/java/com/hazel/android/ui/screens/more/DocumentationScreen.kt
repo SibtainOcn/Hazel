@@ -28,7 +28,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
@@ -59,6 +58,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -256,7 +256,7 @@ fun DocumentationPageScreen(
                 trailing = {
                     IconButton(onClick = { openOutside(context, currentUrl) }) {
                         Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
+                            androidx.compose.ui.graphics.vector.ImageVector.vectorResource(R.drawable.ic_open_app),
                             contentDescription = stringResource(R.string.docs_open_in_browser),
                             tint = MaterialTheme.colorScheme.onSurface
                         )

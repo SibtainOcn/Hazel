@@ -655,6 +655,7 @@
     <string name="media_open_unknown_location">Расположение этого файла неизвестно</string>
     <string name="media_open_chooser">Открыть с помощью</string>
     <string name="media_open_no_app">На этом устройстве нет подходящего приложения</string>
+    <string name="media_open_no_app_here">Hazel не может воспроизвести этот файл</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Загрузка отменена</string>

@@ -613,6 +613,7 @@
     <string name="media_open_unknown_location">不知道这个文件在哪里</string>
     <string name="media_open_chooser">打开方式</string>
     <string name="media_open_no_app">这台设备上没有能打开它的应用</string>
+    <string name="media_open_no_app_here">Hazel 无法播放此文件</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">下载已取消</string>

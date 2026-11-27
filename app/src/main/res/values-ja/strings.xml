@@ -613,6 +613,7 @@
     <string name="media_open_unknown_location">このファイルの保存場所は不明です</string>
     <string name="media_open_chooser">アプリで開く</string>
     <string name="media_open_no_app">このファイルを開けるアプリがありません</string>
+    <string name="media_open_no_app_here">Hazel ではこのファイルを再生できません</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">ダウンロードがキャンセルされました</string>

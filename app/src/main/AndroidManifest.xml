@@ -326,6 +326,29 @@
             android:foregroundServiceType="dataSync" />
 
         <!--
+             Hazel in the system's "Open with" list for audio and video files: sound in the
+             music sheet over the app it came from, a video full screen.
+        -->
+        <activity
+            android:name=".ui.player.PlayerActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Hazel.Overlay"
+            android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+        </activity>
+
+        <!--
              Keeps Home's player going once the app is left, while "Keep playing in background"
              is on. Exported so the system's media controls, Bluetooth and the lock screen
              can reach its media session; it plays nothing of its own.

@@ -44,6 +44,9 @@ class PlaybackController(
 ) {
     enum class Phase { LOADING, READY, FAILED }
 
+    /** A file on the device (a download, or one another app opened in Hazel): played as it is, never read. */
+    val isLocal: Boolean = url.startsWith("content:") || url.startsWith("file:")
+
     val player: ExoPlayer = PlayerFactory.create(context)
     private val app = context.applicationContext
 
@@ -115,6 +118,10 @@ class PlaybackController(
         }
 
         override fun onTracksChanged(tracks: Tracks) {
+            if (isLocal) {
+                hasVideo = tracks.isTypeSupported(C.TRACK_TYPE_VIDEO)
+                return
+            }
             if (current?.isAdaptive != true) return
             audioTracks = PlayerFactory.manifestAudioTracks(tracks)
             audioTrackId = PlayerFactory.selectedManifestAudio(tracks)
@@ -125,7 +132,7 @@ class PlaybackController(
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            if (attempt < StreamResolver.LAST_ATTEMPT) {
+            if (!isLocal && attempt < StreamResolver.LAST_ATTEMPT) {
                 attempt++
                 load(resumeAt = player.currentPosition)
             } else {
@@ -148,7 +155,7 @@ class PlaybackController(
             }
         }
         // A play engine picked while this player is open applies to it straight away.
-        engineWatch = scope.launch {
+        if (!isLocal) engineWatch = scope.launch {
             SettingsRepository.getPlayEngine(app).distinctUntilChanged().drop(1).collect { engine ->
                 if (!released && (phase == Phase.FAILED || changesStream(engine))) reload()
             }
@@ -166,6 +173,13 @@ class PlaybackController(
         loadJob?.cancel()
         stopRead()
         phase = Phase.LOADING
+        if (isLocal) {
+            runCatching {
+                player.setMediaSource(PlayerFactory.sourceFor(PlayableStream(url = url, engine = ListingSource.YT_DLP), metadata), resumeAt)
+                player.prepare()
+            }.onFailure { phase = Phase.FAILED }
+            return
+        }
         val id = StreamResolver.newReadId().also { readId = it }
         loadJob = scope.launch {
             try {

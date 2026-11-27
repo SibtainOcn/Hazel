@@ -12,6 +12,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.hazel.android.download.NetworkProxy.throughProxy
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -65,6 +66,11 @@ object PlayerFactory {
         isDash: Boolean,
         metadata: MediaMetadata? = null
     ): MediaSource {
+        // A file on the device is read through the content resolver, never the network.
+        if (url.startsWith("content:") || url.startsWith("file:")) {
+            val item = MediaItem.Builder().setUri(url).apply { metadata?.let(::setMediaMetadata) }.build()
+            return ProgressiveMediaSource.Factory(DefaultDataSource.Factory(com.hazel.android.HazelApp.instance)).createMediaSource(item)
+        }
         val agent = headers.entries.firstOrNull { it.key.equals("User-Agent", ignoreCase = true) }?.value
         val http = OkHttpDataSource.Factory(http)
             .setUserAgent(agent ?: BROWSER_USER_AGENT)

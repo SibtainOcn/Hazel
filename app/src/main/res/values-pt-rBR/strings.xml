@@ -641,6 +641,7 @@
     <string name="media_open_unknown_location">Não se sabe onde este arquivo está</string>
     <string name="media_open_chooser">Abrir com</string>
     <string name="media_open_no_app">Nada neste aparelho consegue abri-lo</string>
+    <string name="media_open_no_app_here">O Hazel não consegue reproduzir este arquivo</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Download cancelado</string>

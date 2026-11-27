@@ -540,7 +540,7 @@ fun HistoryScreen(
                         val open: () -> Unit = {
                             scope.launch {
                                 if (MediaPresence.refresh(context, entry.fileUri)) {
-                                    MediaOpener.play(context, entry.fileUri, entry.mimeType)
+                                    com.hazel.android.ui.components.player.OfflinePlayback.play(context, entry)
                                 } else {
                                     presence[entry.id] = false
                                     toast(resources.getString(R.string.history_toast_file_gone), ok = false)

@@ -78,5 +78,18 @@ class BackgroundPlaybackTest {
         assertEquals("true", service.getAttributeNS(ns, "exported"))
         val action = service.getElementsByTagName("action").item(0) as org.w3c.dom.Element
         assertEquals("androidx.media3.session.MediaSessionService", action.getAttributeNS(ns, "name"))
+
+        // Hazel stays in the system's "Open with" list for audio and video files.
+        val activities = doc.getElementsByTagName("activity")
+        val player = (0 until activities.length).map { activities.item(it) as org.w3c.dom.Element }
+            .single { it.getAttributeNS(ns, "name") == ".ui.player.PlayerActivity" }
+        val data = player.getElementsByTagName("data").let { list ->
+            (0 until list.length).map { (list.item(it) as org.w3c.dom.Element) }
+        }
+        val types = data.map { it.getAttributeNS(ns, "mimeType") }
+        assertTrue("audio/*" in types && "video/*" in types)
+        assertTrue("content" in data.map { it.getAttributeNS(ns, "scheme") })
+        val viewAction = player.getElementsByTagName("action").item(0) as org.w3c.dom.Element
+        assertEquals("android.intent.action.VIEW", viewAction.getAttributeNS(ns, "name"))
     }
 }
