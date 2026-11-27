@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
+- More: Image settings is now named gallery-dl settings, in the app and the guide.
 - Bug report form asks where the link was used and links to gallery-dl issues.
 
 ## [1.2.18] - 2026-11-27

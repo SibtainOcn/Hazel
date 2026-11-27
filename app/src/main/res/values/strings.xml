@@ -1337,7 +1337,7 @@
     <string name="upd_gallerydl_auto_summary">Install new versions when no download is running</string>
     <string name="gallery_group_by_author">Group by author</string>
     <string name="gallery_group_by_author_summary">Single images from one author in one carousel</string>
-    <string name="more_image_settings">Image settings</string>
+    <string name="more_image_settings">gallery-dl settings</string>
     <string name="guide_share_from_apps">Share a link from any app</string>
     <string name="guide_share_video">Any video, reel or audio. Pick quality, cut, SponsorBlock and more, then download</string>
     <string name="guide_share_gallery">Images, posts, stories, highlights and profiles. Pick what to save, then download</string>

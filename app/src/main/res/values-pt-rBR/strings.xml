@@ -1297,7 +1297,7 @@
     <string name="upd_gallerydl_auto_summary">Instalar versões novas quando nada estiver baixando</string>
     <string name="gallery_group_by_author">Agrupar por autor</string>
     <string name="gallery_group_by_author_summary">Imagens soltas de um autor em um carrossel</string>
-    <string name="more_image_settings">Configurações de imagens</string>
+    <string name="more_image_settings">Configurações do gallery-dl</string>
     <string name="guide_share_from_apps">Compartilhe um link de qualquer app</string>
     <string name="guide_share_video">Qualquer vídeo, reel ou áudio. Escolha qualidade, corte, SponsorBlock e mais, e baixe</string>
     <string name="guide_share_gallery">Imagens, posts, stories, destaques e perfis. Escolha o que salvar e baixe</string>
