@@ -54,6 +54,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -657,7 +658,8 @@ internal fun GalleryPostSheet(
         )
     }
 
-    opened?.let { item ->
+    // A sheet of its own even when this list fills a share host's sheet, never drawn over it.
+    opened?.let { item -> CompositionLocalProvider(LocalInHostSheet provides false) {
         GalleryItemSheet(
             item = item,
             postUrl = postUrl,
@@ -668,7 +670,7 @@ internal fun GalleryPostSheet(
             },
             onDismiss = { opened = null }
         )
-    }
+    } }
 
     postVideos?.let { shared -> openedVideo?.let { listed -> shared.originOf(listed)?.let { (post, item) ->
         GalleryVideoSheet(
