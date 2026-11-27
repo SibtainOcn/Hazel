@@ -78,6 +78,29 @@ fun SheetLinkButton(
     }
 }
 
+/** Opens the failure's log, set only while a sheet is open on a link from the Failed tab. */
+val LocalFailureLog = androidx.compose.runtime.staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/** The middle button of the sheet's corner group, shown for a link that failed before. */
+@Composable
+fun SheetErrorButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_error_outline),
+            contentDescription = stringResource(R.string.history_failed_error_log),
+            modifier = Modifier.size(22.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
 /**
  * The round incognito switch. It is the same setting the rest of the app reads, so turning
  * it on here turns it on everywhere, and what it did is said through [onFeedback].

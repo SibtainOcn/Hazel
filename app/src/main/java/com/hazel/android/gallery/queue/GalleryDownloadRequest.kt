@@ -25,7 +25,9 @@ data class GalleryDownloadRequest(
     val files: List<String>? = null,
     /** The post's caption, saved as a text file or written into the images as [save] and the options ask. */
     val caption: String = "",
-    val save: GallerySave = GallerySave.MEDIA
+    val save: GallerySave = GallerySave.MEDIA,
+    /** The listed failure this request tries again, cleared or replaced by how it ends. */
+    val retryOf: String? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("url", url)
@@ -37,6 +39,7 @@ data class GalleryDownloadRequest(
         files?.let { put("files", JSONArray(it)) }
         if (caption.isNotEmpty()) put("caption", caption)
         put("save", save.name)
+        retryOf?.let { put("retryOf", it) }
         options?.let { o ->
             put("options", JSONObject().apply {
                 put("imageSize", o.imageSize.name)
@@ -92,6 +95,7 @@ data class GalleryDownloadRequest(
                     ?.filter { it.startsWith("http") || it.startsWith("ytdl:") }?.takeIf { it.isNotEmpty() },
                 caption = json.optString("caption"),
                 save = GallerySave.fromName(json.optString("save")),
+                retryOf = json.optString("retryOf").takeIf { it.startsWith("http") },
                 options = json.optJSONObject("options")?.let { o ->
                     GalleryOptions(
                         imageSize = runCatching { GalleryImageSize.valueOf(o.optString("imageSize")) }.getOrDefault(GalleryImageSize.ORIGINAL),

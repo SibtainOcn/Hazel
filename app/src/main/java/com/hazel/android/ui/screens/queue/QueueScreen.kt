@@ -114,14 +114,9 @@ import kotlinx.coroutines.withContext
  * tight until it is chosen, when it rounds out into an accent pill. Pressed, it squeezes. A
  * count shows in a small badge, red for failures.
  */
-/** Each tab's count sits on a shape of its own. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun badgeShapeOf(tab: QueueTab): Shape = when (tab) {
-    QueueTab.RUNNING -> MaterialShapes.Cookie6Sided
-    QueueTab.QUEUED -> MaterialShapes.Pentagon
-    QueueTab.FAILED -> MaterialShapes.Pill
-}.toShape()
+private fun badgeShape(): Shape = MaterialShapes.Cookie6Sided.toShape()
 
 @Composable
 private fun QueueTabSegment(
@@ -224,7 +219,9 @@ fun QueueScreen(
     downloadViewModel: DownloadViewModel,
     /** A tab to open on, by name, as a notification tap asks; [onTabOpened] once it has. */
     openTab: String? = null,
-    onTabOpened: () -> Unit = {}
+    onTabOpened: () -> Unit = {},
+    onOpenCookies: () -> Unit = {},
+    onOpenTempFiles: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -258,6 +255,16 @@ fun QueueScreen(
         downloadViewModel.retryFailed(context, item)
     }
 
+    // Back from signing in from a failure's log, the failure is tried again with the new cookies.
+    var signingIn by remember { mutableStateOf<FailedDownload?>(null) }
+    val signInLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val item = signingIn
+        signingIn = null
+        if (result.resultCode == android.app.Activity.RESULT_OK && item != null) retry(item)
+    }
+
     // The link's own sheet, over the queue: it opens at once, fills as the link is read and
     // says so there if the read fails. The failure stays listed until a download settles it.
     // A gallery-dl failure opens the Hazel Gallery sheet, so it is read by the engine that failed.
@@ -273,17 +280,22 @@ fun QueueScreen(
                 .setAction(android.content.Intent.ACTION_SEND)
                 .setType("text/plain")
                 .putExtra(android.content.Intent.EXTRA_TEXT, item.url)
+                .putExtra(com.hazel.android.ui.share.ShareOverlayActivity.EXTRA_RETRY_OF, item.url)
         )
     }
 
     // Failures whose link is being read, waiting or downloading again: shown as retrying
     // until that settles, when a finished download clears them and a failure replaces them.
     // Each link is reduced to its media once, off the main thread, rather than once per pair.
-    val inHandUrls = remember(running, waiting, state.batch) {
+    val inHandUrls = remember(running, waiting, state.batch, galleryRunning, galleryWaiting) {
         buildSet {
             running.forEach { add(it.info.url) }
             waiting.forEach { add(it.url) }
             state.batch.forEach { if (it.state != BatchState.DONE && it.state != BatchState.FAILED) add(it.url) }
+            (galleryRunning + galleryWaiting).forEach { job ->
+                add(job.request.url)
+                job.request.retryOf?.let(::add)
+            }
         }
     }
     val retryingIds by produceState(emptySet<Long>(), failed, inHandUrls) {
@@ -375,6 +387,14 @@ fun QueueScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
+            com.hazel.android.ui.components.SoftIconButton(onClick = onOpenTempFiles) {
+                Icon(
+                    painterResource(R.drawable.ic_temp_files),
+                    stringResource(R.string.cleanup_title),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
             Box(modifier = Modifier.padding(end = 12.dp)) {
                 com.hazel.android.ui.components.SoftIconButton(onClick = { menuOpen = true }) {
                     Icon(
@@ -490,7 +510,7 @@ fun QueueScreen(
                     selected = pagerState.currentPage == index,
                     first = index == 0,
                     last = index == last,
-                    badgeShape = badgeShapeOf(tab),
+                    badgeShape = badgeShape(),
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.weight(1f)
                 )
@@ -593,7 +613,7 @@ fun QueueScreen(
                             onViewLog = { viewLog = item },
                             onRetry = { retry(item) },
                             onLink = { linkFor = item.url },
-                            onDismiss = { scope.launch { FailedDownloadRepository.remove(context, item.id) } }
+                            onDismiss = { confirmRemovePicked = setOf(item.id) }
                         )
                         }
                     }
@@ -619,8 +639,22 @@ fun QueueScreen(
     }
 
     viewLog?.let { item ->
+        val signIn = if (com.hazel.android.ui.screens.download.isCookieRelated(item.errorLog)) {
+            {
+                viewLog = null
+                signingIn = item
+                signInLauncher.launch(
+                    com.hazel.android.ui.screens.cookies.CookieWebViewActivity.intent(context, com.hazel.android.util.siteRootOf(item.url))
+                )
+            }
+        } else null
         FailureLogSheet(
             item = item,
+            onSignIn = signIn,
+            onCookies = {
+                viewLog = null
+                onOpenCookies()
+            },
             onCopyUrl = {
                 copyToClipboard(context, item.url)
                 Toast.makeText(context, resources.getString(R.string.sheet_link_copied), Toast.LENGTH_SHORT).show()
@@ -669,6 +703,7 @@ fun QueueScreen(
             title = pluralStringResource(R.plurals.queue_failed_remove_title, ids.size, ids.size),
             body = stringResource(R.string.queue_failed_remove_body),
             confirm = stringResource(R.string.queue_failed_remove),
+            dismiss = stringResource(R.string.history_clear_dialog_cancel),
             onConfirm = {
                 confirmRemovePicked = null
                 picked = null
@@ -686,7 +721,8 @@ fun QueueScreen(
                 confirmClearFailed = false
                 scope.launch { FailedDownloadRepository.clear(context) }
             },
-            onDismiss = { confirmClearFailed = false }
+            onDismiss = { confirmClearFailed = false },
+            dismiss = stringResource(R.string.history_clear_dialog_cancel)
         )
     }
 }
@@ -875,7 +911,8 @@ private fun ConfirmDialog(
     body: String,
     confirm: String,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    dismiss: String = stringResource(R.string.download_cancel_dialog_dismiss)
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -885,7 +922,7 @@ private fun ConfirmDialog(
             TextButton(onClick = onConfirm) { Text(confirm, color = MaterialTheme.colorScheme.error) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel_dialog_dismiss)) }
+            TextButton(onClick = onDismiss) { Text(dismiss) }
         }
     )
 }

@@ -111,10 +111,13 @@ object FailedDownloadRepository {
         }
     }
 
-    suspend fun removeByUrl(context: Context, url: String) = withContext(Dispatchers.IO) {
-        unsaved.update { held -> held.filterNot { same(it.url, url) } }
+    /** With [readsOnly], only a link that failed to be read is cleared, never a download that failed. */
+    suspend fun removeByUrl(context: Context, url: String, readsOnly: Boolean = false) = withContext(Dispatchers.IO) {
+        fun FailedDownload.matches() = same(this.url, url) &&
+            (!readsOnly || com.hazel.android.gallery.queue.GalleryDownloadRequest.isRead(queuedPayload))
+        unsaved.update { held -> held.filterNot { it.matches() } }
         context.dataStore.edit { prefs ->
-            val remaining = decode(prefs[FAILED_KEY]).filterNot { same(it.url, url) }
+            val remaining = decode(prefs[FAILED_KEY]).filterNot { it.matches() }
             if (remaining.isEmpty()) prefs.remove(FAILED_KEY)
             else prefs[FAILED_KEY] = encode(remaining)
         }

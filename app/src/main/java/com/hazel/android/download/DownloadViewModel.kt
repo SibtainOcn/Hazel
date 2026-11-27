@@ -924,6 +924,7 @@ class DownloadViewModel : ViewModel() {
 
         // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
         clearAutoOpened()
+        dropSignInFor(valid)
 
         // A running download keeps its record of the run: the queue screen and the
         // notification read it, and reading a new link has nothing to do with either.
@@ -995,6 +996,7 @@ class DownloadViewModel : ViewModel() {
             } catch (e: Exception) {
                 lastFailure = e.message?.trim().orEmpty()
                 val message = sanitizeError(lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) })
+                dropSignInFor(valid)
                 _state.update { s -> s.copy(
                     isFetching = false,
                     errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
@@ -1015,6 +1017,7 @@ class DownloadViewModel : ViewModel() {
                 )
             }
 
+            if (resolved.isEmpty()) dropSignInFor(valid)
             _state.update { s -> if (resolved.isEmpty()) {
                 s.copy(
                     isFetching = false,
@@ -1379,6 +1382,11 @@ class DownloadViewModel : ViewModel() {
                 signInUrl = site
             )
         }
+    }
+
+    /** A new read or a failure dialog for these links stands in for their pending sign-in prompt. */
+    private fun dropSignInFor(links: Collection<String>) {
+        _signInNeeded.update { it?.takeUnless { needed -> needed.info.url in links } }
     }
 
     /** The sign-in dialog was turned down. */
@@ -1807,6 +1815,8 @@ class DownloadViewModel : ViewModel() {
                     markBatch(plan.info.url, BatchState.DONE)
                     downloadScope.launch {
                         com.hazel.android.data.FailedDownloadRepository.removeByUrl(app, plan.info.url)
+                        // A gallery video's post page is the link its read failure was listed under.
+                        plan.info.pageUrl?.let { com.hazel.android.data.FailedDownloadRepository.removeByUrl(app, it, readsOnly = true) }
                     }
                 } catch (_: CancellationException) {
                     if (restartUrl == plan.info.url && !isBatchCancelled) {
@@ -2534,7 +2544,7 @@ class DownloadViewModel : ViewModel() {
             return
         }
         com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
-            viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
+            viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId(), retryOf = failed.url)) }
             return
         }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)

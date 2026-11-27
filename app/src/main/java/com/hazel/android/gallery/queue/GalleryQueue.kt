@@ -210,6 +210,7 @@ object GalleryQueue {
             withContext(NonCancellable) {
                 if (!incognito) DownloadHistoryRepository.recordAll(app, entries.asReversed())
                 FailedDownloadRepository.removeByUrl(app, request.url)
+                request.retryOf?.let { FailedDownloadRepository.removeByUrl(app, it) }
                 finish(request, saved = true)
                 DownloadNotificationHelper.showComplete(
                     app, title, isVideo = false, fileUri = firstFile?.first, mimeType = firstFile?.second
@@ -229,6 +230,8 @@ object GalleryQueue {
             finish(request, saved = false)
             withContext(NonCancellable) {
                 if (!incognito) DownloadHistoryRepository.recordAll(app, entries.asReversed())
+                // This failure takes the place of the one it retried.
+                request.retryOf?.let { FailedDownloadRepository.removeByUrl(app, it) }
                 FailedDownloadRepository.record(
                     app,
                     FailedDownload(
