@@ -262,7 +262,7 @@ object GalleryDlEngine {
             try {
                 work.await()
             } catch (e: CancellationException) {
-                running.get()?.destroyForcibly()
+                running.get()?.let(com.hazel.android.util.Processes::kill)
                 YtDlpEngine.killStrayFfmpeg()
                 throw e
             }
@@ -297,13 +297,13 @@ object GalleryDlEngine {
         val process = builder.start()
         try {
             process.outputStream.close()
-            if (!process.waitFor(PROBE_TIMEOUT_S, TimeUnit.SECONDS)) return@runCatching false
+            if (!com.hazel.android.util.Processes.waitFor(process, PROBE_TIMEOUT_S, TimeUnit.SECONDS)) return@runCatching false
             val output = process.inputStream.bufferedReader().readText()
             val reported = output.lines().map { it.trim() }.lastOrNull { it.isNotEmpty() }
             if (reported != version) Log.w(TAG, "gallery-dl probe: ${output.takeLast(400)}")
             process.exitValue() == 0 && reported == version
         } finally {
-            process.destroyForcibly()
+            com.hazel.android.util.Processes.kill(process)
         }
     }.getOrDefault(false)
 
@@ -314,9 +314,9 @@ object GalleryDlEngine {
     /** A Python process running [boot] with the environment a run gets, its stderr in [stderr]. */
     internal fun spareProcess(context: Context, boot: String, stderr: File): Process {
         val runtime = PythonRuntime.ready(context)
-        val builder = ProcessBuilder(runtime.python.absolutePath, "-c", boot).redirectError(stderr)
+        val builder = ProcessBuilder(runtime.python.absolutePath, "-c", boot)
         runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
-        return builder.start()
+        return com.hazel.android.util.Processes.startWithErrorTo(builder, stderr)
     }
 
     private const val PROBE ="import gallery_dl, gallery_dl.extractor, gallery_dl.job, gallery_dl.version as v; print(v.__version__)"
@@ -352,9 +352,9 @@ object GalleryDlEngine {
                 spare.first
             } else {
                 raw = GalleryLogs.rawFile(logs)
-                val builder = ProcessBuilder(command).redirectError(raw)
+                val builder = ProcessBuilder(command)
                 runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
-                builder.start()
+                com.hazel.android.util.Processes.startWithErrorTo(builder, raw)
             }
             running.set(process)
             try {

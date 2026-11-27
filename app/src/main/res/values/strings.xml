@@ -536,6 +536,13 @@
     <string name="properties_name">Name</string>
     <string name="properties_section_media">Media</string>
     <string name="properties_section_again">Get it again</string>
+    <string name="properties_section_in_file">In the file</string>
+    <string name="properties_tag_description">Description</string>
+    <string name="properties_tag_artist">Artist</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Uploaded</string>
+    <string name="properties_tag_comment">Comment</string>
     <string name="properties_show_file">Show file</string>
     <string name="properties_share">Share</string>
     <string name="properties_copied">Copied</string>
@@ -679,6 +686,7 @@
     <string name="media_open_unknown_location">This file\'s location is unknown</string>
     <string name="media_open_chooser">Open with</string>
     <string name="media_open_no_app">Nothing on this device can open it</string>
+    <string name="media_open_no_app_here">Hazel can\'t play this file</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Download cancelled</string>
@@ -798,14 +806,14 @@
     <string name="whats_new_glass_title">A new glass look</string>
     <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
     <string name="whats_new_highlights_title">In this update</string>
-    <string name="whats_new_stories_title">Feat: Stories and highlights</string>
-    <string name="whats_new_stories_desc">Save stories, highlights and profile sections from Instagram and X.</string>
-    <string name="whats_new_videos_title">Fixed: Stories videos playable</string>
-    <string name="whats_new_videos_desc">Play them in the viewer and save as video or audio.</string>
-    <string name="whats_new_share_title">Fixed: Share to Hazel Gallery</string>
-    <string name="whats_new_share_desc">Shared videos failed to download before; they save now.</string>
-    <string name="whats_new_looks_title">Feat: App icon and glass styles</string>
-    <string name="whats_new_looks_desc">Classic, White or Glass icon, and five new styles.</string>
+    <string name="whats_new_player_title">Feat: Play downloads in Hazel</string>
+    <string name="whats_new_player_desc">A music sheet for audio, and a video player with file actions.</string>
+    <string name="whats_new_background_title">Feat: Keep playing in background</string>
+    <string name="whats_new_background_desc">Home\'s player plays on with lock-screen controls.</string>
+    <string name="whats_new_open_with_title">Feat: Open files with Hazel</string>
+    <string name="whats_new_open_with_desc">Pick Hazel for any audio or video file on your phone.</string>
+    <string name="whats_new_fixes_title">Fixed: Facebook and Pinterest</string>
+    <string name="whats_new_fixes_desc">Facebook videos download again and Pinterest videos play.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>
@@ -1100,6 +1108,9 @@
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
     <string name="fetch_settings_play_audio">Audio language</string>
+    <string name="fetch_settings_play_background">Keep playing in background</string>
+    <string name="fetch_settings_play_background_summary">Plays on with a notification after you leave the app</string>
+    <string name="play_background_channel">Playback</string>
     <string name="player_audio_original">Original</string>
     <string name="player_audio_app_language">App language</string>
     <string name="player_audio_track">Audio track</string>
@@ -1337,7 +1348,7 @@
     <string name="upd_gallerydl_auto_summary">Install new versions when no download is running</string>
     <string name="gallery_group_by_author">Group by author</string>
     <string name="gallery_group_by_author_summary">Single images from one author in one carousel</string>
-    <string name="more_image_settings">Image settings</string>
+    <string name="more_image_settings">gallery-dl settings</string>
     <string name="guide_share_from_apps">Share a link from any app</string>
     <string name="guide_share_video">Any video, reel or audio. Pick quality, cut, SponsorBlock and more, then download</string>
     <string name="guide_share_gallery">Images, posts, stories, highlights and profiles. Pick what to save, then download</string>

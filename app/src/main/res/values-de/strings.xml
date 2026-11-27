@@ -517,6 +517,13 @@
     <string name="properties_name">Name</string>
     <string name="properties_section_media">Medien</string>
     <string name="properties_section_again">Erneut holen</string>
+    <string name="properties_section_in_file">In der Datei</string>
+    <string name="properties_tag_description">Beschreibung</string>
+    <string name="properties_tag_artist">Künstler</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Hochgeladen</string>
+    <string name="properties_tag_comment">Kommentar</string>
     <string name="properties_show_file">Datei zeigen</string>
     <string name="properties_share">Teilen</string>
     <string name="properties_copied">Kopiert</string>
@@ -620,6 +627,7 @@
     <string name="media_open_unknown_location">Wo diese Datei liegt, ist unbekannt</string>
     <string name="media_open_chooser">Öffnen mit</string>
     <string name="media_open_no_app">Nichts auf diesem Gerät kann sie öffnen</string>
+    <string name="media_open_no_app_here">Hazel kann diese Datei nicht abspielen</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Download abgebrochen</string>
@@ -727,14 +735,14 @@
     <string name="whats_new_glass_title">Der neue Glas-Look</string>
     <string name="whats_new_glass_desc">Glaseffekt, neue Stile und Akzentfarben.</string>
     <string name="whats_new_highlights_title">In diesem Update</string>
-    <string name="whats_new_stories_title">Neu: Storys und Highlights</string>
-    <string name="whats_new_stories_desc">Storys, Highlights und Profilbereiche von Instagram und X speichern.</string>
-    <string name="whats_new_videos_title">Behoben: Story-Videos abspielbar</string>
-    <string name="whats_new_videos_desc">Im Viewer abspielen und als Video oder Audio speichern.</string>
-    <string name="whats_new_share_title">Behoben: Mit Hazel Gallery teilen</string>
-    <string name="whats_new_share_desc">Geteilte Videos ließen sich zuvor nicht laden; jetzt werden sie gespeichert.</string>
-    <string name="whats_new_looks_title">Neu: App-Symbol und Glasstile</string>
-    <string name="whats_new_looks_desc">Klassisches, weißes oder Glas-Symbol und fünf neue Stile.</string>
+    <string name="whats_new_player_title">Neu: Downloads in Hazel abspielen</string>
+    <string name="whats_new_player_desc">Ein Musikblatt für Audio und ein Videoplayer mit Dateiaktionen.</string>
+    <string name="whats_new_background_title">Neu: Im Hintergrund weiterspielen</string>
+    <string name="whats_new_background_desc">Der Player der Startseite spielt mit Sperrbildschirm-Steuerung weiter.</string>
+    <string name="whats_new_open_with_title">Neu: Dateien mit Hazel öffnen</string>
+    <string name="whats_new_open_with_desc">Wähle Hazel für jede Audio- oder Videodatei auf deinem Handy.</string>
+    <string name="whats_new_fixes_title">Behoben: Facebook und Pinterest</string>
+    <string name="whats_new_fixes_desc">Facebook-Videos laden wieder und Pinterest-Videos spielen ab.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>
@@ -1023,6 +1031,9 @@
     <string name="fetch_settings_play_with">Abspielen mit</string>
     <string name="fetch_settings_play_quality">Wiedergabequalität</string>
     <string name="fetch_settings_play_audio">Audiosprache</string>
+    <string name="fetch_settings_play_background">Im Hintergrund weiterspielen</string>
+    <string name="fetch_settings_play_background_summary">Spielt mit einer Benachrichtigung weiter, wenn du die App verlässt</string>
+    <string name="play_background_channel">Wiedergabe</string>
     <string name="player_audio_original">Original</string>
     <string name="player_audio_app_language">App-Sprache</string>
     <string name="player_audio_track">Tonspur</string>
@@ -1280,7 +1291,7 @@
     <string name="upd_gallerydl_auto_summary">Neue Versionen installieren, wenn kein Download läuft</string>
     <string name="gallery_group_by_author">Nach Autor gruppieren</string>
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
-    <string name="more_image_settings">Bildeinstellungen</string>
+    <string name="more_image_settings">gallery-dl-Einstellungen</string>
     <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
     <string name="guide_share_video">Jedes Video, Reel oder Audio. Qualität, Schnitt, SponsorBlock und mehr wählen, dann laden</string>
     <string name="guide_share_gallery">Bilder, Beiträge, Storys, Highlights und Profile. Auswahl treffen, dann laden</string>

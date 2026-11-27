@@ -505,6 +505,13 @@
     <string name="properties_name">Nama</string>
     <string name="properties_section_media">Media</string>
     <string name="properties_section_again">Ambil lagi</string>
+    <string name="properties_section_in_file">Di dalam file</string>
+    <string name="properties_tag_description">Deskripsi</string>
+    <string name="properties_tag_artist">Artis</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Diunggah</string>
+    <string name="properties_tag_comment">Komentar</string>
     <string name="properties_show_file">Tampilkan file</string>
     <string name="properties_share">Bagikan</string>
     <string name="properties_copied">Disalin</string>
@@ -606,6 +613,7 @@
     <string name="media_open_unknown_location">Lokasi file ini tidak diketahui</string>
     <string name="media_open_chooser">Buka dengan</string>
     <string name="media_open_no_app">Tidak ada aplikasi di perangkat ini yang dapat membukanya</string>
+    <string name="media_open_no_app_here">Hazel tidak dapat memutar file ini</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Unduhan dibatalkan</string>
@@ -713,14 +721,14 @@
     <string name="whats_new_glass_title">Tampilan kaca baru</string>
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
     <string name="whats_new_highlights_title">Di pembaruan ini</string>
-    <string name="whats_new_stories_title">Baru: Story dan sorotan</string>
-    <string name="whats_new_stories_desc">Simpan story, sorotan, dan bagian profil dari Instagram dan X.</string>
-    <string name="whats_new_videos_title">Diperbaiki: Video story bisa diputar</string>
-    <string name="whats_new_videos_desc">Putar di penampil dan simpan sebagai video atau audio.</string>
-    <string name="whats_new_share_title">Diperbaiki: Bagikan ke Hazel Gallery</string>
-    <string name="whats_new_share_desc">Sebelumnya video yang dibagikan gagal diunduh; kini tersimpan.</string>
-    <string name="whats_new_looks_title">Baru: Ikon aplikasi dan gaya kaca</string>
-    <string name="whats_new_looks_desc">Ikon Klasik, Putih, atau Kaca, dan lima gaya baru.</string>
+    <string name="whats_new_player_title">Baru: Putar unduhan di Hazel</string>
+    <string name="whats_new_player_desc">Lembar musik untuk audio dan pemutar video dengan aksi file.</string>
+    <string name="whats_new_background_title">Baru: Tetap putar di latar belakang</string>
+    <string name="whats_new_background_desc">Pemutar Beranda terus berjalan dengan kontrol layar kunci.</string>
+    <string name="whats_new_open_with_title">Baru: Buka file dengan Hazel</string>
+    <string name="whats_new_open_with_desc">Pilih Hazel untuk file audio atau video apa pun di ponsel.</string>
+    <string name="whats_new_fixes_title">Diperbaiki: Facebook dan Pinterest</string>
+    <string name="whats_new_fixes_desc">Video Facebook bisa diunduh lagi dan video Pinterest bisa diputar.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>
@@ -1008,6 +1016,9 @@
     <string name="fetch_settings_play_with">Putar dengan</string>
     <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
     <string name="fetch_settings_play_audio">Bahasa audio</string>
+    <string name="fetch_settings_play_background">Tetap putar di latar belakang</string>
+    <string name="fetch_settings_play_background_summary">Terus diputar dengan notifikasi setelah keluar dari aplikasi</string>
+    <string name="play_background_channel">Pemutaran</string>
     <string name="player_audio_original">Asli</string>
     <string name="player_audio_app_language">Bahasa aplikasi</string>
     <string name="player_audio_track">Trek audio</string>
@@ -1263,7 +1274,7 @@
     <string name="upd_gallerydl_auto_summary">Pasang versi baru saat tidak ada unduhan</string>
     <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
     <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
-    <string name="more_image_settings">Setelan gambar</string>
+    <string name="more_image_settings">Setelan gallery-dl</string>
     <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
     <string name="guide_share_video">Video, reel, atau audio apa pun. Pilih kualitas, potong, SponsorBlock, dan lainnya, lalu unduh</string>
     <string name="guide_share_gallery">Gambar, postingan, story, sorotan, dan profil. Pilih yang disimpan, lalu unduh</string>

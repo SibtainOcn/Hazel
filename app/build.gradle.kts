@@ -191,8 +191,8 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = 10218990
-        versionName = "1.2.18"
+        versionCode = 10219990
+        versionName = "1.2.19"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -215,7 +215,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             isShrinkResources = false
             // Left unset when the keystore is unavailable, so the build produces an
             // unsigned APK instead of failing during signing validation.
@@ -246,6 +246,22 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+        }
+    }
+
+    // CI's crash gate (`-PcrashLint`): only the lint rules whose finding is a crash or a
+    // refused service on a phone, each one failing the build.
+    if (project.hasProperty("crashLint")) {
+        lint {
+            checkOnly += setOf(
+                "ForegroundServiceType", "ForegroundServicePermission", "MissingPermission",
+                "NewApi", "MissingClass", "Instantiatable", "WrongConstant",
+                "UnspecifiedRegisterReceiverFlag", "LaunchActivityFromNotification"
+            )
+            abortOnError = true
+            warningsAsErrors = true
+            checkDependencies = false
+            checkReleaseBuilds = false
         }
     }
 
@@ -390,6 +406,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer.hls)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.session)
     // Streams over the app's OkHttp, which answers a proxy's password request.
     implementation(libs.androidx.media3.datasource.okhttp)
 

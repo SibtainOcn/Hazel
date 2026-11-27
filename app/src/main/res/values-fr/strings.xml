@@ -529,6 +529,13 @@
     <string name="properties_name">Nom</string>
     <string name="properties_section_media">Média</string>
     <string name="properties_section_again">Récupérer à nouveau</string>
+    <string name="properties_section_in_file">Dans le fichier</string>
+    <string name="properties_tag_description">Description</string>
+    <string name="properties_tag_artist">Artiste</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Mis en ligne</string>
+    <string name="properties_tag_comment">Commentaire</string>
     <string name="properties_show_file">Afficher le fichier</string>
     <string name="properties_share">Partager</string>
     <string name="properties_copied">Copié</string>
@@ -634,6 +641,7 @@
     <string name="media_open_unknown_location">L\'emplacement de ce fichier est inconnu</string>
     <string name="media_open_chooser">Ouvrir avec</string>
     <string name="media_open_no_app">Rien sur cet appareil ne peut l\'ouvrir</string>
+    <string name="media_open_no_app_here">Hazel ne peut pas lire ce fichier</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Téléchargement annulé</string>
@@ -741,14 +749,14 @@
     <string name="whats_new_glass_title">Un nouvel effet verre</string>
     <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
     <string name="whats_new_highlights_title">Dans cette mise à jour</string>
-    <string name="whats_new_stories_title">Nouveau : Stories et à la une</string>
-    <string name="whats_new_stories_desc">Enregistrez stories, à la une et sections de profil d\'Instagram et X.</string>
-    <string name="whats_new_videos_title">Corrigé : Vidéos des stories lisibles</string>
-    <string name="whats_new_videos_desc">Lisez-les dans la visionneuse et enregistrez en vidéo ou audio.</string>
-    <string name="whats_new_share_title">Corrigé : Partager vers Hazel Gallery</string>
-    <string name="whats_new_share_desc">Les vidéos partagées ne se téléchargeaient pas ; elles s\'enregistrent maintenant.</string>
-    <string name="whats_new_looks_title">Nouveau : Icône et styles de verre</string>
-    <string name="whats_new_looks_desc">Icône classique, blanche ou verre, et cinq nouveaux styles.</string>
+    <string name="whats_new_player_title">Nouveau : lire les téléchargements dans Hazel</string>
+    <string name="whats_new_player_desc">Une feuille musique pour l\'audio et un lecteur vidéo avec actions sur le fichier.</string>
+    <string name="whats_new_background_title">Nouveau : lecture en arrière-plan</string>
+    <string name="whats_new_background_desc">Le lecteur de l\'accueil continue avec les commandes sur l\'écran verrouillé.</string>
+    <string name="whats_new_open_with_title">Nouveau : ouvrir des fichiers avec Hazel</string>
+    <string name="whats_new_open_with_desc">Choisissez Hazel pour tout fichier audio ou vidéo du téléphone.</string>
+    <string name="whats_new_fixes_title">Corrigé : Facebook et Pinterest</string>
+    <string name="whats_new_fixes_desc">Les vidéos Facebook se téléchargent à nouveau et celles de Pinterest se lisent.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>
@@ -1038,6 +1046,9 @@
     <string name="fetch_settings_play_with">Lire avec</string>
     <string name="fetch_settings_play_quality">Qualité de lecture</string>
     <string name="fetch_settings_play_audio">Langue audio</string>
+    <string name="fetch_settings_play_background">Continuer la lecture en arrière-plan</string>
+    <string name="fetch_settings_play_background_summary">Continue avec une notification quand vous quittez l\'appli</string>
+    <string name="play_background_channel">Lecture</string>
     <string name="player_audio_original">Originale</string>
     <string name="player_audio_app_language">Langue de l’application</string>
     <string name="player_audio_track">Piste audio</string>
@@ -1297,7 +1308,7 @@
     <string name="upd_gallerydl_auto_summary">Installer les nouvelles versions hors téléchargement</string>
     <string name="gallery_group_by_author">Grouper par auteur</string>
     <string name="gallery_group_by_author_summary">Images seules d\'un auteur dans un carrousel</string>
-    <string name="more_image_settings">Réglages des images</string>
+    <string name="more_image_settings">Réglages de gallery-dl</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
     <string name="guide_share_video">N’importe quelle vidéo, reel ou audio. Choisis la qualité, la coupe, SponsorBlock et plus, puis télécharge</string>
     <string name="guide_share_gallery">Images, publications, stories, à la une et profils. Choisis quoi garder, puis télécharge</string>

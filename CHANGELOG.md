@@ -6,9 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.2.19] - 2026-11-27
+### Added
+- Gallery: long press a file for Play or Full screen and Download, plus Open and Properties once saved.
+- Keep playing in background: Home's player plays on with media controls once the app is left (off by default).
+- Offline player: downloads play in Hazel, audio in a music sheet with ±10 s, video full screen or in a sheet; both keep Open with, Show file, Share and Properties at hand.
+- Hazel appears in Android's Open with list for audio and video files.
+- Properties: an In the file section shows the description, link, artist, genre and upload date written into a video or audio file.
 ### Changed
+- Open with uses a new icon across the app.
+- Download all button on Home and Gallery is smaller, so it covers less of the list.
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
+- More: Image settings is now named gallery-dl settings, in the app and the guide.
 - Bug report form asks where the link was used and links to gallery-dl issues.
+- Release builds are optimized with R8: smoother scrolling and screens, smaller APK; yt-dlp, gallery-dl, Python and NewPipe stay untouched.
+### Fixed
+- Gallery no longer crashes on Android 7.
+- Search options open at once instead of waiting on saved settings.
+- A download that fails with saved sign-ins is tried once more without them, as the link read already does (Facebook "No video found").
+- Gallery: Pinterest videos play in the viewer; their stream is played directly instead of read again.
+- Hazel Gallery share: tapping an image in Download all opens its own sheet instead of drawing over the list.
 
 ## [1.2.18] - 2026-11-27
 ### Added

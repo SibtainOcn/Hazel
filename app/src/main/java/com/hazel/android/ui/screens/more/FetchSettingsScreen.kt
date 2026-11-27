@@ -1,6 +1,7 @@
 package com.hazel.android.ui.screens.more
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Hub
@@ -45,6 +46,7 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     val mode by remember(context) { SettingsRepository.getFetchMode(context) }.collectAsState(initial = FetchMode.DEFAULT)
     val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
     val forceIpv4 by remember(context) { SettingsRepository.getForceIpv4(context) }.collectAsState(initial = false)
+    val playInBackground by remember(context) { SettingsRepository.getPlayInBackground(context) }.collectAsState(initial = false)
     val searchSource by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
     val searchEngine by remember(context) { SettingsRepository.getSearchEngine(context) }.collectAsState(initial = ListingSource.NEWPIPE)
     val searchResults by remember(context) { SettingsRepository.getSearchResults(context) }
@@ -166,6 +168,15 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                         value = playAudioLabel(playAudio),
                         onClick = { open = Choice.PLAY_AUDIO }
                     )
+                },
+                {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.Headphones,
+                        title = stringResource(R.string.fetch_settings_play_background),
+                        summary = stringResource(R.string.fetch_settings_play_background_summary),
+                        checked = playInBackground,
+                        onCheckedChange = { setPlayInBackground(context, scope, it) }
+                    )
                 }
             )
         )
@@ -260,4 +271,18 @@ internal fun engineSummary(engine: ListingSource): String = stringResource(
 
 private enum class Choice {
     NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY, PLAY_AUDIO, SUGGESTIONS
+}
+
+/**
+ * Saves "Keep playing in background". Turned on, the system is also asked once to exempt
+ * the app from battery optimisation, without which some phones stop playback soon after
+ * the screen goes off.
+ */
+internal fun setPlayInBackground(context: android.content.Context, scope: kotlinx.coroutines.CoroutineScope, on: Boolean) {
+    scope.launch {
+        SettingsRepository.setPlayInBackground(context, on)
+        if (on && !com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations(context)) {
+            com.hazel.android.ui.screens.download.openBatterySettings(context)
+        }
+    }
 }

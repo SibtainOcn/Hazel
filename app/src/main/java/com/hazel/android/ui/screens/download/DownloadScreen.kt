@@ -472,11 +472,13 @@ fun DownloadScreen(
             // Home screen search bar. Its 3-dot opens the same search options sheet the full
             // SearchScreen opens, so the two entry points behave identically.
             var homeMenuOpen by remember { mutableStateOf(false) }
+            val optionsPrefs = rememberSearchOptionsPrefs()
             if (homeMenuOpen) {
                 SearchOptionsSheet(
                     onClearResults = downloadViewModel::clearResults,
                     onDismiss = { homeMenuOpen = false },
-                    onCleared = statusToast::show
+                    onCleared = statusToast::show,
+                    prefs = optionsPrefs
                 )
             }
 
@@ -740,7 +742,7 @@ fun DownloadScreen(
         homePastePendingDupe?.let { (links, existing) ->
             AlreadyDownloadedDialog(
                 entry = existing,
-                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onPlay = { com.hazel.android.ui.components.player.OfflinePlayback.play(context, existing) },
                 onOpenLocation = {
                     MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
                 },
@@ -915,7 +917,7 @@ fun DownloadScreen(
     alreadyHave?.let { existing ->
         AlreadyDownloadedDialog(
             entry = existing,
-            onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+            onPlay = { com.hazel.android.ui.components.player.OfflinePlayback.play(context, existing) },
             onOpenLocation = {
                 MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
             },
@@ -1200,16 +1202,16 @@ internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifie
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = fill
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 20.dp),
+            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp, end = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(32.dp)
                     .clip(MaterialShapes.Cookie7Sided.toShape())
                     .background(ink),
                 contentAlignment = Alignment.Center
@@ -1217,20 +1219,20 @@ internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifie
                 Icon(
                     Icons.Filled.Download,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(16.dp),
                     tint = fill
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 stringResource(R.string.download_download_all),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = ink,
                 maxLines = 1,
                 softWrap = false,
                 autoSize = TextAutoSize.StepBased(
                     minFontSize = 8.sp,
-                    maxFontSize = MaterialTheme.typography.titleMedium.fontSize
+                    maxFontSize = MaterialTheme.typography.labelLarge.fontSize
                 )
             )
         }

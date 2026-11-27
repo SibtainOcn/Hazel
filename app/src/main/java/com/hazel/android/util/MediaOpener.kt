@@ -7,11 +7,8 @@ import android.widget.Toast
 import com.hazel.android.R
 
 /**
- * Handing a finished download to whatever the device plays that kind of media with.
- *
- * The app deliberately does not carry a player. A downloaded file is an ordinary file, and
- * the device already has an app the user has chosen for it; opening it there is both less
- * code and the behaviour people expect from a downloader.
+ * Handing a finished download to another app: the device's default for its kind, a chosen
+ * one, a folder view or a share. Playing in Hazel itself goes through OfflinePlayback.
  */
 object MediaOpener {
 
@@ -82,7 +79,12 @@ object MediaOpener {
             setDataAndType(Uri.parse(fileUri), mimeType)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        start(context, Intent.createChooser(view, context.getString(R.string.media_open_chooser)))
+        // Asked from inside Hazel, so Hazel's own player is left off the list.
+        val chooser = Intent.createChooser(view, context.getString(R.string.media_open_chooser)).putExtra(
+            Intent.EXTRA_EXCLUDE_COMPONENTS,
+            arrayOf(android.content.ComponentName(context, com.hazel.android.ui.player.PlayerActivity::class.java))
+        )
+        start(context, chooser)
     }
 
     /** Sends the file itself to another app. */

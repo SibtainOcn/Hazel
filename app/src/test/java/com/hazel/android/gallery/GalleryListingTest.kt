@@ -46,6 +46,14 @@ class GalleryListingTest {
         assertEquals("https://cdn.example/story.mp4", GalleryListing.parse(output).items.single().playUrl)
     }
 
+    @Test
+    fun `a stream manifest handed to yt-dlp plays as it is`() {
+        val output = """
+            [[3, "ytdl:https://v1.pinimg.com/videos/iht/hls/f1/a.m3u8", {"extension": "m3u8"}]]
+        """
+        assertEquals("https://v1.pinimg.com/videos/iht/hls/f1/a.m3u8", GalleryListing.parse(output).items.single().playUrl)
+    }
+
 
 
     @Test(expected = GalleryDlException::class)

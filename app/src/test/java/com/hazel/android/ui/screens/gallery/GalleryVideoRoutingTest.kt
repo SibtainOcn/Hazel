@@ -30,4 +30,24 @@ class GalleryVideoRoutingTest {
         assertEquals(carousel, info.pageUrl)
         assertEquals("news 2", info.title)
     }
+
+    @Test
+    fun holdFindsTheSavedFileOfItsOwnItem() {
+        val post = "https://www.instagram.com/p/xyz/"
+        fun image(index: Int) = GalleryItem(
+            index = index, url = "https://cdn/pic$index.jpg?x=1", extension = "jpg", title = "", author = "news",
+            site = "instagram", width = 1, height = 1, thumbnail = null, postUrl = post
+        )
+        fun saved(name: String, video: Boolean) = com.hazel.android.data.HistoryEntry(
+            id = name.hashCode().toLong(), url = post, title = "", author = "", thumbnail = null, durationSeconds = 0,
+            fileName = name, fileUri = "content://$name", savedPath = "", isVideo = video, sizeBytes = 1, completedAt = 0
+        )
+        val items = listOf(image(1), image(2), video(3, post))
+        val gallery = GalleryPost(post, post, items)
+        val history = listOf(saved("pic2.jpg", false), saved("clip.mp4", true))
+        assertEquals("pic2.jpg", savedEntry(gallery, items[1], history)?.fileName)
+        assertNull(savedEntry(gallery, items[0], history))
+        assertEquals("clip.mp4", savedEntry(gallery, items[2], history)?.fileName)
+        assertNull(savedEntry(gallery, items[0], emptyList()))
+    }
 }

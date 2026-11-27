@@ -517,6 +517,13 @@
     <string name="properties_name">नाम</string>
     <string name="properties_section_media">मीडिया</string>
     <string name="properties_section_again">फिर से पाएँ</string>
+    <string name="properties_section_in_file">फ़ाइल में</string>
+    <string name="properties_tag_description">विवरण</string>
+    <string name="properties_tag_artist">कलाकार</string>
+    <string name="properties_tag_album">एल्बम</string>
+    <string name="properties_tag_genre">शैली</string>
+    <string name="properties_tag_date">अपलोड किया गया</string>
+    <string name="properties_tag_comment">टिप्पणी</string>
     <string name="properties_show_file">फ़ाइल दिखाएँ</string>
     <string name="properties_share">शेयर करें</string>
     <string name="properties_copied">कॉपी किया गया</string>
@@ -620,6 +627,7 @@
     <string name="media_open_unknown_location">इस फ़ाइल की जगह पता नहीं है</string>
     <string name="media_open_chooser">इससे खोलें</string>
     <string name="media_open_no_app">इस डिवाइस पर इसे खोलने वाला कुछ नहीं है</string>
+    <string name="media_open_no_app_here">Hazel यह फ़ाइल नहीं चला सकता</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">डाउनलोड रद्द हुआ</string>
@@ -727,14 +735,14 @@
     <string name="whats_new_glass_title">नया ग्लास लुक</string>
     <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
     <string name="whats_new_highlights_title">इस अपडेट में</string>
-    <string name="whats_new_stories_title">नया: स्टोरी और हाइलाइट</string>
-    <string name="whats_new_stories_desc">Instagram और X से स्टोरी, हाइलाइट और प्रोफ़ाइल सेक्शन सेव करें।</string>
-    <string name="whats_new_videos_title">ठीक किया: स्टोरी वीडियो अब चलते हैं</string>
-    <string name="whats_new_videos_desc">व्यूअर में चलाएं और वीडियो या ऑडियो के रूप में सेव करें।</string>
-    <string name="whats_new_share_title">ठीक किया: Hazel Gallery पर शेयर करें</string>
-    <string name="whats_new_share_desc">पहले शेयर किए गए वीडियो डाउनलोड नहीं होते थे; अब सेव होते हैं।</string>
-    <string name="whats_new_looks_title">नया: ऐप आइकन और ग्लास स्टाइल</string>
-    <string name="whats_new_looks_desc">क्लासिक, सफ़ेद या ग्लास आइकन, और पांच नई स्टाइल।</string>
+    <string name="whats_new_player_title">नया: डाउनलोड Hazel में चलाएँ</string>
+    <string name="whats_new_player_desc">ऑडियो के लिए म्यूज़िक शीट और फ़ाइल एक्शन वाला वीडियो प्लेयर।</string>
+    <string name="whats_new_background_title">नया: बैकग्राउंड में चलता रहे</string>
+    <string name="whats_new_background_desc">होम का प्लेयर लॉक-स्क्रीन कंट्रोल के साथ चलता रहता है।</string>
+    <string name="whats_new_open_with_title">नया: फ़ाइलें Hazel से खोलें</string>
+    <string name="whats_new_open_with_desc">फ़ोन की किसी भी ऑडियो या वीडियो फ़ाइल के लिए Hazel चुनें।</string>
+    <string name="whats_new_fixes_title">ठीक किया: Facebook और Pinterest</string>
+    <string name="whats_new_fixes_desc">Facebook वीडियो फिर से डाउनलोड होते हैं और Pinterest वीडियो चलते हैं।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>
@@ -1023,6 +1031,9 @@
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
     <string name="fetch_settings_play_audio">ऑडियो भाषा</string>
+    <string name="fetch_settings_play_background">बैकग्राउंड में चलाते रहें</string>
+    <string name="fetch_settings_play_background_summary">ऐप छोड़ने के बाद सूचना के साथ चलता रहता है</string>
+    <string name="play_background_channel">प्लेबैक</string>
     <string name="player_audio_original">मूल</string>
     <string name="player_audio_app_language">ऐप की भाषा</string>
     <string name="player_audio_track">ऑडियो ट्रैक</string>
@@ -1280,7 +1291,7 @@
     <string name="upd_gallerydl_auto_summary">कोई डाउनलोड न चलने पर नया वर्शन इंस्टॉल करें</string>
     <string name="gallery_group_by_author">लेखक के हिसाब से समूह</string>
     <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
-    <string name="more_image_settings">इमेज सेटिंग्स</string>
+    <string name="more_image_settings">gallery-dl सेटिंग्स</string>
     <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
     <string name="guide_share_video">कोई भी वीडियो, रील या ऑडियो। क्वालिटी, कट, SponsorBlock और बहुत कुछ चुनें, फिर डाउनलोड करें</string>
     <string name="guide_share_gallery">इमेज, पोस्ट, स्टोरी, हाइलाइट और प्रोफ़ाइल। क्या सहेजना है चुनें, फिर डाउनलोड करें</string>

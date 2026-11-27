@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.PersonSearch
@@ -68,6 +69,7 @@ import com.hazel.android.ui.theme.sheetBlackColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -89,7 +91,9 @@ fun SearchOptionsSheet(
     onDismiss: () -> Unit,
     imagesFirst: Boolean = false,
     /** Told how a clear went, after the sheet has slid away, so the screen can say so. */
-    onCleared: (message: String, ok: Boolean) -> Unit = { _, _ -> }
+    onCleared: (message: String, ok: Boolean) -> Unit = { _, _ -> },
+    /** Read by the screen while it is shown, so the sheet opens at once on what is saved. */
+    prefs: SearchOptionsPrefs = rememberSearchOptionsPrefs()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -114,30 +118,8 @@ fun SearchOptionsSheet(
         }
     }
 
-    // Read as one, and the sheet is not shown until it has been: the rows open on what is
-    // saved, and the sheet measures its full content, so it settles at half height rather
-    // than measuring empty and jumping to full.
-    val prefs by remember(context) {
-        combine(
-            SettingsRepository.getSearchSource(context),
-            SettingsRepository.getSearchEngine(context),
-            SettingsRepository.getSearchResults(context),
-            SettingsRepository.getSearchSuggestions(context),
-            SettingsRepository.getPlayEngine(context),
-            ::SearchPrefs
-        )
-    }.collectAsState(initial = null)
-    val galleryPrefs by remember(context) {
-        combine(
-            SettingsRepository.getGalleryPostsPerSearch(context),
-            SettingsRepository.getGalleryShow(context),
-            SettingsRepository.getGallerySkipReposts(context),
-            SettingsRepository.getGalleryGroupByAuthor(context),
-            ::GalleryPrefs
-        )
-    }.collectAsState(initial = null)
     var imagesTab by remember { mutableStateOf(imagesFirst) }
-    val profileAsk by remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    val profileAsk = prefs.profileAsk.value
     var profileSheet by remember { mutableStateOf<com.hazel.android.gallery.ProfileSite?>(null) }
     profileSheet?.let { site ->
         com.hazel.android.ui.screens.gallery.SavedProfileSectionsSheet(site = site, onDismiss = { profileSheet = null })
@@ -145,8 +127,10 @@ fun SearchOptionsSheet(
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
-    val current = prefs ?: return
-    val gallery = galleryPrefs ?: return
+    // Until the first read lands the sheet is not shown: the rows open on what is saved, and
+    // the sheet measures its full content rather than measuring empty and jumping.
+    val current = prefs.search.value ?: return
+    val gallery = prefs.gallery.value ?: return
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -299,13 +283,16 @@ fun SearchOptionsSheet(
                                 else scope.launch { SettingsRepository.setSearchSuggestions(context, false) }
                             }
                         )
-                    }
-                )
-            )
-
-            SettingsSection(
-                title = stringResource(R.string.fetch_settings_playback),
-                rows = listOf(
+                    },
+                    {
+                        SwitchSettingRow(
+                            icon = Icons.Filled.Headphones,
+                            title = stringResource(R.string.fetch_settings_play_background),
+                            summary = stringResource(R.string.fetch_settings_play_background_summary),
+                            checked = current.playInBackground,
+                            onCheckedChange = { on -> com.hazel.android.ui.screens.more.setPlayInBackground(context, scope, on) }
+                        )
+                    },
                     {
                         ValueSettingRow(
                             icon = Icons.Filled.PlayCircle,
@@ -404,15 +391,16 @@ fun SearchOptionsSheet(
     }
 }
 
-private data class SearchPrefs(
+internal data class SearchPrefs(
     val source: SearchSource,
     val searchEngine: ListingSource,
     val results: Int,
     val suggestions: Boolean,
-    val playEngine: ListingSource
+    val playEngine: ListingSource,
+    val playInBackground: Boolean
 )
 
-private data class GalleryPrefs(
+internal data class GalleryPrefs(
     val posts: Int,
     val show: GalleryShow,
     val skipReposts: Boolean,
@@ -455,7 +443,7 @@ private fun ClearShape(
     }
 }
 
-/** The profile-link rows, shared by the three dots menu and Image settings: one setting, two doors. */
+/** The profile-link rows, shared by the three dots menu and gallery-dl settings: one setting, two doors. */
 @Composable
 internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.ProfileSite) -> Unit): List<@Composable () -> Unit> {
     val context = LocalContext.current
@@ -487,3 +475,42 @@ internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.Profil
 
 /** The search options sheet's fixed height, as a share of the screen. */
 private const val SHEET_HEIGHT_SHARE = 0.72f
+
+/**
+ * What the options sheet shows, read live from the saved settings. Only read here, never
+ * written: each row still writes its own setting. Kept by the screen that opens the sheet,
+ * so the values are already in hand when it opens and no frame is spent waiting for them.
+ */
+@androidx.compose.runtime.Stable
+class SearchOptionsPrefs internal constructor(
+    internal val search: androidx.compose.runtime.State<SearchPrefs?>,
+    internal val gallery: androidx.compose.runtime.State<GalleryPrefs?>,
+    internal val profileAsk: androidx.compose.runtime.State<Boolean>
+)
+
+@Composable
+fun rememberSearchOptionsPrefs(): SearchOptionsPrefs {
+    val context = LocalContext.current
+    val search = remember(context) {
+        combine(
+            SettingsRepository.getSearchSource(context),
+            SettingsRepository.getSearchEngine(context),
+            SettingsRepository.getSearchResults(context),
+            SettingsRepository.getSearchSuggestions(context),
+            combine(SettingsRepository.getPlayEngine(context), SettingsRepository.getPlayInBackground(context), ::Pair)
+        ) { source, engine, results, suggestions, play ->
+            SearchPrefs(source, engine, results, suggestions, play.first, play.second)
+        }.distinctUntilChanged()
+    }.collectAsState(initial = null)
+    val gallery = remember(context) {
+        combine(
+            SettingsRepository.getGalleryPostsPerSearch(context),
+            SettingsRepository.getGalleryShow(context),
+            SettingsRepository.getGallerySkipReposts(context),
+            SettingsRepository.getGalleryGroupByAuthor(context),
+            ::GalleryPrefs
+        ).distinctUntilChanged()
+    }.collectAsState(initial = null)
+    val profileAsk = remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    return remember(search, gallery, profileAsk) { SearchOptionsPrefs(search, gallery, profileAsk) }
+}

@@ -174,7 +174,8 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.fetch_settings_suggestions to R.string.fetch_settings_suggestions_summary,
         R.string.fetch_settings_play_with to null,
         R.string.fetch_settings_play_quality to null,
-        R.string.fetch_settings_play_audio to null
+        R.string.fetch_settings_play_audio to null,
+        R.string.fetch_settings_play_background to R.string.fetch_settings_play_background_summary
     )
     on(
         R.string.more_image_settings, "gallery_settings",

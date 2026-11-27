@@ -505,6 +505,13 @@
     <string name="properties_name">名称</string>
     <string name="properties_section_media">媒体</string>
     <string name="properties_section_again">再次获取</string>
+    <string name="properties_section_in_file">文件内信息</string>
+    <string name="properties_tag_description">描述</string>
+    <string name="properties_tag_artist">艺术家</string>
+    <string name="properties_tag_album">专辑</string>
+    <string name="properties_tag_genre">类型</string>
+    <string name="properties_tag_date">上传日期</string>
+    <string name="properties_tag_comment">评论</string>
     <string name="properties_show_file">显示文件</string>
     <string name="properties_share">分享</string>
     <string name="properties_copied">已复制</string>
@@ -606,6 +613,7 @@
     <string name="media_open_unknown_location">不知道这个文件在哪里</string>
     <string name="media_open_chooser">打开方式</string>
     <string name="media_open_no_app">这台设备上没有能打开它的应用</string>
+    <string name="media_open_no_app_here">Hazel 无法播放此文件</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">下载已取消</string>
@@ -713,14 +721,14 @@
     <string name="whats_new_glass_title">全新玻璃效果</string>
     <string name="whats_new_glass_desc">玻璃效果、新样式和强调色。</string>
     <string name="whats_new_highlights_title">本次更新</string>
-    <string name="whats_new_stories_title">新功能：快拍和精选</string>
-    <string name="whats_new_stories_desc">保存 Instagram 和 X 的快拍、精选和主页各栏目。</string>
-    <string name="whats_new_videos_title">修复：快拍视频可播放</string>
-    <string name="whats_new_videos_desc">在查看器中播放，并保存为视频或音频。</string>
-    <string name="whats_new_share_title">修复：分享到 Hazel Gallery</string>
-    <string name="whats_new_share_desc">此前分享的视频无法下载，现已修复。</string>
-    <string name="whats_new_looks_title">新功能：应用图标和玻璃风格</string>
-    <string name="whats_new_looks_desc">经典、白色或玻璃图标，以及五种新风格。</string>
+    <string name="whats_new_player_title">新功能：在 Hazel 中播放下载</string>
+    <string name="whats_new_player_desc">音频使用音乐面板，视频播放器附带文件操作。</string>
+    <string name="whats_new_background_title">新功能：后台继续播放</string>
+    <string name="whats_new_background_desc">首页播放器继续播放，并提供锁屏控制。</string>
+    <string name="whats_new_open_with_title">新功能：用 Hazel 打开文件</string>
+    <string name="whats_new_open_with_desc">可为手机上的任何音频或视频选择 Hazel。</string>
+    <string name="whats_new_fixes_title">已修复：Facebook 和 Pinterest</string>
+    <string name="whats_new_fixes_desc">Facebook 视频可再次下载，Pinterest 视频可以播放。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>
@@ -1008,6 +1016,9 @@
     <string name="fetch_settings_play_with">播放引擎</string>
     <string name="fetch_settings_play_quality">播放画质</string>
     <string name="fetch_settings_play_audio">音频语言</string>
+    <string name="fetch_settings_play_background">在后台继续播放</string>
+    <string name="fetch_settings_play_background_summary">离开应用后继续播放并显示通知</string>
+    <string name="play_background_channel">播放</string>
     <string name="player_audio_original">原声</string>
     <string name="player_audio_app_language">应用语言</string>
     <string name="player_audio_track">音轨</string>
@@ -1263,7 +1274,7 @@
     <string name="upd_gallerydl_auto_summary">无下载时安装新版本</string>
     <string name="gallery_group_by_author">按作者分组</string>
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
-    <string name="more_image_settings">图片设置</string>
+    <string name="more_image_settings">gallery-dl 设置</string>
     <string name="guide_share_from_apps">从任意应用分享链接</string>
     <string name="guide_share_video">任意视频、短视频或音频。选择画质、剪辑、SponsorBlock 等，然后下载</string>
     <string name="guide_share_gallery">图片、帖子、快拍、精选和主页。选择要保存的内容，然后下载</string>

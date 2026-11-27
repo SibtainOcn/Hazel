@@ -1,0 +1,8 @@
+* Play downloads in Hazel: a music sheet for audio, a video player with file actions
+* Hazel in the Open with list for audio and video files
+* Keep playing in background with lock-screen controls
+* Gallery: long press a file to play, download, open or see properties
+* Properties show the description, link and date saved in the file
+* Fixed Facebook downloads and Pinterest video playback
+* Fixed a Gallery crash on Android 7
+* Smoother, smaller app and faster search options

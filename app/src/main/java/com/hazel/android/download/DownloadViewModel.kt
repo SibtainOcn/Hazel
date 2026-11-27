@@ -1718,15 +1718,16 @@ class DownloadViewModel : ViewModel() {
                         break
                     }
 
-                    try {
-                        executeYtDlp(
-                            buildRequest(
-                                plan.info.url, plan.format, options, plan.title, plan.author,
-                                planAccess, limits,
-                                plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
-                                plan.audioLanguage
-                            )
+                    fun runWith(access: SiteAccess) = executeYtDlp(
+                        buildRequest(
+                            plan.info.url, plan.format, options, plan.title, plan.author,
+                            access, limits,
+                            plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
+                            plan.audioLanguage
                         )
+                    )
+                    try {
+                        runWith(planAccess)
                     } catch (e: Exception) {
                         // A replayed payload whose addresses have expired fails here. That
                         // is not the link failing, so it is read again and tried once more
@@ -1735,8 +1736,12 @@ class DownloadViewModel : ViewModel() {
                         // Without that the retry treated the stopped process as a stale
                         // payload, threw away the part file and started the download again,
                         // which is the one thing a pause must not do.
+                        // A sign-in the read never proved was needed is dropped for one more
+                        // try, as the read itself does: some sites (Facebook) serve a signed-in
+                        // session a page the engine cannot read.
                         val replayed = InfoCache.infoJsonFor(plan.info.url) != null
-                        if (!replayed || isCancelled || isBatchCancelled || isPaused ||
+                        val dropSignIn = planAccess.hasCookies && !plan.info.requiresSignIn
+                        if ((!replayed && !dropSignIn) || isCancelled || isBatchCancelled || isPaused ||
                             restartUrl == plan.info.url) throw e
 
                         InfoCache.invalidate(plan.info.url)
@@ -1756,14 +1761,18 @@ class DownloadViewModel : ViewModel() {
                                 totalBytes = 0L, eta = ""
                             ) }
                         }
-                        executeYtDlp(
-                            buildRequest(
-                                plan.info.url, plan.format, options, plan.title, plan.author,
-                                planAccess, limits,
-                                plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
-                                plan.audioLanguage
-                            )
-                        )
+                        if (replayed) {
+                            try {
+                                runWith(planAccess)
+                            } catch (again: Exception) {
+                                if (!dropSignIn || isCancelled || isBatchCancelled || isPaused ||
+                                    restartUrl == plan.info.url) throw again
+                                purgeFragments()
+                                runWith(SiteAccess.NONE)
+                            }
+                        } else {
+                            runWith(SiteAccess.NONE)
+                        }
                     }
 
                     if (restartUrl == plan.info.url && !isBatchCancelled) {

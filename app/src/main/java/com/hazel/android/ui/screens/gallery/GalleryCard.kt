@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.gallery
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,8 @@ fun GalleryCard(
     section: String? = null,
     onOpen: () -> Unit,
     onView: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onHold: (() -> Unit)? = null
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -68,7 +70,7 @@ fun GalleryCard(
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable(onClick = onOpen)
+                .combinedClickable(onLongClick = onHold, onClick = onOpen)
         ) {
             ArtworkPlaceholder(Modifier.matchParentSize())
             item.thumbnail?.let { thumbnail ->

@@ -541,6 +541,13 @@
     <string name="properties_name">Имя</string>
     <string name="properties_section_media">Медиа</string>
     <string name="properties_section_again">Получить снова</string>
+    <string name="properties_section_in_file">В файле</string>
+    <string name="properties_tag_description">Описание</string>
+    <string name="properties_tag_artist">Исполнитель</string>
+    <string name="properties_tag_album">Альбом</string>
+    <string name="properties_tag_genre">Жанр</string>
+    <string name="properties_tag_date">Загружено</string>
+    <string name="properties_tag_comment">Комментарий</string>
     <string name="properties_show_file">Показать файл</string>
     <string name="properties_share">Поделиться</string>
     <string name="properties_copied">Скопировано</string>
@@ -648,6 +655,7 @@
     <string name="media_open_unknown_location">Расположение этого файла неизвестно</string>
     <string name="media_open_chooser">Открыть с помощью</string>
     <string name="media_open_no_app">На этом устройстве нет подходящего приложения</string>
+    <string name="media_open_no_app_here">Hazel не может воспроизвести этот файл</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Загрузка отменена</string>
@@ -755,14 +763,14 @@
     <string name="whats_new_glass_title">Новый стеклянный вид</string>
     <string name="whats_new_glass_desc">Эффект стекла, новые стили и акцентные цвета.</string>
     <string name="whats_new_highlights_title">В этом обновлении</string>
-    <string name="whats_new_stories_title">Новое: Истории и актуальное</string>
-    <string name="whats_new_stories_desc">Сохраняйте истории, актуальное и разделы профилей Instagram и X.</string>
-    <string name="whats_new_videos_title">Исправлено: Видео из историй воспроизводятся</string>
-    <string name="whats_new_videos_desc">Смотрите во встроенном просмотре и сохраняйте как видео или аудио.</string>
-    <string name="whats_new_share_title">Исправлено: Делитесь в Hazel Gallery</string>
-    <string name="whats_new_share_desc">Раньше общие видео не скачивались; теперь сохраняются.</string>
-    <string name="whats_new_looks_title">Новое: Значок и стили стекла</string>
-    <string name="whats_new_looks_desc">Классический, белый или стеклянный значок и пять новых стилей.</string>
+    <string name="whats_new_player_title">Новое: загрузки играют в Hazel</string>
+    <string name="whats_new_player_desc">Музыкальная панель для аудио и видеоплеер с действиями над файлом.</string>
+    <string name="whats_new_background_title">Новое: воспроизведение в фоне</string>
+    <string name="whats_new_background_desc">Плеер Главной играет дальше с управлением на экране блокировки.</string>
+    <string name="whats_new_open_with_title">Новое: открывайте файлы в Hazel</string>
+    <string name="whats_new_open_with_desc">Выбирайте Hazel для любого аудио или видео на телефоне.</string>
+    <string name="whats_new_fixes_title">Исправлено: Facebook и Pinterest</string>
+    <string name="whats_new_fixes_desc">Видео Facebook снова скачиваются, а видео Pinterest воспроизводятся.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>
@@ -1052,6 +1060,9 @@
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>
     <string name="fetch_settings_play_audio">Язык аудио</string>
+    <string name="fetch_settings_play_background">Воспроизводить в фоне</string>
+    <string name="fetch_settings_play_background_summary">Продолжает играть с уведомлением после выхода из приложения</string>
+    <string name="play_background_channel">Воспроизведение</string>
     <string name="player_audio_original">Оригинал</string>
     <string name="player_audio_app_language">Язык приложения</string>
     <string name="player_audio_track">Звуковая дорожка</string>
@@ -1313,7 +1324,7 @@
     <string name="upd_gallerydl_auto_summary">Ставить новые версии, когда нет загрузок</string>
     <string name="gallery_group_by_author">Группировать по автору</string>
     <string name="gallery_group_by_author_summary">Одиночные фото автора в одной карусели</string>
-    <string name="more_image_settings">Настройки изображений</string>
+    <string name="more_image_settings">Настройки gallery-dl</string>
     <string name="guide_share_from_apps">Поделитесь ссылкой из любого приложения</string>
     <string name="guide_share_video">Любое видео, рилс или аудио. Выберите качество, обрезку, SponsorBlock и другое, затем скачайте</string>
     <string name="guide_share_gallery">Изображения, публикации, истории, актуальное и профили. Выберите, что сохранить, затем скачайте</string>

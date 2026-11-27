@@ -1,5 +1,9 @@
 package com.hazel.android.download.playback
 
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.BitmapLoader
+import androidx.media3.datasource.DataSourceBitmapLoader
+import androidx.media3.session.CacheBitmapLoader
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
@@ -8,6 +12,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.hazel.android.download.NetworkProxy.throughProxy
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -48,18 +53,29 @@ object PlayerFactory {
      */
     private val http by lazy { okhttp3.OkHttpClient.Builder().throughProxy().build() }
 
-    fun sourceFor(stream: PlayableStream): MediaSource {
-        val main = source(stream.url, stream.headers, stream.isHls, stream.isDash)
+    fun sourceFor(stream: PlayableStream, metadata: MediaMetadata? = null): MediaSource {
+        val main = source(stream.url, stream.headers, stream.isHls, stream.isDash, metadata)
         val audio = stream.audioUrl?.let { source(it, stream.audioHeaders, isHls = false, isDash = false) }
         return if (audio != null) MergingMediaSource(main, audio) else main
     }
 
-    private fun source(url: String, headers: Map<String, String>, isHls: Boolean, isDash: Boolean): MediaSource {
+    private fun source(
+        url: String,
+        headers: Map<String, String>,
+        isHls: Boolean,
+        isDash: Boolean,
+        metadata: MediaMetadata? = null
+    ): MediaSource {
+        // A file on the device is read through the content resolver, never the network.
+        if (url.startsWith("content:") || url.startsWith("file:")) {
+            val item = MediaItem.Builder().setUri(url).apply { metadata?.let(::setMediaMetadata) }.build()
+            return ProgressiveMediaSource.Factory(DefaultDataSource.Factory(com.hazel.android.HazelApp.instance)).createMediaSource(item)
+        }
         val agent = headers.entries.firstOrNull { it.key.equals("User-Agent", ignoreCase = true) }?.value
         val http = OkHttpDataSource.Factory(http)
             .setUserAgent(agent ?: BROWSER_USER_AGENT)
             .setDefaultRequestProperties(headers.filterKeys { !it.equals("User-Agent", ignoreCase = true) })
-        val item = MediaItem.fromUri(url)
+        val item = MediaItem.Builder().setUri(url).apply { metadata?.let(::setMediaMetadata) }.build()
         val path = url.substringBefore('?')
         return if (isDash || path.endsWith(".mpd")) {
             DashMediaSource.Factory(http).createMediaSource(item)
@@ -70,6 +86,17 @@ object PlayerFactory {
             ProgressiveMediaSource.Factory(reader).createMediaSource(item)
         }
     }
+
+    /**
+     * Loads the media notification's artwork through the app's proxied client, so the
+     * thumbnail is never fetched around the proxy, at a size a notification needs.
+     */
+    fun bitmapLoader(context: Context): BitmapLoader = CacheBitmapLoader(
+        DataSourceBitmapLoader.Builder(context.applicationContext)
+            .setDataSourceFactory(OkHttpDataSource.Factory(http).setUserAgent(BROWSER_USER_AGENT))
+            .setMaximumOutputDimension(ARTWORK_MAX_PX)
+            .build()
+    )
 
     /** Keeps an adaptive stream within the chosen quality, measured on the shorter side. */
     fun applyCap(player: ExoPlayer, stream: PlayableStream) {
@@ -125,6 +152,7 @@ object PlayerFactory {
     private const val BROWSER_USER_AGENT =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    private const val ARTWORK_MAX_PX = 512
     private const val START_BUFFER_MS = 5_000
     private const val MAX_BUFFER_MS = 50_000
     private const val PLAYBACK_BUFFER_MS = 1_000

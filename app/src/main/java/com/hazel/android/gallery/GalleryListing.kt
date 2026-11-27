@@ -104,11 +104,17 @@ data class GalleryListing(
 
         /**
          * A file gallery-dl hands to yt-dlp is named `ytdl:<page>`, which no player reads; the
-         * site's own progressive file (Instagram's `video_url`) streams instead.
+         * site's own progressive file (Instagram's `video_url`) streams instead, and a handed-over
+         * stream manifest (Pinterest's HLS) plays as it is.
          */
         private fun playUrlOf(url: String, info: JSONObject): String? =
             url.takeIf { it.startsWith("http") }
                 ?: info.optString("video_url").takeIf { it.startsWith("http") }
+                ?: url.removePrefix("ytdl:").takeIf { inner ->
+                    inner.startsWith("http") && inner.substringBefore('?').substringAfterLast('.').lowercase() in MANIFESTS
+                }
+
+        private val MANIFESTS = setOf("m3u8", "mpd")
 
         /** The post's own page, from the site's fields; null when the site gives none (Pinterest search). */
         internal fun postLinkOf(info: JSONObject): String? {

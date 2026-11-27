@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Fullscreen
@@ -96,28 +97,46 @@ import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.download.languageLabel
 import com.hazel.android.download.playback.AudioTrack
+import com.hazel.android.download.playback.BackgroundPlayback
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import kotlinx.coroutines.delay
 
 /**
  * A player for [url] that lives as long as the composable holding it, and pauses when the
- * app leaves the screen.
+ * app leaves the screen, unless [background] lends it to the playback service, which keeps
+ * it playing with a media notification showing [metadata].
  */
 @Composable
-fun rememberPlaybackController(url: String, startAtMs: Long = 0L): PlaybackController {
+fun rememberPlaybackController(
+    url: String,
+    startAtMs: Long = 0L,
+    background: Boolean = false,
+    metadata: () -> androidx.media3.common.MediaMetadata? = { null }
+): PlaybackController {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val controller = remember(url) {
-        PlaybackController(context, scope, url).also { it.start(startAtMs) }
+        PlaybackController(context, scope, url, metadata()).also { it.start(startAtMs) }
     }
     DisposableEffect(controller) {
         onDispose { controller.release() }
     }
+    if (background) {
+        DisposableEffect(controller) {
+            BackgroundPlayback.attach(context, controller.player)
+            onDispose { BackgroundPlayback.detach(context, controller.player) }
+        }
+    }
+    val keepPlaying by rememberUpdatedState(background)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, controller) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) controller.pause()
+            when (event) {
+                Lifecycle.Event.ON_STOP -> if (keepPlaying) controller.playOutOfSight(true) else controller.pause()
+                Lifecycle.Event.ON_START -> controller.playOutOfSight(false)
+                else -> Unit
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -177,7 +196,11 @@ fun FullscreenPlayer(
     controller: PlaybackController,
     thumbnail: String?,
     onExit: () -> Unit,
-    onDownload: (() -> Unit)? = null
+    onDownload: (() -> Unit)? = null,
+    /** Shown beside the full screen button, such as a saved file's actions. */
+    barActions: (@Composable () -> Unit)? = null,
+    /** A back button pinned top left, for a player that is its own screen. */
+    onBack: (() -> Unit)? = null
 ) {
     val activity = LocalContext.current.findActivity()
     val ratio = controller.aspectRatio
@@ -215,8 +238,11 @@ fun FullscreenPlayer(
                 attached = true,
                 fullscreen = true,
                 onToggleFullscreen = onExit,
-                onClose = null,
+                onClose = onBack,
+                closeIcon = Icons.AutoMirrored.Filled.ArrowBackIos,
+                closeLabel = if (onBack != null) stringResource(R.string.settings_back) else null,
                 onDownload = onDownload,
+                barActions = barActions,
                 modifier = Modifier
                     .fillMaxSize()
                     .systemBarsPadding()
@@ -237,7 +263,8 @@ private fun PlayerArea(
     modifier: Modifier = Modifier,
     closeIcon: ImageVector = Icons.Filled.Close,
     closeLabel: String? = null,
-    showControls: Boolean = true
+    showControls: Boolean = true,
+    barActions: (@Composable () -> Unit)? = null
 ) {
     var controlsShown by remember { mutableStateOf(true) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -400,6 +427,7 @@ private fun PlayerArea(
 
                 SeekBar(
                     controller = controller,
+                    barActions = barActions,
                     fullscreen = fullscreen,
                     onToggleFullscreen = onToggleFullscreen,
                     onMenuChange = { menuOpen = it },
@@ -423,39 +451,22 @@ private fun PlayerArea(
 @Composable
 private fun SeekBar(
     controller: PlaybackController,
+    barActions: (@Composable () -> Unit)?,
     fullscreen: Boolean,
     onToggleFullscreen: () -> Unit,
     onMenuChange: (Boolean) -> Unit,
     onScrubChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var scrubbing by remember { mutableStateOf(false) }
-    val setScrubbing = { value: Boolean ->
-        scrubbing = value
-        onScrubChange(value)
-    }
-    val latestScrubChange by rememberUpdatedState(onScrubChange)
-    DisposableEffect(Unit) { onDispose { latestScrubChange(false) } }
-    var scrubFraction by remember { mutableFloatStateOf(0f) }
+    val scrub = remember { SeekScrub() }
     val duration = controller.durationMs
-    val enabled = duration > 0
-    val length by rememberUpdatedState(duration)
-    val played = when {
-        scrubbing -> scrubFraction
-        enabled -> (controller.positionMs.toFloat() / duration).coerceIn(0f, 1f)
-        else -> 0f
-    }
-    val buffered = if (enabled) (controller.bufferedMs.toFloat() / duration).coerceIn(0f, 1f) else 0f
-    val thumb by animateDpAsState(if (scrubbing) 22.dp else 16.dp, label = "seekThumb")
-    val accent = MaterialTheme.colorScheme.primary
-    // Flows while the video plays; a finger on the bar or a pause lays it flat.
-    val (wave, wavePhase) = rememberSeekWave(flowing = controller.isPlaying && !scrubbing)
+    val played = scrub.played(controller)
 
     Column(modifier = modifier) {
-        if (scrubbing) {
+        if (scrub.active) {
             ScrubTime(
-                text = formatClock((scrubFraction * duration).toLong()),
-                fraction = scrubFraction,
+                text = formatClock((scrub.fraction * duration).toLong()),
+                fraction = scrub.fraction,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -467,7 +478,8 @@ private fun SeekBar(
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
-            MoreButton(controller = controller, onMenuChange = onMenuChange)
+            if (!controller.isLocal) MoreButton(controller = controller, onMenuChange = onMenuChange)
+            barActions?.invoke()
             GlassIcon(
                 icon = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 description = stringResource(
@@ -477,8 +489,64 @@ private fun SeekBar(
                 background = Color.Transparent
             )
         }
+        WaveSeekLine(
+            controller = controller,
+            scrub = scrub,
+            onScrubChange = onScrubChange,
+            track = Color.White.copy(alpha = 0.25f),
+            loaded = Color.White.copy(alpha = 0.45f)
+        )
+    }
+}
+
+/** Where a finger on the seek bar is, shared by the bar and the time drawn over it. */
+@androidx.compose.runtime.Stable
+internal class SeekScrub {
+    var active by mutableStateOf(false)
+    var fraction by mutableFloatStateOf(0f)
+
+    fun played(controller: PlaybackController): Float {
+        val duration = controller.durationMs
+        return when {
+            active -> fraction
+            duration > 0 -> (controller.positionMs.toFloat() / duration).coerceIn(0f, 1f)
+            else -> 0f
+        }
+    }
+}
+
+/**
+ * The bar itself: played in the accent as a flowing wave while it plays, loaded in [loaded],
+ * the rest in [track]. A finger lays the wave flat and lengthens the pill thumb; the jump is
+ * made on release, and a tap anywhere jumps there.
+ */
+@Composable
+internal fun WaveSeekLine(
+    controller: PlaybackController,
+    scrub: SeekScrub,
+    track: Color,
+    loaded: Color,
+    modifier: Modifier = Modifier,
+    onScrubChange: (Boolean) -> Unit = {}
+) {
+    val setScrubbing = { value: Boolean ->
+        scrub.active = value
+        onScrubChange(value)
+    }
+    val latestScrubChange by rememberUpdatedState(onScrubChange)
+    DisposableEffect(Unit) { onDispose { latestScrubChange(false) } }
+    val duration = controller.durationMs
+    val enabled = duration > 0
+    val length by rememberUpdatedState(duration)
+    val played = scrub.played(controller)
+    val buffered = if (enabled) (controller.bufferedMs.toFloat() / duration).coerceIn(0f, 1f) else 0f
+    val scrubbing = scrub.active
+    val thumb by animateDpAsState(if (scrubbing) 22.dp else 16.dp, label = "seekThumb")
+    val accent = MaterialTheme.colorScheme.primary
+    // Flows while it plays; a finger on the bar or a pause lays it flat.
+    val (wave, wavePhase) = rememberSeekWave(flowing = controller.isPlaying && !scrubbing)
         Canvas(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(28.dp)
                 .pointerInput(enabled) {
@@ -491,29 +559,28 @@ private fun SeekBar(
                     if (!enabled) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragStart = { offset ->
-                            scrubFraction = (offset.x / size.width).coerceIn(0f, 1f)
+                            scrub.fraction = (offset.x / size.width).coerceIn(0f, 1f)
                             setScrubbing(true)
                         },
                         onDragEnd = {
-                            controller.seekTo((scrubFraction * length).toLong())
+                            controller.seekTo((scrub.fraction * length).toLong())
                             setScrubbing(false)
                         },
                         onDragCancel = { setScrubbing(false) }
                     ) { change, _ ->
                         change.consume()
-                        scrubFraction = (change.position.x / size.width).coerceIn(0f, 1f)
+                        scrub.fraction = (change.position.x / size.width).coerceIn(0f, 1f)
                     }
                 }
         ) {
             val y = size.height / 2f
             val stroke = if (scrubbing) 4.dp.toPx() else 3.dp.toPx()
             // The track and the loaded part start at the thumb, so nothing runs under the wave.
-            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f), from = played)
-            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f), from = played)
+            drawSeekLine(y, stroke, 1f, track, from = played)
+            drawSeekLine(y, stroke, buffered, loaded, from = played)
             drawWavyLine(y, stroke, played, accent, wave.value, wavePhase.value)
             drawPillThumb(size.width * played, y, accent, height = thumb.toPx(), width = 5.dp.toPx())
         }
-    }
 }
 
 /** The time under the finger while the bar is dragged, held above that point of the bar. */
