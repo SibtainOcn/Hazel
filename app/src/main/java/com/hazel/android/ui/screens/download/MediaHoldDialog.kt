@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material3.toShape
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -189,7 +188,7 @@ private fun HoldActions(
     } ?: download
     val tiles = listOfNotNull(
         download.takeIf { onPlay != null },
-        onOpen?.let { HoldItem(MaterialShapes.Sunny, Icons.AutoMirrored.Rounded.OpenInNew, R.string.sheet_link_open, it) },
+        onOpen?.let { HoldItem(MaterialShapes.Sunny, androidx.compose.ui.graphics.vector.ImageVector.vectorResource(R.drawable.ic_open_app), R.string.sheet_link_open, it) },
         onProperties?.let { HoldItem(MaterialShapes.Cookie6Sided, Icons.Rounded.Info, R.string.history_card_properties, it) }
     )
     val scheme = MaterialTheme.colorScheme
