@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Gallery: long press a file for Play or Full screen and Download, plus Open and Properties once saved.
+- Keep playing in background: Home's player plays on with media controls once the app is left (off by default).
 ### Changed
 - Download all button on Home and Gallery is smaller, so it covers less of the list.
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.

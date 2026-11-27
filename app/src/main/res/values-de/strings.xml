@@ -1023,6 +1023,9 @@
     <string name="fetch_settings_play_with">Abspielen mit</string>
     <string name="fetch_settings_play_quality">Wiedergabequalität</string>
     <string name="fetch_settings_play_audio">Audiosprache</string>
+    <string name="fetch_settings_play_background">Im Hintergrund weiterspielen</string>
+    <string name="fetch_settings_play_background_summary">Spielt mit einer Benachrichtigung weiter, wenn du die App verlässt</string>
+    <string name="play_background_channel">Wiedergabe</string>
     <string name="player_audio_original">Original</string>
     <string name="player_audio_app_language">App-Sprache</string>
     <string name="player_audio_track">Tonspur</string>

@@ -217,7 +217,14 @@ fun AppNavigation(
 
     // Held above the screens, so the video plays on in the mini player on every screen.
     val playerSession = remember { PlayerSession() }
-    val playback = playerSession.playingUrl?.let { rememberPlaybackController(it) }
+    val playInBackground by remember(context) { SettingsRepository.getPlayInBackground(context) }
+        .collectAsState(initial = false)
+    val playback = playerSession.playingUrl?.let { url ->
+        rememberPlaybackController(url, background = playInBackground, metadata = {
+            downloadViewModel.state.value.results.firstOrNull { it.url == url }
+                ?.let(com.hazel.android.download.playback.BackgroundPlayback::metadataOf)
+        })
+    }
 
     // A download that could not reach its folder (an SD card taken out, full or no longer
     // granting access) is reported wherever the user is in the app, including after it ran

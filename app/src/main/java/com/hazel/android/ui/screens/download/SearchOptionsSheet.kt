@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.PersonSearch
@@ -123,9 +124,10 @@ fun SearchOptionsSheet(
             SettingsRepository.getSearchEngine(context),
             SettingsRepository.getSearchResults(context),
             SettingsRepository.getSearchSuggestions(context),
-            SettingsRepository.getPlayEngine(context),
-            ::SearchPrefs
-        )
+            combine(SettingsRepository.getPlayEngine(context), SettingsRepository.getPlayInBackground(context), ::Pair)
+        ) { source, engine, results, suggestions, play ->
+            SearchPrefs(source, engine, results, suggestions, play.first, play.second)
+        }
     }.collectAsState(initial = null)
     val galleryPrefs by remember(context) {
         combine(
@@ -313,6 +315,15 @@ fun SearchOptionsSheet(
                             value = stringResource(current.playEngine.labelRes),
                             onClick = { open = SearchChoice.PLAY_ENGINE }
                         )
+                    },
+                    {
+                        SwitchSettingRow(
+                            icon = Icons.Filled.Headphones,
+                            title = stringResource(R.string.fetch_settings_play_background),
+                            summary = stringResource(R.string.fetch_settings_play_background_summary),
+                            checked = current.playInBackground,
+                            onCheckedChange = { on -> com.hazel.android.ui.screens.more.setPlayInBackground(context, scope, on) }
+                        )
                     }
                 )
             )
@@ -409,7 +420,8 @@ private data class SearchPrefs(
     val searchEngine: ListingSource,
     val results: Int,
     val suggestions: Boolean,
-    val playEngine: ListingSource
+    val playEngine: ListingSource,
+    val playInBackground: Boolean
 )
 
 private data class GalleryPrefs(

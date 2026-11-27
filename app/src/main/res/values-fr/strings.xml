@@ -1038,6 +1038,9 @@
     <string name="fetch_settings_play_with">Lire avec</string>
     <string name="fetch_settings_play_quality">Qualité de lecture</string>
     <string name="fetch_settings_play_audio">Langue audio</string>
+    <string name="fetch_settings_play_background">Continuer la lecture en arrière-plan</string>
+    <string name="fetch_settings_play_background_summary">Continue avec une notification quand vous quittez l\'appli</string>
+    <string name="play_background_channel">Lecture</string>
     <string name="player_audio_original">Originale</string>
     <string name="player_audio_app_language">Langue de l’application</string>
     <string name="player_audio_track">Piste audio</string>

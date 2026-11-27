@@ -1023,6 +1023,9 @@
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
     <string name="fetch_settings_play_audio">ऑडियो भाषा</string>
+    <string name="fetch_settings_play_background">बैकग्राउंड में चलाते रहें</string>
+    <string name="fetch_settings_play_background_summary">ऐप छोड़ने के बाद सूचना के साथ चलता रहता है</string>
+    <string name="play_background_channel">प्लेबैक</string>
     <string name="player_audio_original">मूल</string>
     <string name="player_audio_app_language">ऐप की भाषा</string>
     <string name="player_audio_track">ऑडियो ट्रैक</string>

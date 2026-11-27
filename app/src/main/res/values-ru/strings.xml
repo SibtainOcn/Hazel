@@ -1052,6 +1052,9 @@
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>
     <string name="fetch_settings_play_audio">Язык аудио</string>
+    <string name="fetch_settings_play_background">Воспроизводить в фоне</string>
+    <string name="fetch_settings_play_background_summary">Продолжает играть с уведомлением после выхода из приложения</string>
+    <string name="play_background_channel">Воспроизведение</string>
     <string name="player_audio_original">Оригинал</string>
     <string name="player_audio_app_language">Язык приложения</string>
     <string name="player_audio_track">Звуковая дорожка</string>

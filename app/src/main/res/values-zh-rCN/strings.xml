@@ -1008,6 +1008,9 @@
     <string name="fetch_settings_play_with">播放引擎</string>
     <string name="fetch_settings_play_quality">播放画质</string>
     <string name="fetch_settings_play_audio">音频语言</string>
+    <string name="fetch_settings_play_background">在后台继续播放</string>
+    <string name="fetch_settings_play_background_summary">离开应用后继续播放并显示通知</string>
+    <string name="play_background_channel">播放</string>
     <string name="player_audio_original">原声</string>
     <string name="player_audio_app_language">应用语言</string>
     <string name="player_audio_track">音轨</string>

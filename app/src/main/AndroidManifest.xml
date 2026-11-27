@@ -10,6 +10,9 @@
     
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Home's player playing on in the background, only while the user turned that on. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"
         tools:ignore="ScopedStorage" />
@@ -321,6 +324,20 @@
             android:name=".download.DownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!--
+             Keeps Home's player going once the app is left, while "Keep playing in background"
+             is on. Exported so the system's media controls, Bluetooth and the lock screen
+             can reach its media session; it plays nothing of its own.
+        -->
+        <service
+            android:name=".download.playback.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
         <!--
              Carries the notification's Pause, Resume and Cancel buttons to the download

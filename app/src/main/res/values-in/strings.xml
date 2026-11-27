@@ -1008,6 +1008,9 @@
     <string name="fetch_settings_play_with">Putar dengan</string>
     <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
     <string name="fetch_settings_play_audio">Bahasa audio</string>
+    <string name="fetch_settings_play_background">Tetap putar di latar belakang</string>
+    <string name="fetch_settings_play_background_summary">Terus diputar dengan notifikasi setelah keluar dari aplikasi</string>
+    <string name="play_background_channel">Pemutaran</string>
     <string name="player_audio_original">Asli</string>
     <string name="player_audio_app_language">Bahasa aplikasi</string>
     <string name="player_audio_track">Trek audio</string>

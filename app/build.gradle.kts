@@ -406,6 +406,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer.hls)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.session)
     // Streams over the app's OkHttp, which answers a proxy's password request.
     implementation(libs.androidx.media3.datasource.okhttp)
 

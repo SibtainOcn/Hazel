@@ -1008,6 +1008,9 @@
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>
     <string name="fetch_settings_play_audio">音声の言語</string>
+    <string name="fetch_settings_play_background">バックグラウンドで再生を続ける</string>
+    <string name="fetch_settings_play_background_summary">アプリを離れても通知付きで再生を続けます</string>
+    <string name="play_background_channel">再生</string>
     <string name="player_audio_original">オリジナル</string>
     <string name="player_audio_app_language">アプリの言語</string>
     <string name="player_audio_track">音声トラック</string>
