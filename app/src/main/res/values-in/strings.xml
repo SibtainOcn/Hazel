@@ -721,14 +721,14 @@
     <string name="whats_new_glass_title">Tampilan kaca baru</string>
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
     <string name="whats_new_highlights_title">Di pembaruan ini</string>
-    <string name="whats_new_stories_title">Baru: Story dan sorotan</string>
-    <string name="whats_new_stories_desc">Simpan story, sorotan, dan bagian profil dari Instagram dan X.</string>
-    <string name="whats_new_videos_title">Diperbaiki: Video story bisa diputar</string>
-    <string name="whats_new_videos_desc">Putar di penampil dan simpan sebagai video atau audio.</string>
-    <string name="whats_new_share_title">Diperbaiki: Bagikan ke Hazel Gallery</string>
-    <string name="whats_new_share_desc">Sebelumnya video yang dibagikan gagal diunduh; kini tersimpan.</string>
-    <string name="whats_new_looks_title">Baru: Ikon aplikasi dan gaya kaca</string>
-    <string name="whats_new_looks_desc">Ikon Klasik, Putih, atau Kaca, dan lima gaya baru.</string>
+    <string name="whats_new_player_title">Baru: Putar unduhan di Hazel</string>
+    <string name="whats_new_player_desc">Lembar musik untuk audio dan pemutar video dengan aksi file.</string>
+    <string name="whats_new_background_title">Baru: Tetap putar di latar belakang</string>
+    <string name="whats_new_background_desc">Pemutar Beranda terus berjalan dengan kontrol layar kunci.</string>
+    <string name="whats_new_open_with_title">Baru: Buka file dengan Hazel</string>
+    <string name="whats_new_open_with_desc">Pilih Hazel untuk file audio atau video apa pun di ponsel.</string>
+    <string name="whats_new_fixes_title">Diperbaiki: Facebook dan Pinterest</string>
+    <string name="whats_new_fixes_desc">Video Facebook bisa diunduh lagi dan video Pinterest bisa diputar.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

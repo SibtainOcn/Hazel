@@ -735,14 +735,14 @@
     <string name="whats_new_glass_title">Der neue Glas-Look</string>
     <string name="whats_new_glass_desc">Glaseffekt, neue Stile und Akzentfarben.</string>
     <string name="whats_new_highlights_title">In diesem Update</string>
-    <string name="whats_new_stories_title">Neu: Storys und Highlights</string>
-    <string name="whats_new_stories_desc">Storys, Highlights und Profilbereiche von Instagram und X speichern.</string>
-    <string name="whats_new_videos_title">Behoben: Story-Videos abspielbar</string>
-    <string name="whats_new_videos_desc">Im Viewer abspielen und als Video oder Audio speichern.</string>
-    <string name="whats_new_share_title">Behoben: Mit Hazel Gallery teilen</string>
-    <string name="whats_new_share_desc">Geteilte Videos ließen sich zuvor nicht laden; jetzt werden sie gespeichert.</string>
-    <string name="whats_new_looks_title">Neu: App-Symbol und Glasstile</string>
-    <string name="whats_new_looks_desc">Klassisches, weißes oder Glas-Symbol und fünf neue Stile.</string>
+    <string name="whats_new_player_title">Neu: Downloads in Hazel abspielen</string>
+    <string name="whats_new_player_desc">Ein Musikblatt für Audio und ein Videoplayer mit Dateiaktionen.</string>
+    <string name="whats_new_background_title">Neu: Im Hintergrund weiterspielen</string>
+    <string name="whats_new_background_desc">Der Player der Startseite spielt mit Sperrbildschirm-Steuerung weiter.</string>
+    <string name="whats_new_open_with_title">Neu: Dateien mit Hazel öffnen</string>
+    <string name="whats_new_open_with_desc">Wähle Hazel für jede Audio- oder Videodatei auf deinem Handy.</string>
+    <string name="whats_new_fixes_title">Behoben: Facebook und Pinterest</string>
+    <string name="whats_new_fixes_desc">Facebook-Videos laden wieder und Pinterest-Videos spielen ab.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>
