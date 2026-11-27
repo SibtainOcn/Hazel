@@ -75,7 +75,7 @@ internal fun GalleryShareContent(
      * each is queued or found missing.
      */
     onQueued: (requests: List<GalleryDownloadRequest>, videos: Job?) -> Unit,
-    /** Opens Image settings in the app, from the profile sheet. */
+    /** Opens gallery-dl settings in the app, from the profile sheet. */
     onTune: () -> Unit,
     onClose: () -> Unit
 ) {

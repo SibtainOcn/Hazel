@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 /**
  * Which sections of a profile to fetch, at most [GalleryProfiles.MAX_SECTIONS] at a time: a
  * third switched on drops the first. One sheet for every door to it: a pasted profile link
- * (with [onFetch]), the three dots menu and Image settings (without; the choice saves as made).
+ * (with [onFetch]), the three dots menu and gallery-dl settings (without; the choice saves as made).
  * [signedIn] marks the sections only signed-in accounts can see.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -239,7 +239,7 @@ private fun XSwitches() {
 
 /**
  * The sheet as a setting: the saved sections of [site], saved as they change. Opened from the
- * three dots menu and from Image settings.
+ * three dots menu and from gallery-dl settings.
  */
 @Composable
 fun SavedProfileSectionsSheet(site: ProfileSite, onDismiss: () -> Unit) {

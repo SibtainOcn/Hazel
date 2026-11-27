@@ -215,7 +215,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             isShrinkResources = false
             // Left unset when the keystore is unavailable, so the build produces an
             // unsigned APK instead of failing during signing validation.

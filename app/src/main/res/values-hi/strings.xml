@@ -1280,7 +1280,7 @@
     <string name="upd_gallerydl_auto_summary">कोई डाउनलोड न चलने पर नया वर्शन इंस्टॉल करें</string>
     <string name="gallery_group_by_author">लेखक के हिसाब से समूह</string>
     <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
-    <string name="more_image_settings">इमेज सेटिंग्स</string>
+    <string name="more_image_settings">gallery-dl सेटिंग्स</string>
     <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
     <string name="guide_share_video">कोई भी वीडियो, रील या ऑडियो। क्वालिटी, कट, SponsorBlock और बहुत कुछ चुनें, फिर डाउनलोड करें</string>
     <string name="guide_share_gallery">इमेज, पोस्ट, स्टोरी, हाइलाइट और प्रोफ़ाइल। क्या सहेजना है चुनें, फिर डाउनलोड करें</string>

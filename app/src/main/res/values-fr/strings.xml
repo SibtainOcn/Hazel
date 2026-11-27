@@ -1297,7 +1297,7 @@
     <string name="upd_gallerydl_auto_summary">Installer les nouvelles versions hors téléchargement</string>
     <string name="gallery_group_by_author">Grouper par auteur</string>
     <string name="gallery_group_by_author_summary">Images seules d\'un auteur dans un carrousel</string>
-    <string name="more_image_settings">Réglages des images</string>
+    <string name="more_image_settings">Réglages de gallery-dl</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
     <string name="guide_share_video">N’importe quelle vidéo, reel ou audio. Choisis la qualité, la coupe, SponsorBlock et plus, puis télécharge</string>
     <string name="guide_share_gallery">Images, publications, stories, à la une et profils. Choisis quoi garder, puis télécharge</string>
