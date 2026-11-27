@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Gallery: long press a file for Play or Full screen and Download, plus Open and Properties once saved.
 - Keep playing in background: Home's player plays on with media controls once the app is left (off by default).
+- Offline player: downloads play in Hazel, audio in a music sheet with ±10 s, video full screen or in a sheet; both keep Open with, Show file, Share and Properties at hand.
+- Hazel appears in Android's Open with list for audio and video files.
 - Properties: an In the file section shows the description, link, artist, genre and upload date written into a video or audio file.
 ### Changed
+- Open with uses a new icon across the app.
 - Download all button on Home and Gallery is smaller, so it covers less of the list.
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
 - More: Image settings is now named gallery-dl settings, in the app and the guide.
