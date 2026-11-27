@@ -301,20 +301,6 @@ fun SearchOptionsSheet(
                                 else scope.launch { SettingsRepository.setSearchSuggestions(context, false) }
                             }
                         )
-                    }
-                )
-            )
-
-            SettingsSection(
-                title = stringResource(R.string.fetch_settings_playback),
-                rows = listOf(
-                    {
-                        ValueSettingRow(
-                            icon = Icons.Filled.PlayCircle,
-                            title = stringResource(R.string.fetch_settings_play_with),
-                            value = stringResource(current.playEngine.labelRes),
-                            onClick = { open = SearchChoice.PLAY_ENGINE }
-                        )
                     },
                     {
                         SwitchSettingRow(
@@ -323,6 +309,14 @@ fun SearchOptionsSheet(
                             summary = stringResource(R.string.fetch_settings_play_background_summary),
                             checked = current.playInBackground,
                             onCheckedChange = { on -> com.hazel.android.ui.screens.more.setPlayInBackground(context, scope, on) }
+                        )
+                    },
+                    {
+                        ValueSettingRow(
+                            icon = Icons.Filled.PlayCircle,
+                            title = stringResource(R.string.fetch_settings_play_with),
+                            value = stringResource(current.playEngine.labelRes),
+                            onClick = { open = SearchChoice.PLAY_ENGINE }
                         )
                     }
                 )
