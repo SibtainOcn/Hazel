@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
 - Bug report form asks where the link was used and links to gallery-dl issues.
+### Fixed
+- A download that fails with saved sign-ins is tried once more without them, as the link read already does (Facebook "No video found").
 
 ## [1.2.18] - 2026-11-27
 ### Added
