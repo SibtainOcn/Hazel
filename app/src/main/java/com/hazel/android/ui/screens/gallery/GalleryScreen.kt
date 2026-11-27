@@ -412,6 +412,7 @@ fun GalleryScreen(
     var menuOpen by remember { mutableStateOf(false) }
     // Post index and file position, so a file of any post on a list of several can be opened.
     var viewing by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
+    var held by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     val galleryJobs by GalleryQueue.jobs.collectAsState()
     WarmGalleryOptions()
     val galleryFinished by GalleryQueue.finished.collectAsState()
@@ -566,13 +567,15 @@ fun GalleryScreen(
                                         section = post.section?.let { stringResource(it.label) },
                                         status = GalleryQueue.statusOf(galleryJobs, galleryFinished, post, post.items.first()),
                                         onOpen = { openItem(i, 0) },
-                                        onView = { viewing = i to 0 }
+                                        onView = { viewing = i to 0 },
+                                        onHold = { held = i to 0 }
                                     )
                                 } else {
                                     GalleryPostCard(
                                         post = post,
                                         onOpen = { position -> viewing = i to position },
-                                        onDownloadAll = { openPost(i) }
+                                        onDownloadAll = { openPost(i) },
+                                        onHold = { position -> held = i to position }
                                     )
                                 }
                             }
@@ -587,7 +590,8 @@ fun GalleryScreen(
                                     total = viewModel.items.size,
                                     status = viewModel.post?.let { GalleryQueue.statusOf(galleryJobs, galleryFinished, it, item) },
                                     onOpen = { openItem(currentPost, position) },
-                                    onView = { viewing = currentPost to position }
+                                    onView = { viewing = currentPost to position },
+                                    onHold = { held = currentPost to position }
                                 )
                             }
                         }
@@ -658,6 +662,22 @@ fun GalleryScreen(
             onClearResults = viewModel::clear,
             onDismiss = { searchOpen = false }
         )
+    }
+
+    held?.let { (postIndex, position) ->
+        val post = viewModel.posts.getOrNull(postIndex)
+        val item = post?.items?.getOrNull(position)
+        if (post == null || item == null) {
+            LaunchedEffect(Unit) { held = null }
+        } else {
+            GalleryHoldDialog(
+                post = post,
+                item = item,
+                onDismiss = { held = null },
+                onView = { viewing = postIndex to position },
+                onDownload = { openItem(postIndex, position) }
+            )
+        }
     }
 
     viewing?.let { (postIndex, start) ->

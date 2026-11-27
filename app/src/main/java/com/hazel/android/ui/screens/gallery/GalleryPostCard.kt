@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.gallery
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +63,9 @@ internal fun GalleryPostCard(
     /** Opens the viewer on the file at this place in the post. */
     onOpen: (position: Int) -> Unit,
     onDownloadAll: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Long press on the file at this place in the post. */
+    onHold: ((position: Int) -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val count = post.items.size
@@ -133,7 +136,7 @@ internal fun GalleryPostCard(
                             .fillMaxSize()
                             .maskClip(RoundedCornerShape(16.dp))
                             .background(colors.surfaceVariant)
-                            .clickable { onOpen(i) }
+                            .combinedClickable(onLongClick = onHold?.let { { it(i) } }) { onOpen(i) }
                     ) {
                         ArtworkPlaceholder(Modifier.fillMaxSize())
                         item.thumbnail?.let {
