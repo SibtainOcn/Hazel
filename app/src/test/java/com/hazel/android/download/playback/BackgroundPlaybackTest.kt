@@ -19,7 +19,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 @UnstableApi
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [35])
 class BackgroundPlaybackTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
