@@ -26,9 +26,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Headphones
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
@@ -74,7 +74,7 @@ enum class WhatsNewCard { APPEARANCE, HIGHLIGHTS }
  * installs never see it: the getting-started guide records the id as seen when it closes.
  */
 object WhatsNew {
-    const val RELEASE_ID = "1.2.18"
+    const val RELEASE_ID = "1.2.19"
     val cards: List<WhatsNewCard> = listOf(WhatsNewCard.HIGHLIGHTS)
 
     /** Null while either stored value is still loading, so nothing is decided early. */
@@ -232,10 +232,10 @@ private class Highlight(val icon: ImageVector, val shape: Shape, @StringRes val 
 @Composable
 private fun HighlightsStep() {
     val items = listOf(
-        Highlight(Icons.Outlined.PhotoLibrary, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_stories_title, R.string.whats_new_stories_desc),
-        Highlight(Icons.Outlined.PlayCircle, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_videos_title, R.string.whats_new_videos_desc),
-        Highlight(Icons.Outlined.Share, MaterialShapes.Pentagon.toShape(), R.string.whats_new_share_title, R.string.whats_new_share_desc),
-        Highlight(Icons.Outlined.Palette, MaterialShapes.Sunny.toShape(), R.string.whats_new_looks_title, R.string.whats_new_looks_desc)
+        Highlight(Icons.Outlined.PlayCircle, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_player_title, R.string.whats_new_player_desc),
+        Highlight(Icons.Outlined.Headphones, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_background_title, R.string.whats_new_background_desc),
+        Highlight(Icons.Outlined.Apps, MaterialShapes.Pentagon.toShape(), R.string.whats_new_open_with_title, R.string.whats_new_open_with_desc),
+        Highlight(Icons.Outlined.BugReport, MaterialShapes.Sunny.toShape(), R.string.whats_new_fixes_title, R.string.whats_new_fixes_desc)
     )
     Column(modifier = Modifier.fillMaxWidth()) {
         StepTitle(stringResource(R.string.whats_new_highlights_title))

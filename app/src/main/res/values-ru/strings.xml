@@ -763,14 +763,14 @@
     <string name="whats_new_glass_title">Новый стеклянный вид</string>
     <string name="whats_new_glass_desc">Эффект стекла, новые стили и акцентные цвета.</string>
     <string name="whats_new_highlights_title">В этом обновлении</string>
-    <string name="whats_new_stories_title">Новое: Истории и актуальное</string>
-    <string name="whats_new_stories_desc">Сохраняйте истории, актуальное и разделы профилей Instagram и X.</string>
-    <string name="whats_new_videos_title">Исправлено: Видео из историй воспроизводятся</string>
-    <string name="whats_new_videos_desc">Смотрите во встроенном просмотре и сохраняйте как видео или аудио.</string>
-    <string name="whats_new_share_title">Исправлено: Делитесь в Hazel Gallery</string>
-    <string name="whats_new_share_desc">Раньше общие видео не скачивались; теперь сохраняются.</string>
-    <string name="whats_new_looks_title">Новое: Значок и стили стекла</string>
-    <string name="whats_new_looks_desc">Классический, белый или стеклянный значок и пять новых стилей.</string>
+    <string name="whats_new_player_title">Новое: загрузки играют в Hazel</string>
+    <string name="whats_new_player_desc">Музыкальная панель для аудио и видеоплеер с действиями над файлом.</string>
+    <string name="whats_new_background_title">Новое: воспроизведение в фоне</string>
+    <string name="whats_new_background_desc">Плеер Главной играет дальше с управлением на экране блокировки.</string>
+    <string name="whats_new_open_with_title">Новое: открывайте файлы в Hazel</string>
+    <string name="whats_new_open_with_desc">Выбирайте Hazel для любого аудио или видео на телефоне.</string>
+    <string name="whats_new_fixes_title">Исправлено: Facebook и Pinterest</string>
+    <string name="whats_new_fixes_desc">Видео Facebook снова скачиваются, а видео Pinterest воспроизводятся.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>
