@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - A download that fails with saved sign-ins is tried once more without them, as the link read already does (Facebook "No video found").
 - Gallery: Pinterest videos play in the viewer; their stream is played directly instead of read again.
+- Hazel Gallery share: tapping an image in Download all opens its own sheet instead of drawing over the list.
 
 ## [1.2.18] - 2026-11-27
 ### Added
