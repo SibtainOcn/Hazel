@@ -505,6 +505,13 @@
     <string name="properties_name">名前</string>
     <string name="properties_section_media">メディア</string>
     <string name="properties_section_again">もう一度取得</string>
+    <string name="properties_section_in_file">ファイル内の情報</string>
+    <string name="properties_tag_description">説明</string>
+    <string name="properties_tag_artist">アーティスト</string>
+    <string name="properties_tag_album">アルバム</string>
+    <string name="properties_tag_genre">ジャンル</string>
+    <string name="properties_tag_date">アップロード日</string>
+    <string name="properties_tag_comment">コメント</string>
     <string name="properties_show_file">ファイルを表示</string>
     <string name="properties_share">共有</string>
     <string name="properties_copied">コピーしました</string>

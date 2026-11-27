@@ -529,6 +529,13 @@
     <string name="properties_name">Nom</string>
     <string name="properties_section_media">Média</string>
     <string name="properties_section_again">Récupérer à nouveau</string>
+    <string name="properties_section_in_file">Dans le fichier</string>
+    <string name="properties_tag_description">Description</string>
+    <string name="properties_tag_artist">Artiste</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Mis en ligne</string>
+    <string name="properties_tag_comment">Commentaire</string>
     <string name="properties_show_file">Afficher le fichier</string>
     <string name="properties_share">Partager</string>
     <string name="properties_copied">Copié</string>

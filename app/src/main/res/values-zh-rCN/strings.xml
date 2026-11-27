@@ -505,6 +505,13 @@
     <string name="properties_name">名称</string>
     <string name="properties_section_media">媒体</string>
     <string name="properties_section_again">再次获取</string>
+    <string name="properties_section_in_file">文件内信息</string>
+    <string name="properties_tag_description">描述</string>
+    <string name="properties_tag_artist">艺术家</string>
+    <string name="properties_tag_album">专辑</string>
+    <string name="properties_tag_genre">类型</string>
+    <string name="properties_tag_date">上传日期</string>
+    <string name="properties_tag_comment">评论</string>
     <string name="properties_show_file">显示文件</string>
     <string name="properties_share">分享</string>
     <string name="properties_copied">已复制</string>

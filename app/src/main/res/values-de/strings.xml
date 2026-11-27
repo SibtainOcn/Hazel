@@ -517,6 +517,13 @@
     <string name="properties_name">Name</string>
     <string name="properties_section_media">Medien</string>
     <string name="properties_section_again">Erneut holen</string>
+    <string name="properties_section_in_file">In der Datei</string>
+    <string name="properties_tag_description">Beschreibung</string>
+    <string name="properties_tag_artist">Künstler</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Hochgeladen</string>
+    <string name="properties_tag_comment">Kommentar</string>
     <string name="properties_show_file">Datei zeigen</string>
     <string name="properties_share">Teilen</string>
     <string name="properties_copied">Kopiert</string>

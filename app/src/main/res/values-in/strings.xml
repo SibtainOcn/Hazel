@@ -505,6 +505,13 @@
     <string name="properties_name">Nama</string>
     <string name="properties_section_media">Media</string>
     <string name="properties_section_again">Ambil lagi</string>
+    <string name="properties_section_in_file">Di dalam file</string>
+    <string name="properties_tag_description">Deskripsi</string>
+    <string name="properties_tag_artist">Artis</string>
+    <string name="properties_tag_album">Album</string>
+    <string name="properties_tag_genre">Genre</string>
+    <string name="properties_tag_date">Diunggah</string>
+    <string name="properties_tag_comment">Komentar</string>
     <string name="properties_show_file">Tampilkan file</string>
     <string name="properties_share">Bagikan</string>
     <string name="properties_copied">Disalin</string>

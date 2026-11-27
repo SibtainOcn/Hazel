@@ -541,6 +541,13 @@
     <string name="properties_name">Имя</string>
     <string name="properties_section_media">Медиа</string>
     <string name="properties_section_again">Получить снова</string>
+    <string name="properties_section_in_file">В файле</string>
+    <string name="properties_tag_description">Описание</string>
+    <string name="properties_tag_artist">Исполнитель</string>
+    <string name="properties_tag_album">Альбом</string>
+    <string name="properties_tag_genre">Жанр</string>
+    <string name="properties_tag_date">Загружено</string>
+    <string name="properties_tag_comment">Комментарий</string>
     <string name="properties_show_file">Показать файл</string>
     <string name="properties_share">Поделиться</string>
     <string name="properties_copied">Скопировано</string>
