@@ -798,12 +798,14 @@ fun GalleryScreen(
         )
     }
 
+    val optionsPrefs = com.hazel.android.ui.screens.download.rememberSearchOptionsPrefs()
     if (menuOpen) {
         SearchOptionsSheet(
             onClearResults = viewModel::clear,
             onDismiss = { menuOpen = false },
             imagesFirst = true,
-            onCleared = statusToast::show
+            onCleared = statusToast::show,
+            prefs = optionsPrefs
         )
     }
 }
