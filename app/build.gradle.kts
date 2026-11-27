@@ -249,6 +249,22 @@ android {
         }
     }
 
+    // CI's crash gate (`-PcrashLint`): only the lint rules whose finding is a crash or a
+    // refused service on a phone, each one failing the build.
+    if (project.hasProperty("crashLint")) {
+        lint {
+            checkOnly += setOf(
+                "ForegroundServiceType", "ForegroundServicePermission", "MissingPermission",
+                "NewApi", "MissingClass", "Instantiatable", "WrongConstant",
+                "UnspecifiedRegisterReceiverFlag", "LaunchActivityFromNotification"
+            )
+            abortOnError = true
+            warningsAsErrors = true
+            checkDependencies = false
+            checkReleaseBuilds = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

@@ -166,6 +166,40 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Android lint limited to the rules whose finding is a crash or a refused service on a
+  # phone: a call above minSdk, a foreground service without its type or permission, a
+  # missing permission, a manifest class that does not exist. All of them compile.
+  crash-lint:
+    name: Crash checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Lint for crashes
+        run: ./gradlew :app:lintGithubDebug -PcrashLint --stacktrace
+
+      - name: Upload the lint report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: crash-lint-report
+          path: app/build/reports/lint-results-githubDebug.*
+          retention-days: 7
+          if-no-files-found: ignore
+
   build:
     name: Build APK
     runs-on: ubuntu-latest
