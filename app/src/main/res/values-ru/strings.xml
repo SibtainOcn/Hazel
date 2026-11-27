@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">Медиа · результаты на главной</string>
     <string name="search_guide_media_body">Видео и музыка. Ищите на YouTube, YouTube Music, SoundCloud или Bandcamp или вставьте ссылку с более чем 1500 сайтов. Сохраняйте как видео или аудио: одну ссылку, несколько ссылок или целый плейлист или канал.</string>
     <string name="search_guide_gallery_title">Галерея · результаты на вкладке «Галерея»</string>
-    <string name="search_guide_gallery_body">Фото, карусели, короткие видео и подписи. Ищите слова на Pinterest, Bluesky, Tumblr или DeviantArt или вставьте ссылку на публикацию, доску или профиль.</string>
+    <string name="search_guide_gallery_body">Изображения, публикации, истории, актуальное и профили. Вставьте ссылку на публикацию, доску или профиль или ищите слова в Pinterest, Bluesky, Tumblr или DeviantArt. Для видео используйте Медиа.</string>
     <string name="search_guide_profiles_title">Профили</string>
     <string name="search_guide_profiles_body">Ссылка на профиль Instagram или X спрашивает, что получить, по два раздела за раз: истории, актуальное, публикации, Reels или отметки в Instagram; медиа, посты и ответы или отметки «Нравится» в X. Каждая подборка актуального приходит отдельной группой.</string>
     <string name="search_guide_links_title">Вставленные ссылки</string>
-    <string name="search_guide_links_body">Ссылка уходит как есть на выбранную сторону — «Медиа» или «Галерея». Источники и сайты нужны только для поиска по словам, поэтому, пока в поле ссылка, они отходят на второй план.</string>
+    <string name="search_guide_links_body">Ссылка уходит как есть в активный раздел. Видео, рилсы и аудио: Медиа. Изображения, истории, актуальное и профили: Галерея. Если один раздел не справился, попробуйте другой. Источники и сайты отходят в сторону, пока в поле есть ссылка.</string>
     <string name="search_guide_sign_in_title">Вход</string>
     <string name="search_guide_sign_in_body">Для закрытых публикаций, историй, актуального и отметок «Нравится» нужно войти на этот сайт. Hazel спросит, когда это нужно, или войдите в любое время через Cookies в разделе «Ещё».</string>
     <string name="search_mode_media">Медиа</string>
@@ -223,7 +223,7 @@
     <string name="guide_step2_title">Выбор формата</string>
     <string name="guide_step4_title">Оптимизация батареи</string>
     <string name="guide_step5_title">Уведомления</string>
-    <string name="guide_step_paste_link">Одна ссылка, несколько или целый плейлист. Видео, аудио, изображения, истории, актуальное и подписи.</string>
+    <string name="guide_step_paste_link">Одна ссылка, много ссылок или целый плейлист. Видео и аудио здесь; изображения, истории и актуальное во вкладке Галерея.</string>
     <string name="guide_step_pick_format">Нажмите на карточку, чтобы выбрать точный формат, с размером и кодеком для каждого качества.</string>
     <string name="guide_step_battery_unrestricted">Снимите ограничения батареи, чтобы Android не останавливал фоновые загрузки.</string>
     <string name="guide_step_notifications">Получайте уведомления о ходе и завершении загрузок в фоновом режиме.</string>
@@ -1315,10 +1315,10 @@
     <string name="gallery_group_by_author_summary">Одиночные фото автора в одной карусели</string>
     <string name="more_image_settings">Настройки изображений</string>
     <string name="guide_share_from_apps">Поделитесь ссылкой из любого приложения</string>
-    <string name="guide_share_video">Видео, аудио и рилс. Выберите качество, обрезку, SponsorBlock и другое, затем скачайте</string>
-    <string name="guide_share_gallery">Изображения, посты, рилс, истории и актуальное. Выберите, что сохранить, и скачайте</string>
-    <string name="guide_share_instant">Видео или аудио напрямую, с сохранёнными настройками</string>
-    <string name="guide_share_instant_gallery">Посты, истории и актуальное напрямую, с сохранёнными настройками</string>
+    <string name="guide_share_video">Любое видео, рилс или аудио. Выберите качество, обрезку, SponsorBlock и другое, затем скачайте</string>
+    <string name="guide_share_gallery">Изображения, публикации, истории, актуальное и профили. Выберите, что сохранить, затем скачайте</string>
+    <string name="guide_share_instant">Любое видео или аудио сразу, с вашими сохранёнными настройками</string>
+    <string name="guide_share_instant_gallery">Изображения, истории и актуальное сразу, с вашими сохранёнными настройками</string>
     <string name="caption_copy">Копировать</string>
     <string name="caption_save_text">Сохранить как текст</string>
     <string name="caption_saved">Подпись скачана</string>

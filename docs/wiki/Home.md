@@ -1,7 +1,20 @@
 # Welcome to the official Hazel documentation!
 
-- The art of saving media 🍂✨ -> A simple way to save videos, music, and playlists from YouTube and 1500+ sites with zero ads, tracking, or account setups.
+- The art of saving media 🍂✨ -> A simple way to save videos, music, playlists, images, stories and highlights from 1500+ sites with zero ads, tracking, or account setups. Built on yt-dlp and gallery-dl.
 - **[Explore everything Hazel can do >>>](https://sibtainocn.github.io/Hazel/hazel/index.html#features)**
+
+## 🧭 Where each link goes
+Hazel has two places for links. Use the one that fits what you want to save.
+
+| Content | In the app | Share menu |
+|---|---|---|
+| Videos, reels and audio (most sites) | **Home** tab (yt-dlp) | **Hazel Video** (choose options) · **Instant Video** (saves at once) |
+| Images, posts, stories, highlights and profiles | **Gallery** tab (gallery-dl) | **Hazel Gallery** (choose what to save) · **Instant Gallery** (saves at once) |
+
+- A profile link on the Gallery tab asks which sections to fetch (for example stories, highlights, posts, reels or tagged on Instagram; media or likes on X).
+- Videos found in a gallery post open the video download sheet, so you can save them as video or audio.
+- Stories, highlights and private posts need you signed in to that site (More → Cookies).
+- If a link fails in one place, try the other before [opening an issue](https://github.com/SibtainOcn/Hazel/issues/new/choose).
 
 ## 📚 Quick Links
 | Page | What's inside |
@@ -23,8 +36,9 @@
 | Topic | Link |
 |---|---|
 | Playlists and many links | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#playlists) |
-| Share from other apps | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#share) |
+| Share from other apps (four targets) | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#share) |
 | Search and play | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#search) |
+| Stories, highlights and posts (Gallery) | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#images) |
 | Quality, cut, cleaner files, live streams | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#options) |
 | Where your files go (incl. SD card) | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#storage) |
 | Background downloads | [Read](https://sibtainocn.github.io/Hazel/hazel/guide.html#background) |
@@ -55,3 +69,4 @@
 - [Security Policy](https://github.com/SibtainOcn/Hazel/blob/main/SECURITY.md) - Report vulnerabilities privately
 - [Changelog (repo)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md) - Developer-facing change history
 - [Report a bug](https://github.com/SibtainOcn/Hazel/issues/new/choose) or [request a feature](https://github.com/SibtainOcn/Hazel/issues/new/choose)
+- Engines: [yt-dlp](https://github.com/yt-dlp/yt-dlp) ([supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)) · [gallery-dl](https://github.com/mikf/gallery-dl) ([supported sites](https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md))

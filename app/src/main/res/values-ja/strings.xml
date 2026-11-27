@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">メディア · 結果はホームに</string>
     <string name="search_guide_media_body">動画と音楽。YouTube、YouTube Music、SoundCloud、Bandcamp で検索するか、1,500 以上のサイトのリンクを貼り付けます。動画または音声で保存：1 つのリンク、複数のリンク、プレイリストやチャンネル全体も。</string>
     <string name="search_guide_gallery_title">ギャラリー · 結果はギャラリータブに</string>
-    <string name="search_guide_gallery_body">写真、カルーセル、短い動画、キャプション。Pinterest、Bluesky、Tumblr、DeviantArt で言葉を検索するか、投稿・ボード・プロフィールのリンクを貼り付けます。</string>
+    <string name="search_guide_gallery_body">画像、投稿、ストーリーズ、ハイライト、プロフィール。投稿、ボード、プロフィールのリンクを貼るか、Pinterest、Bluesky、Tumblr、DeviantArt で語句を検索します。動画はメディアを使ってください。</string>
     <string name="search_guide_profiles_title">プロフィール</string>
     <string name="search_guide_profiles_body">Instagram や X のプロフィールのリンクでは、取得する内容を一度に 2 つまで選べます：Instagram はストーリーズ、ハイライト、投稿、リール、タグ付け。X はメディア、投稿と返信、いいね。ハイライトはそれぞれ別のグループになります。</string>
     <string name="search_guide_links_title">貼り付けたリンク</string>
-    <string name="search_guide_links_body">リンクはそのまま、選んでいる側（メディアかギャラリー）へ送られます。ソースやサイトは言葉の検索だけに使うので、リンクが入力されている間は控えめになります。</string>
+    <string name="search_guide_links_body">リンクはそのまま、オンになっている側に送られます。動画、リール、音声はメディア。画像、ストーリーズ、ハイライト、プロフィールはギャラリー。うまくいかないときはもう一方を試してください。リンクが入っている間、ソースとサイトは控えます。</string>
     <string name="search_guide_sign_in_title">ログイン</string>
     <string name="search_guide_sign_in_body">非公開の投稿、ストーリーズ、ハイライト、いいねにはそのサイトへのログインが必要です。必要なときは Hazel が確認します。いつでも「その他」の Cookie からログインできます。</string>
     <string name="search_mode_media">メディア</string>
@@ -208,7 +208,7 @@
     <string name="guide_step2_title">フォーマット選択</string>
     <string name="guide_step4_title">バッテリー最適化</string>
     <string name="guide_step5_title">通知</string>
-    <string name="guide_step_paste_link">リンク1つ、複数、プレイリスト全体も。動画、音声、画像、ストーリーズ、ハイライト、キャプション。</string>
+    <string name="guide_step_paste_link">リンク1つ、複数のリンク、プレイリスト全体。動画と音声はここで、画像、ストーリーズ、ハイライトはギャラリータブで。</string>
     <string name="guide_step_pick_format">カードをタップして形式を選択。各画質のサイズとコーデックを表示します。</string>
     <string name="guide_step_battery_unrestricted">電池の使用を「制限なし」にすると、Android がバックグラウンドのダウンロードを止めません。</string>
     <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
@@ -1265,10 +1265,10 @@
     <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
     <string name="more_image_settings">画像の設定</string>
     <string name="guide_share_from_apps">どのアプリからでもリンクを共有</string>
-    <string name="guide_share_video">動画、音声、リール。画質、カット、SponsorBlock などを選んでからダウンロード</string>
-    <string name="guide_share_gallery">画像、投稿、リール、ストーリーズ、ハイライト。保存するものを選んでダウンロード</string>
-    <string name="guide_share_instant">保存した設定で動画や音声を直接保存</string>
-    <string name="guide_share_instant_gallery">保存した設定で投稿、ストーリーズ、ハイライトを直接保存</string>
+    <string name="guide_share_video">あらゆる動画、リール、音声。画質、カット、SponsorBlock などを選んでダウンロード</string>
+    <string name="guide_share_gallery">画像、投稿、ストーリーズ、ハイライト、プロフィール。保存するものを選んでダウンロード</string>
+    <string name="guide_share_instant">あらゆる動画や音声を、保存した設定ですぐに保存</string>
+    <string name="guide_share_instant_gallery">画像、ストーリーズ、ハイライトを、保存した設定ですぐに保存</string>
     <string name="caption_copy">コピー</string>
     <string name="caption_save_text">テキストで保存</string>
     <string name="caption_saved">キャプションをダウンロードしました</string>

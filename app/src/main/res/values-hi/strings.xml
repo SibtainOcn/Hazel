@@ -22,11 +22,11 @@
     <string name="search_guide_media_title">मीडिया · नतीजे होम पर</string>
     <string name="search_guide_media_body">वीडियो और संगीत। YouTube, YouTube Music, SoundCloud या Bandcamp पर खोजें, या 1,500 से ज़्यादा साइटों का लिंक पेस्ट करें। वीडियो या ऑडियो के रूप में सेव करें: एक लिंक, कई लिंक, या पूरी प्लेलिस्ट या चैनल।</string>
     <string name="search_guide_gallery_title">गैलरी · नतीजे गैलरी टैब में</string>
-    <string name="search_guide_gallery_body">फ़ोटो, कैरोसेल, छोटे वीडियो और कैप्शन। Pinterest, Bluesky, Tumblr या DeviantArt पर शब्द खोजें, या किसी पोस्ट, बोर्ड या प्रोफ़ाइल का लिंक पेस्ट करें।</string>
+    <string name="search_guide_gallery_body">इमेज, पोस्ट, स्टोरी, हाइलाइट और प्रोफ़ाइल। किसी पोस्ट, बोर्ड या प्रोफ़ाइल का लिंक पेस्ट करें, या Pinterest, Bluesky, Tumblr या DeviantArt पर शब्द खोजें। वीडियो के लिए मीडिया इस्तेमाल करें।</string>
     <string name="search_guide_profiles_title">प्रोफ़ाइल</string>
     <string name="search_guide_profiles_body">Instagram या X प्रोफ़ाइल का लिंक पूछता है कि क्या लाना है, एक बार में दो: Instagram पर स्टोरीज़, हाइलाइट्स, पोस्ट, रील्स या टैग किए गए; X पर मीडिया, पोस्ट और जवाब, या लाइक। हर हाइलाइट अपने अलग समूह में आता है।</string>
     <string name="search_guide_links_title">पेस्ट किए गए लिंक</string>
-    <string name="search_guide_links_body">लिंक जैसा है वैसा ही चालू तरफ़ जाता है, मीडिया या गैलरी। स्रोत और साइटें सिर्फ़ शब्द खोजने के लिए हैं, इसलिए जब तक फ़ील्ड में लिंक है वे पीछे हट जाती हैं।</string>
+    <string name="search_guide_links_body">लिंक जैसा है वैसा ही चालू वाली तरफ़ जाता है। वीडियो, रील और ऑडियो: मीडिया। इमेज, स्टोरी, हाइलाइट और प्रोफ़ाइल: गैलरी। एक तरफ़ काम न करे तो दूसरी आज़माएँ। फ़ील्ड में लिंक रहते स्रोत और साइटें पीछे हट जाती हैं।</string>
     <string name="search_guide_sign_in_title">साइन इन</string>
     <string name="search_guide_sign_in_body">निजी पोस्ट, स्टोरीज़, हाइलाइट्स और लाइक के लिए उस साइट पर साइन इन ज़रूरी है। ज़रूरत होने पर Hazel पूछता है, या कभी भी और में कुकीज़ से साइन इन करें।</string>
     <string name="search_mode_media">मीडिया</string>
@@ -213,7 +213,7 @@
     <string name="guide_step2_title">फ़ॉर्मैट चयन</string>
     <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
     <string name="guide_step5_title">सूचनाएं</string>
-    <string name="guide_step_paste_link">एक लिंक, कई लिंक या पूरी प्लेलिस्ट। वीडियो, ऑडियो, इमेज, स्टोरी, हाइलाइट और कैप्शन।</string>
+    <string name="guide_step_paste_link">एक लिंक, कई लिंक या पूरी प्लेलिस्ट। वीडियो और ऑडियो यहाँ; इमेज, स्टोरी और हाइलाइट गैलरी टैब में।</string>
     <string name="guide_step_pick_format">सटीक फ़ॉर्मेट चुनने के लिए कार्ड टैप करें, हर क्वालिटी के साइज़ और कोडेक के साथ।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग अप्रतिबंधित करें ताकि Android बैकग्राउंड डाउनलोड न रोके।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
@@ -1282,10 +1282,10 @@
     <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
     <string name="more_image_settings">इमेज सेटिंग्स</string>
     <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
-    <string name="guide_share_video">वीडियो, ऑडियो और रील। क्वालिटी, कट, SponsorBlock और बहुत कुछ चुनें, फिर डाउनलोड करें</string>
-    <string name="guide_share_gallery">इमेज, पोस्ट, रील, स्टोरी और हाइलाइट। क्या सेव करना है चुनें, फिर डाउनलोड करें</string>
-    <string name="guide_share_instant">वीडियो या ऑडियो सीधे, आपकी सेव की गई सेटिंग्स के साथ</string>
-    <string name="guide_share_instant_gallery">पोस्ट, स्टोरी और हाइलाइट सीधे, आपकी सेव की गई सेटिंग्स के साथ</string>
+    <string name="guide_share_video">कोई भी वीडियो, रील या ऑडियो। क्वालिटी, कट, SponsorBlock और बहुत कुछ चुनें, फिर डाउनलोड करें</string>
+    <string name="guide_share_gallery">इमेज, पोस्ट, स्टोरी, हाइलाइट और प्रोफ़ाइल। क्या सहेजना है चुनें, फिर डाउनलोड करें</string>
+    <string name="guide_share_instant">कोई भी वीडियो या ऑडियो सीधे, आपकी सहेजी सेटिंग्स के साथ</string>
+    <string name="guide_share_instant_gallery">इमेज, स्टोरी और हाइलाइट सीधे, आपकी सहेजी सेटिंग्स के साथ</string>
     <string name="caption_copy">कॉपी करें</string>
     <string name="caption_save_text">टेक्स्ट के रूप में सेव करें</string>
     <string name="caption_saved">कैप्शन डाउनलोड हो गया</string>
