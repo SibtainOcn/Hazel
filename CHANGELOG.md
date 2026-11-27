@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
 - Bug report form asks where the link was used and links to gallery-dl issues.
+### Fixed
+- Gallery: Pinterest videos play in the viewer; their stream is played directly instead of read again.
 
 ## [1.2.18] - 2026-11-27
 ### Added
