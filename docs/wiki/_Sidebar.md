@@ -1,4 +1,5 @@
 **[🏠 Home](Home)**
+- [Where each link goes](Home#-where-each-link-goes)
 
 **🚀 Getting started**
 - [Install Hazel](https://sibtainocn.github.io/Hazel/hazel/guide.html#install)
@@ -9,6 +10,7 @@
 - [Playlists and many links](https://sibtainocn.github.io/Hazel/hazel/guide.html#playlists)
 - [Share from other apps](https://sibtainocn.github.io/Hazel/hazel/guide.html#share)
 - [Search and play](https://sibtainocn.github.io/Hazel/hazel/guide.html#search)
+- [Stories, highlights and posts](https://sibtainocn.github.io/Hazel/hazel/guide.html#images)
 - [Quality and extras](https://sibtainocn.github.io/Hazel/hazel/guide.html#options)
 - [Where your files go](https://sibtainocn.github.io/Hazel/hazel/guide.html#storage)
 - [Background downloads](https://sibtainocn.github.io/Hazel/hazel/guide.html#background)
