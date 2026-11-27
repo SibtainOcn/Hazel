@@ -613,6 +613,7 @@
     <string name="media_open_unknown_location">Lokasi file ini tidak diketahui</string>
     <string name="media_open_chooser">Buka dengan</string>
     <string name="media_open_no_app">Tidak ada aplikasi di perangkat ini yang dapat membukanya</string>
+    <string name="media_open_no_app_here">Hazel tidak dapat memutar file ini</string>
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Unduhan dibatalkan</string>
