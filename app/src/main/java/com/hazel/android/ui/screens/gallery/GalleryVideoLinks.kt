@@ -62,7 +62,8 @@ internal class GalleryVideoLinks(private val scope: CoroutineScope, context: Con
             linkReads.remove(post.source)
             fresh
         }.also { linkReads[post.source] = it }
-        return read.await()[item.url]
+        // The same link read again is no fresher, so the player moves on to its page instead.
+        return read.await()[item.url]?.takeUnless { it == failed }
     }
 
     /**
