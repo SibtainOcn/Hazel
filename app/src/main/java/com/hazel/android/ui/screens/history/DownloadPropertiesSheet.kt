@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.OpenInFull
 import com.hazel.android.ui.components.CaptionSheet
 import com.hazel.android.util.CaptionMetadata
 import androidx.compose.material.icons.filled.PlayArrow
@@ -435,11 +434,22 @@ private fun TextPreviewRow(@StringRes heading: Int, text: String, onOpen: (Int, 
         modifier = Modifier.fillMaxWidth().clickable { onOpen(heading, text) },
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Drawn like the caption field of the gallery-dl item sheet: label, first line, expand.
         Column(modifier = Modifier.weight(1f)) {
-            Label(stringResource(heading))
-            Text(text, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(heading), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty(),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
-        SquareIcon(Icons.Filled.OpenInFull, R.string.caption_view_full) { onOpen(heading, text) }
+        androidx.compose.material3.IconButton(onClick = { onOpen(heading, text) }) {
+            Icon(
+                androidx.compose.ui.res.painterResource(R.drawable.ic_expand_all),
+                contentDescription = stringResource(R.string.caption_view_full)
+            )
+        }
     }
 }
 
