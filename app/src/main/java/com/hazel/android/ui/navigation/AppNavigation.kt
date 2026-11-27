@@ -671,6 +671,18 @@ fun AppNavigation(
             )
         }
     }
+
+    // A saved file playing in Hazel; Home's player stops, so only one plays at a time.
+    val offline by com.hazel.android.ui.components.player.OfflinePlayback.media.collectAsState()
+    offline?.let { media ->
+        LaunchedEffect(media) { playerSession.stop() }
+        androidx.compose.runtime.key(media.uri) {
+            com.hazel.android.ui.components.player.OfflinePlayer(
+                media = media,
+                onClose = com.hazel.android.ui.components.player.OfflinePlayback::close
+            )
+        }
+    }
 }
 
 /** The player's views over every screen. Only the results are watched, so download progress does not recompose it. */

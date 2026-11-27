@@ -340,7 +340,7 @@ fun SearchScreen(
         pendingDuplicate?.let { (links, existing) ->
             AlreadyDownloadedDialog(
                 entry = existing,
-                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onPlay = { com.hazel.android.ui.components.player.OfflinePlayback.play(context, existing) },
                 onOpenLocation = {
                     MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
                 },

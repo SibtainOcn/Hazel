@@ -37,11 +37,11 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Image
 import com.hazel.android.ui.components.CaptionSheet
 import com.hazel.android.util.CaptionMetadata
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -298,15 +299,25 @@ private fun FileActions(entry: HistoryEntry, present: Boolean) {
     val primary = MaterialTheme.colorScheme.primary
     val neutral = MaterialTheme.colorScheme.surfaceContainerHighest
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        // An image is viewed, not played.
+        // An image is viewed, not played. The file already playing in Hazel pauses and resumes here.
+        val active = com.hazel.android.ui.components.player.OfflinePlayback.playerOf(entry.fileUri)
+        val playing = active?.isPlaying == true
         CookieAction(
-            if (entry.isImage) Icons.Filled.Image else Icons.Filled.PlayArrow,
-            if (entry.isImage) R.string.gallery_view else R.string.format_sheet_play,
+            when {
+                entry.isImage -> Icons.Filled.Image
+                playing -> Icons.Filled.Pause
+                else -> Icons.Filled.PlayArrow
+            },
+            when {
+                entry.isImage -> R.string.gallery_view
+                playing -> R.string.player_pause
+                else -> R.string.format_sheet_play
+            },
             present, primary, MaterialTheme.colorScheme.onPrimary
         ) {
-            MediaOpener.play(context, entry.fileUri, entry.mimeType)
+            if (active != null) active.toggle() else com.hazel.android.ui.components.player.OfflinePlayback.play(context, entry)
         }
-        CookieAction(Icons.AutoMirrored.Filled.OpenInNew, R.string.media_open_chooser, present, neutral, MaterialTheme.colorScheme.onSurface) {
+        CookieAction(androidx.compose.ui.graphics.vector.ImageVector.vectorResource(R.drawable.ic_open_app), R.string.media_open_chooser, present, neutral, MaterialTheme.colorScheme.onSurface) {
             MediaOpener.openWith(context, entry.fileUri, entry.mimeType)
         }
         CookieAction(Icons.Filled.FolderOpen, R.string.properties_show_file, true, neutral, MaterialTheme.colorScheme.onSurface) {
