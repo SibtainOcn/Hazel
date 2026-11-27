@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Download all button on Home and Gallery is smaller, so it covers less of the list.
 - Guide and share target hints say which place fits each link: videos and audio on Home, images, stories and highlights on Gallery.
+- More: Image settings is now named gallery-dl settings, in the app and the guide.
 - Bug report form asks where the link was used and links to gallery-dl issues.
 - Release builds are optimized with R8: smoother scrolling and screens, smaller APK; yt-dlp, gallery-dl, Python and NewPipe stay untouched.
 

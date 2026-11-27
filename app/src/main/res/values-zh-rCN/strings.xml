@@ -1263,7 +1263,7 @@
     <string name="upd_gallerydl_auto_summary">无下载时安装新版本</string>
     <string name="gallery_group_by_author">按作者分组</string>
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
-    <string name="more_image_settings">图片设置</string>
+    <string name="more_image_settings">gallery-dl 设置</string>
     <string name="guide_share_from_apps">从任意应用分享链接</string>
     <string name="guide_share_video">任意视频、短视频或音频。选择画质、剪辑、SponsorBlock 等，然后下载</string>
     <string name="guide_share_gallery">图片、帖子、快拍、精选和主页。选择要保存的内容，然后下载</string>

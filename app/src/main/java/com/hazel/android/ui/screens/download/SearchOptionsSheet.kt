@@ -455,7 +455,7 @@ private fun ClearShape(
     }
 }
 
-/** The profile-link rows, shared by the three dots menu and Image settings: one setting, two doors. */
+/** The profile-link rows, shared by the three dots menu and gallery-dl settings: one setting, two doors. */
 @Composable
 internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.ProfileSite) -> Unit): List<@Composable () -> Unit> {
     val context = LocalContext.current
