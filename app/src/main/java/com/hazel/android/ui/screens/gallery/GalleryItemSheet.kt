@@ -258,6 +258,10 @@ internal fun GalleryItemSheet(
                     shape = RoundedCornerShape(topStart = 22.dp, bottomStart = 22.dp, topEnd = 8.dp, bottomEnd = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(3.dp))
+                com.hazel.android.ui.screens.download.LocalFailureLog.current?.let { showLog ->
+                    com.hazel.android.ui.screens.download.SheetErrorButton(onClick = showLog)
+                    Spacer(modifier = Modifier.width(3.dp))
+                }
                 IncognitoButton(
                     onFeedback = { message -> feedback = Feedback(message) },
                     shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 22.dp, bottomEnd = 22.dp)

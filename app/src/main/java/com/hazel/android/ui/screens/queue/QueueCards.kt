@@ -50,6 +50,8 @@ import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
@@ -299,7 +301,7 @@ fun FailedCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(10.dp),
-                        spacing = 6.dp,
+                        spacing = 2.dp,
                         start = {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -318,24 +320,30 @@ fun FailedCard(
                             }
                         }
                     ) {
+                        // One connected group: round at its ends, tight where the buttons meet.
+                        // Left in the flow row, so a narrow card wraps them rather than cutting them.
                         if (!picking) {
+                            val count = if (retrying) 2 else 3
                             CardPill(
                                 icon = Icons.Filled.Link,
                                 label = null,
                                 description = stringResource(R.string.sheet_link_options),
-                                onClick = onLink
+                                onClick = onLink,
+                                shape = groupShape(0, count)
                             )
                             CardPill(
                                 icon = Icons.Filled.Description,
                                 label = stringResource(R.string.history_failed_logs),
-                                onClick = onViewLog
+                                onClick = onViewLog,
+                                shape = groupShape(1, count)
                             )
                             if (!retrying) CardPill(
                                 icon = Icons.Filled.Refresh,
                                 label = stringResource(R.string.history_failed_retry),
                                 onClick = onRetry,
                                 background = MaterialTheme.colorScheme.primary,
-                                foreground = MaterialTheme.colorScheme.onPrimary
+                                foreground = MaterialTheme.colorScheme.onPrimary,
+                                shape = groupShape(2, count)
                             )
                         }
                     }
@@ -365,8 +373,11 @@ fun FailureLogSheet(
     item: FailedDownload,
     onCopy: () -> Unit,
     onCopyUrl: () -> Unit,
-    onRetry: () -> Unit,
-    onDismiss: () -> Unit
+    /** Null where the sheet the log was opened from is itself the retry. */
+    onRetry: (() -> Unit)?,
+    onDismiss: () -> Unit,
+    onSignIn: (() -> Unit)? = null,
+    onCookies: () -> Unit = {}
 ) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     val errorColor = MaterialTheme.colorScheme.error
@@ -389,6 +400,11 @@ fun FailureLogSheet(
         }
     }
 
+    // The app's accent tint, as on the queue tabs, rather than Material's stock secondary.
+    val tonal = androidx.compose.material3.ButtonDefaults.filledTonalButtonColors(
+        containerColor = com.hazel.android.ui.theme.accentTint(),
+        contentColor = com.hazel.android.ui.theme.accentInk()
+    )
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -462,18 +478,33 @@ fun FailureLogSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            onSignIn?.let { signIn ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Button(onClick = signIn, shape = groupShape(0, 2), modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.no_results_sign_in), maxLines = 1)
+                    }
+                    FilledTonalButton(onClick = onCookies, shape = groupShape(1, 2), colors = tonal, modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.cookies_title), maxLines = 1)
+                    }
+                }
+            }
+
             // A third of the width each while every label fits; one per line when not.
             EqualWidthActions(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                spacing = 10.dp
+                spacing = 2.dp
             ) {
-                FilledTonalButton(onClick = onCopy, contentPadding = LogButtonPadding) {
+                val count = if (onRetry != null) 3 else 2
+                FilledTonalButton(onClick = onCopy, contentPadding = LogButtonPadding, shape = groupShape(0, count), colors = tonal) {
                     Text(stringResource(R.string.history_failed_copy_log), maxLines = 1)
                 }
-                FilledTonalButton(onClick = onCopyUrl, contentPadding = LogButtonPadding) {
+                FilledTonalButton(onClick = onCopyUrl, contentPadding = LogButtonPadding, shape = groupShape(1, count), colors = tonal) {
                     Text(stringResource(R.string.failed_copy_url), maxLines = 1)
                 }
-                Button(onClick = onRetry, contentPadding = LogButtonPadding) {
+                if (onRetry != null) Button(onClick = onRetry, contentPadding = LogButtonPadding, shape = groupShape(2, count)) {
                     Text(stringResource(R.string.history_failed_retry), maxLines = 1)
                 }
             }
@@ -524,11 +555,13 @@ private fun CardPill(
     onClick: () -> Unit,
     description: String? = null,
     background: Color = Color.Black.copy(alpha = 0.6f),
-    foreground: Color = Color.White
+    foreground: Color = Color.White,
+    shape: Shape = RoundedCornerShape(50)
 ) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .heightIn(min = 32.dp)
+            .clip(shape)
             .background(background)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -546,6 +579,13 @@ private fun CardPill(
             )
         }
     }
+}
+
+/** A button's shape at [position] of a connected group of [count]. */
+private fun groupShape(position: Int, count: Int): Shape {
+    val start = if (position == 0) 50 else 18
+    val end = if (position == count - 1) 50 else 18
+    return RoundedCornerShape(topStartPercent = start, bottomStartPercent = start, topEndPercent = end, bottomEndPercent = end)
 }
 
 @Composable
@@ -627,18 +667,29 @@ private fun DismissButton(description: String, onClick: () -> Unit, modifier: Mo
     }
 }
 
+/** What the card holds, video, audio or gallery, on the same shape as the tab counts. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun KindIcon(hasVideo: Boolean, image: Boolean = false) {
-    Icon(
-        when {
-            image -> Icons.Filled.Image
-            hasVideo -> Icons.Filled.PlayArrow
-            else -> Icons.Filled.MusicNote
-        },
-        contentDescription = null,
-        modifier = Modifier.size(16.dp),
-        tint = Color.White
-    )
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .background(Color.Black.copy(alpha = 0.6f), androidx.compose.material3.MaterialShapes.Cookie6Sided.toShape()),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            androidx.compose.ui.res.painterResource(
+                when {
+                    image -> R.drawable.gallery_tab
+                    hasVideo -> R.drawable.ic_video
+                    else -> R.drawable.music
+                }
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = Color.White
+        )
+    }
 }
 
 /**

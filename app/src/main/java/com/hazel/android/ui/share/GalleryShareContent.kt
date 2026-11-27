@@ -70,6 +70,8 @@ private sealed interface GalleryRead {
 @Composable
 internal fun GalleryShareContent(
     url: String,
+    /** Raised after a sign-in made outside this sheet, so the link is read again with the new cookies. */
+    reread: Int = 0,
     /**
      * Files for gallery-dl's queue, and the job handing videos to yt-dlp's, which ends once
      * each is queued or found missing.
@@ -91,6 +93,12 @@ internal fun GalleryShareContent(
             attempt++
         } else {
             onClose()
+        }
+    }
+    LaunchedEffect(reread) {
+        if (reread > 0) {
+            read = GalleryRead.Reading
+            attempt++
         }
     }
     LaunchedEffect(url, attempt, sections) {

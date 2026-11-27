@@ -153,7 +153,8 @@ import com.hazel.android.util.MediaDeleter
 fun HistoryScreen(
     onOpenRunning: () -> Unit = {},
     onDownloadAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
-    onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null
+    onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
+    onOpenTempFiles: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -321,6 +322,17 @@ fun HistoryScreen(
                 Icon(
                     Icons.Filled.FilterList,
                     contentDescription = stringResource(R.string.history_filter_action),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(3.dp))
+            com.hazel.android.ui.components.SegmentIconButton(
+                onClick = onOpenTempFiles,
+                position = com.hazel.android.ui.components.SegmentPosition.Middle
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_temp_files),
+                    contentDescription = stringResource(R.string.cleanup_title),
                     modifier = Modifier.size(22.dp)
                 )
             }

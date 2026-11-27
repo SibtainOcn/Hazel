@@ -16,7 +16,8 @@ class GalleryQueueRecordsTest {
             url = "https://x.com/a/status/1",
             indexes = listOf(2, 3),
             options = GalleryOptions(imageSize = GalleryImageSize.LARGE, packZip = true),
-            title = "Post"
+            title = "Post",
+            retryOf = "https://x.com/a/status/1?s=20"
         )
         assertEquals(request, GalleryDownloadRequest.fromPayload(request.toPayload()))
         assertNull(GalleryDownloadRequest.fromPayload("{\"url\":\"https://x.com\"}"))

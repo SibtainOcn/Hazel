@@ -468,6 +468,7 @@ fun AppNavigation(
             }
             screen(Screen.History.route) {
                 HistoryScreen(
+                    onOpenTempFiles = { navController.navigate("storage_cleanup") },
                     onOpenRunning = {
                         queueTab = "running"
                         openTab(Screen.Queue.route)
@@ -509,7 +510,9 @@ fun AppNavigation(
                 QueueScreen(
                     downloadViewModel = downloadViewModel,
                     openTab = queueTab,
-                    onTabOpened = { queueTab = null }
+                    onTabOpened = { queueTab = null },
+                    onOpenCookies = { navController.navigate("cookies") },
+                    onOpenTempFiles = { navController.navigate("storage_cleanup") }
                 )
             }
             screen(Screen.More.route) {

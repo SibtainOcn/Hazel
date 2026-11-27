@@ -34,7 +34,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +62,7 @@ import com.hazel.android.util.UrlExtractor
 import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
@@ -150,6 +153,9 @@ class ShareOverlayActivity : ComponentActivity() {
      */
     private var mode by mutableStateOf(ShareMode.VIDEO)
 
+    /** The Failed tab's entry this sheet was opened from; what it queues settles that entry. */
+    private var retryOf by mutableStateOf<String?>(null)
+
     /** A profile shared to Instant Gallery, while it asks once which sections to save. */
     private var instantProfile by mutableStateOf<com.hazel.android.gallery.GalleryProfile?>(null)
 
@@ -189,6 +195,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
         sharedUrl = firstUrl
         mode = intent.shareMode()
+        retryOf = intent.retryOfFor(firstUrl)
         // Only on a first start: an activity brought back after its process was reclaimed
         // must not download the same link a second time.
         if (savedInstanceState == null) startShare(firstUrl, intent)
@@ -212,11 +219,14 @@ class ShareOverlayActivity : ComponentActivity() {
                 val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = false)
                 val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.DEFAULT.key)
 
+                // A failure left by an earlier read of this link is not this sheet's answer.
+                var readStarted by remember { mutableStateOf(false) }
                 LaunchedEffect(url, mode) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the
                     // composition, so closing the dialog cannot cancel it.
                     if (mode != ShareMode.VIDEO) return@LaunchedEffect
                     downloadViewModel.fetchShare(url)
+                    readStarted = true
                     val app = applicationContext
                     scope.launch(Dispatchers.IO) {
                         if (!SettingsRepository.getIncognito(app).first()) {
@@ -241,18 +251,36 @@ class ShareOverlayActivity : ComponentActivity() {
                 }
 
                 // Signing in from the failure dialog reads the link again with the new cookies.
+                var galleryReread by remember { mutableIntStateOf(0) }
                 val signInLauncher = rememberLauncherForActivityResult(
                     ActivityResultContracts.StartActivityForResult()
                 ) { result ->
-                    if (result.resultCode == Activity.RESULT_OK) downloadViewModel.fetchShare(url)
+                    if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+                    if (mode == ShareMode.VIDEO) downloadViewModel.fetchShare(url) else galleryReread++
                 }
 
+                // Opened from the Failed tab: its log stays one tap away on the sheet. Nothing is read otherwise.
+                val failedLink = retryOf
+                val failedEntry by produceState<com.hazel.android.data.FailedDownload?>(null, failedLink) {
+                    val link = failedLink ?: return@produceState
+                    com.hazel.android.data.FailedDownloadRepository.getFailed(applicationContext)
+                        .catch { android.util.Log.w("HazelShare", "Could not read the failed list", it) }
+                        .collect { list -> value = list.firstOrNull { it.url == link } }
+                }
+                var showLog by remember { mutableStateOf(false) }
+                // Kept stable: a new lambda each pass would redraw every sheet reading it.
+                val openLog = remember { { showLog = true } }
+
                 OverlayTheme(accentName, glass, GlassStyle.fromKey(glassStyle)) {
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        com.hazel.android.ui.screens.download.LocalFailureLog provides openLog.takeIf { failedEntry != null }
+                    ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        com.hazel.android.ui.screens.download.SignInPrompt(downloadViewModel)
-                        val readHere = state.url == url
+                        val readHere = readStarted && state.url == url
                         val results = if (readHere) state.results else emptyList()
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
+                        // The failure dialog offers its own sign-in, so only one dialog shows.
+                        if (failure == null) com.hazel.android.ui.screens.download.SignInPrompt(downloadViewModel)
                         // A link on the failed list that fails to read again keeps its entry,
                         // with this attempt's log in place of the last one.
                         LaunchedEffect(failure) {
@@ -266,8 +294,9 @@ class ShareOverlayActivity : ComponentActivity() {
                         when {
                             mode == ShareMode.GALLERY -> GalleryShareContent(
                                 url = url,
+                                reread = galleryReread,
                                 onQueued = { requests, videos ->
-                                    requests.forEach { request -> queueGallery { request } }
+                                    requests.forEach { request -> queueGallery { request.copy(retryOf = retryOf ?: request.retryOf) } }
                                     // Kept open until the videos are queued, so their download starts in the foreground.
                                     scope.launch {
                                         videos?.join()
@@ -413,6 +442,29 @@ class ShareOverlayActivity : ComponentActivity() {
                                 )
                             }
                         }
+                        failedEntry?.takeIf { showLog }?.let { item ->
+                            com.hazel.android.ui.screens.queue.FailureLogSheet(
+                                item = item,
+                                onCopy = {
+                                    copyToClipboard(this@ShareOverlayActivity, listOfNotNull(item.stoppedAt, item.errorLog).joinToString("\n\n"))
+                                    Toast.makeText(this@ShareOverlayActivity, getString(R.string.history_failed_log_copied), Toast.LENGTH_SHORT).show()
+                                },
+                                onCopyUrl = {
+                                    copyToClipboard(this@ShareOverlayActivity, item.url)
+                                    Toast.makeText(this@ShareOverlayActivity, getString(R.string.sheet_link_copied), Toast.LENGTH_SHORT).show()
+                                },
+                                onRetry = null,
+                                onDismiss = { showLog = false },
+                                onSignIn = if (com.hazel.android.ui.screens.download.isCookieRelated(item.errorLog)) {
+                                    {
+                                        showLog = false
+                                        signInLauncher.launch(CookieWebViewActivity.intent(this@ShareOverlayActivity, siteRootOf(item.url)))
+                                    }
+                                } else null,
+                                onCookies = { openInApp("cookies") }
+                            )
+                        }
+                    }
                     }
                 }
             }
@@ -428,6 +480,7 @@ class ShareOverlayActivity : ComponentActivity() {
             return
         }
         mode = intent.shareMode()
+        retryOf = intent.retryOfFor(url)
         startShare(url, intent)
         sharedUrl = url
     }
@@ -524,6 +577,7 @@ class ShareOverlayActivity : ComponentActivity() {
                     .setComponent(com.hazel.android.util.AppIcon.current(context).shareComponent(context, GALLERY_ALIAS))
                     .setType("text/plain")
                     .putExtra(Intent.EXTRA_TEXT, url)
+                    .putExtra(EXTRA_RETRY_OF, url)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
@@ -531,7 +585,14 @@ class ShareOverlayActivity : ComponentActivity() {
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
         const val EXTRA_AUDIO_ONLY = "hazel.audio_only"
+
+        /** The failed link a sheet opened from the Failed tab retries. */
+        const val EXTRA_RETRY_OF = "hazel.retry_of"
     }
+
+    /** Kept only for the link being shared, so another app's extra cannot settle a different failure. */
+    private fun Intent.retryOfFor(url: String): String? =
+        getStringExtra(EXTRA_RETRY_OF)?.takeIf { it == url || com.hazel.android.util.LinkKey.sameMedia(it, url) }
 
     private fun Intent.audioOnlyOverride(): Boolean? =
         if (hasExtra(EXTRA_AUDIO_ONLY)) getBooleanExtra(EXTRA_AUDIO_ONLY, false) else null

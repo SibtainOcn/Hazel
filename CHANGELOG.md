@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Tapping a failed link no longer stacks an old failure, the sheet and two sign-in dialogs on top of each other.
+- Queue tabs use the same badge shape for their counts.
+- A gallery download that succeeds on retry now leaves the Failed tab.
+- Gallery retries show as Retrying and are not queued twice by Retry all.
+### Changed
+- Failed log sheet offers Sign in and Cookies when the site asked for an account.
+- Failed cards show a video, audio or gallery icon and connected action buttons; removing one asks first.
+- A sheet opened from a failed item has an error button that shows its log.
+- Download queue and All Downloads headers have a shortcut to Temporary files.
 
 ## [1.2.19] - 2026-11-27
 ### Added
