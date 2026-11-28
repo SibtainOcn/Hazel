@@ -69,7 +69,7 @@ import com.hazel.android.util.openInAppBrowser
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SponsorScreen(onBack: () -> Unit) {
+fun SponsorScreen(onBack: () -> Unit, onOpenGitHub: () -> Unit = {}) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
 
@@ -100,7 +100,8 @@ fun SponsorScreen(onBack: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             com.hazel.android.ui.components.GitHubStarButton(
-                modifier = Modifier.widthIn(max = 160.dp)
+                modifier = Modifier.widthIn(max = 160.dp),
+                onClick = onOpenGitHub
             )
         }
         Column(

@@ -93,7 +93,10 @@ enum class DocPage(
     FEATURES(R.string.docs_features, Icons.Filled.AutoAwesome, "${SITE}index.html#features"),
     FAQ(R.string.docs_faq, Icons.Filled.QuestionAnswer, "${SITE}faq.html"),
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
-    LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true);
+    LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true),
+
+    /** The repository's home page, opened only by the GitHub button; not listed or searched. */
+    GITHUB(R.string.github_open_desc, Icons.Filled.Language, REPO);
 
     /** [url], a link to this file on the main branch, pointed at release [tag] instead. */
     fun atTag(url: String, tag: String): String = url.replace("/main/", "/$tag/")
@@ -153,7 +156,7 @@ fun DocumentationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            ConnectedRows(DocPage.entries.flatMap { page ->
+            ConnectedRows(DocPage.entries.filter { it != DocPage.GITHUB }.flatMap { page ->
                 val row: @Composable () -> Unit = { DocRow(page.labelRes, page.icon) { onOpen(page) } }
                 if (page != DocPage.CHANGELOG) listOf(row)
                 else listOf(row, { DocRow(R.string.docs_whats_new, Icons.Filled.NewReleases) { whatsNewVisible = true } })

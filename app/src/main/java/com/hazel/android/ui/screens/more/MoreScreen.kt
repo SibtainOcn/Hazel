@@ -99,7 +99,8 @@ fun MoreScreen(
     onNavigateToAdvanced: () -> Unit = {},
     onNavigateToBackup: () -> Unit = {},
     onNavigateToDocumentation: () -> Unit = {},
-    onNavigateToSettingsSearch: () -> Unit = {}
+    onNavigateToSettingsSearch: () -> Unit = {},
+    onOpenGitHub: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
@@ -189,7 +190,7 @@ fun MoreScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
-            start = { com.hazel.android.ui.components.GitHubStarButton() },
+            start = { com.hazel.android.ui.components.GitHubStarButton(onClick = onOpenGitHub) },
             title = {
                 Text(
                     stringResource(R.string.more_title),

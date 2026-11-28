@@ -34,7 +34,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hazel.android.BuildConfig
 import com.hazel.android.R
 import com.hazel.android.download.NetworkProxy.throughProxy
 import com.hazel.android.ui.theme.sheetButtonColor
@@ -50,7 +49,7 @@ private const val REPO_URL = "https://github.com/${HazelUpdater.REPO_NAME}"
 
 /**
  * The repository's star count: kept on the phone and asked of GitHub at most every 12 hours,
- * only while a screen showing it is open. The F-Droid build never asks.
+ * only while a screen showing it is open. Same GitHub API as the engine updates.
  */
 object GitHubStars {
     private const val PREFS = "github_stars"
@@ -72,22 +71,28 @@ object GitHubStars {
     /** The last known count without touching the disk or network, for the first frame. */
     fun cached(): Int? = memory
 
-    /** The saved count, refreshed from GitHub first when it is older than 12 hours. */
+    /**
+     * The saved count, refreshed from GitHub first when it is older than 12 hours. Never throws:
+     * any failure (no network, rate limit, odd reply, unreadable saved value) keeps the last
+     * count, or null, and the button shows just the GitHub mark.
+     */
     suspend fun load(context: Context): Int? = withContext(Dispatchers.IO) {
-        if (memory == null) {
+        try {
             val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            if (prefs.contains(KEY_COUNT)) {
-                memory = prefs.getInt(KEY_COUNT, 0)
+            if (memory == null && prefs.contains(KEY_COUNT)) {
+                memory = prefs.getInt(KEY_COUNT, -1).takeIf { it >= 0 }
                 memoryAt = prefs.getLong(KEY_AT, 0L)
             }
-        }
-        val now = System.currentTimeMillis()
-        if (BuildConfig.IS_FDROID || (memory != null && now - memoryAt in 0 until MAX_AGE_MS)) return@withContext memory
-        fetch()?.let { fresh ->
-            memory = fresh
-            memoryAt = now
-            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putInt(KEY_COUNT, fresh).putLong(KEY_AT, now).apply()
+            val now = System.currentTimeMillis()
+            if (memory != null && now - memoryAt in 0 until MAX_AGE_MS) return@withContext memory
+            fetch()?.let { fresh ->
+                memory = fresh
+                memoryAt = now
+                prefs.edit().putInt(KEY_COUNT, fresh).putLong(KEY_AT, now).apply()
+            }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
         }
         memory
     }
@@ -105,13 +110,19 @@ object GitHubStars {
     }.getOrNull()
 }
 
-private fun shortCount(n: Int): String =
-    if (n < 1000) n.toString()
-    else "%.1f".format(java.util.Locale.ROOT, n / 1000.0).trimEnd('0').trimEnd('.') + "k"
+/** 204, 1.2k, 3.4M: at most six characters, so the button never grows past its slot. */
+private fun shortCount(n: Int): String = when {
+    n < 1000 -> n.toString()
+    n < 999_950 -> "%.1f".format(java.util.Locale.ROOT, n / 1000.0).removeSuffix(".0") + "k"
+    else -> "%.1f".format(java.util.Locale.ROOT, n / 1_000_000.0).removeSuffix(".0") + "M"
+}
 
-/** The GitHub mark, an outlined star and the star count, as on the website; opens the repository. */
+/**
+ * The GitHub mark, an outlined star and the star count, as on the website. [onClick] opens the
+ * repository in the app's page viewer, so Back returns here; without it the browser opens it.
+ */
 @Composable
-fun GitHubStarButton(modifier: Modifier = Modifier) {
+fun GitHubStarButton(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val context = LocalContext.current
     var stars by remember { mutableStateOf(GitHubStars.cached()) }
     LaunchedEffect(Unit) { stars = GitHubStars.load(context.applicationContext) }
@@ -122,7 +133,7 @@ fun GitHubStarButton(modifier: Modifier = Modifier) {
             .heightIn(min = 40.dp)
             .clip(CircleShape)
             .background(sheetButtonColor)
-            .clickable(role = Role.Button) { openRepo(context) }
+            .clickable(role = Role.Button) { onClick?.invoke() ?: openRepo(context) }
             .semantics(mergeDescendants = true) { contentDescription = label }
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
