@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Documentation: yt-dlp and gallery-dl supported sites, read in the app.
 - Documentation pages draw italics, tables (swipe sideways when wide), numbered lists and plain web addresses as links.
 - GitHub button with the star count in the Preferences and Support headers.
 

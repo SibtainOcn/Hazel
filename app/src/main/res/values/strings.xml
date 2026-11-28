@@ -320,8 +320,6 @@
     <string name="docs_changelog">Changelog</string>
     <string name="docs_whats_new">What\'s new</string>
     <string name="docs_license">License</string>
-    <string name="docs_sites_ytdlp">yt-dlp supported sites</string>
-    <string name="docs_sites_gallery_dl">gallery-dl supported sites</string>
     <string name="docs_open_in_browser">Open in browser</string>
     <string name="docs_error_title">Could not load this page</string>
     <string name="docs_error_body">Check your connection and try again.</string>

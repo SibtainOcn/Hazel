@@ -1,7 +1,7 @@
 package com.hazel.android.ui.screens.more
 
 /**
- * Turns Markdown files (the project's own, and the engines' supported-site lists) into a light
+ * Turns Markdown files (the project's own) into a light
  * HTML page, so they open in a moment instead of inside the whole GitHub page around them.
  *
  * Understood: headings, bullet and numbered lists (nested by indent), paragraphs, bold,
@@ -55,7 +55,7 @@ td.g{background:none!important;color:$accent;padding-top:22px;font-size:14px}
     private const val TEAL_ON_LIGHT = "#0E7C86"
     private const val TEAL_ON_DARK = "#5CD0D6"
 
-    // Built once: files such as the supported-site lists run to thousands of lines.
+    // Built once: files such as the changelog run to hundreds of lines.
     private val HEADING = Regex("^(#{1,6})\\s+(.*)")
     private val BULLET = Regex("^[-*+]\\s+(.*)")
     private val NUMBERED = Regex("^\\d{1,9}[.)]\\s+(.*)")

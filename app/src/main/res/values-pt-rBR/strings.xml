@@ -313,8 +313,6 @@
     <string name="docs_changelog">Registro de alterações</string>
     <string name="docs_whats_new">Novidades</string>
     <string name="docs_license">Licença</string>
-    <string name="docs_sites_ytdlp">Sites compatíveis com o yt-dlp</string>
-    <string name="docs_sites_gallery_dl">Sites compatíveis com o gallery-dl</string>
     <string name="docs_open_in_browser">Abrir no navegador</string>
     <string name="docs_error_title">Não foi possível carregar esta página</string>
     <string name="docs_error_body">Verifique sua conexão e tente de novo.</string>

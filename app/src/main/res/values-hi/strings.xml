@@ -308,8 +308,6 @@
     <string name="docs_changelog">बदलाव</string>
     <string name="docs_whats_new">नया क्या है</string>
     <string name="docs_license">लाइसेंस</string>
-    <string name="docs_sites_ytdlp">yt-dlp की समर्थित साइटें</string>
-    <string name="docs_sites_gallery_dl">gallery-dl की समर्थित साइटें</string>
     <string name="docs_open_in_browser">ब्राउज़र में खोलें</string>
     <string name="docs_error_title">यह पेज लोड नहीं हो सका</string>
     <string name="docs_error_body">अपना कनेक्शन जांचें और फिर से कोशिश करें।</string>

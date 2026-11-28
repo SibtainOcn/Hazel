@@ -33,9 +33,7 @@ import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.NewReleases
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.QuestionAnswer
-import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -93,18 +91,6 @@ enum class DocPage(
     FAQ(R.string.docs_faq, Icons.Filled.QuestionAnswer, "${SITE}faq.html"),
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
     LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true),
-
-    /** The engines' own lists of the sites they read, drawn here from their Markdown files. */
-    SITES_YTDLP(
-        R.string.docs_sites_ytdlp, Icons.Filled.VideoLibrary,
-        "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md",
-        "https://raw.githubusercontent.com/yt-dlp/yt-dlp/master/supportedsites.md"
-    ),
-    SITES_GALLERY_DL(
-        R.string.docs_sites_gallery_dl, Icons.Filled.PhotoLibrary,
-        "https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md",
-        "https://raw.githubusercontent.com/mikf/gallery-dl/master/docs/supportedsites.md"
-    ),
 
     /** The repository's home page, opened only by the GitHub button; not listed or searched. */
     GITHUB(R.string.github_open_desc, Icons.Filled.Language, REPO);
@@ -241,7 +227,7 @@ fun DocumentationPageScreen(
                 val bg = css(background)
                 val ink = css(scheme.onBackground)
                 val muted = css(scheme.onSurfaceVariant)
-                // Long files (the supported-site lists) take a moment to turn into HTML: off the main thread.
+                // Long files (the changelog) take a moment to turn into HTML: off the main thread.
                 val html = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                     MarkdownLite.page(text, bg, ink, muted, dark, plain = page.plain)
                 }

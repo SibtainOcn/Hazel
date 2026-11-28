@@ -318,8 +318,6 @@
     <string name="docs_changelog">Изменения</string>
     <string name="docs_whats_new">Что нового</string>
     <string name="docs_license">Лицензия</string>
-    <string name="docs_sites_ytdlp">Сайты, которые поддерживает yt-dlp</string>
-    <string name="docs_sites_gallery_dl">Сайты, которые поддерживает gallery-dl</string>
     <string name="docs_open_in_browser">Открыть в браузере</string>
     <string name="docs_error_title">Не удалось загрузить страницу</string>
     <string name="docs_error_body">Проверьте подключение и попробуйте снова.</string>
