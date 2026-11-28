@@ -33,7 +33,9 @@ import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -90,7 +92,22 @@ enum class DocPage(
     FEATURES(R.string.docs_features, Icons.Filled.AutoAwesome, "${SITE}index.html#features"),
     FAQ(R.string.docs_faq, Icons.Filled.QuestionAnswer, "${SITE}faq.html"),
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
-    LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true);
+    LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true),
+
+    /** The engines' own lists of the sites they read, drawn here from their Markdown files. */
+    SITES_YTDLP(
+        R.string.docs_sites_ytdlp, Icons.Filled.VideoLibrary,
+        "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md",
+        "https://raw.githubusercontent.com/yt-dlp/yt-dlp/master/supportedsites.md"
+    ),
+    SITES_GALLERY_DL(
+        R.string.docs_sites_gallery_dl, Icons.Filled.PhotoLibrary,
+        "https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md",
+        "https://raw.githubusercontent.com/mikf/gallery-dl/master/docs/supportedsites.md"
+    ),
+
+    /** The repository's home page, opened only by the GitHub button; not listed or searched. */
+    GITHUB(R.string.github_open_desc, Icons.Filled.Language, REPO);
 
     /** [url], a link to this file on the main branch, pointed at release [tag] instead. */
     fun atTag(url: String, tag: String): String = url.replace("/main/", "/$tag/")
@@ -149,7 +166,7 @@ fun DocumentationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            ConnectedRows(DocPage.entries.flatMap { page ->
+            ConnectedRows(DocPage.entries.filter { it != DocPage.GITHUB }.flatMap { page ->
                 val row: @Composable () -> Unit = { DocRow(page.labelRes, page.icon) { onOpen(page) } }
                 if (page != DocPage.CHANGELOG) listOf(row)
                 else listOf(row, { DocRow(R.string.docs_whats_new, Icons.Filled.NewReleases) { whatsNewVisible = true } })
@@ -162,7 +179,11 @@ fun DocumentationScreen(
 }
 
 @Composable
-private fun DocRow(@androidx.annotation.StringRes label: Int, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+private fun DocRow(
+    @androidx.annotation.StringRes label: Int,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
     ListItem(
         headlineContent = { Text(stringResource(label)) },
         leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
@@ -217,10 +238,13 @@ fun DocumentationPageScreen(
             if (text == null) {
                 view.loadUrl(url)
             } else {
-                val html = MarkdownLite.page(
-                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), dark,
-                    plain = page.plain
-                )
+                val bg = css(background)
+                val ink = css(scheme.onBackground)
+                val muted = css(scheme.onSurfaceVariant)
+                // Long files (the supported-site lists) take a moment to turn into HTML: off the main thread.
+                val html = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                    MarkdownLite.page(text, bg, ink, muted, dark, plain = page.plain)
+                }
                 view.loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
             }
         }
@@ -428,5 +452,7 @@ private fun isOurs(url: String): Boolean =
 private fun openOutside(context: android.content.Context, url: String) {
     runCatching {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }.onFailure {
+        android.widget.Toast.makeText(context, R.string.sheet_link_open_failed, android.widget.Toast.LENGTH_SHORT).show()
     }
 }

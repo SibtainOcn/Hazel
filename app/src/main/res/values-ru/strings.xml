@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">Главная</string>
     <string name="nav_history">Загрузки</string>
-    <string name="nav_more">Ещё</string>
+    <string name="nav_more">Настройки</string>
     <string name="nav_gallery">Галерея</string>
     <string name="gallery_image">Изображение</string>
     <string name="gallery_video">Видео</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">Вставленные ссылки</string>
     <string name="search_guide_links_body">Ссылка уходит как есть в активный раздел. Видео, рилсы и аудио: Медиа. Изображения, истории, актуальное и профили: Галерея. Если один раздел не справился, попробуйте другой. Источники и сайты отходят в сторону, пока в поле есть ссылка.</string>
     <string name="search_guide_sign_in_title">Вход</string>
-    <string name="search_guide_sign_in_body">Для закрытых публикаций, историй, актуального и отметок «Нравится» нужно войти на этот сайт. Hazel спросит, когда это нужно, или войдите в любое время через Cookies в разделе «Ещё».</string>
+    <string name="search_guide_sign_in_body">Для закрытых публикаций, историй, актуального и отметок «Нравится» нужно войти на этот сайт. Hazel спросит, когда это нужно, или войдите в любое время через Cookies в разделе «Настройки».</string>
     <string name="search_mode_media">Медиа</string>
     <string name="profile_stories">Истории</string>
     <string name="profile_highlights">Актуальное</string>
@@ -293,7 +293,7 @@
     <string name="converter_heading_other">Все остальные</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">Ещё</string>
+    <string name="more_title">Настройки</string>
     <string name="settings_search">Поиск настроек</string>
     <string name="settings_search_hint">Найдите настройку по названию или по тому, что она делает</string>
     <string name="settings_search_none">Нет настроек по запросу %1$s</string>
@@ -318,6 +318,8 @@
     <string name="docs_changelog">Изменения</string>
     <string name="docs_whats_new">Что нового</string>
     <string name="docs_license">Лицензия</string>
+    <string name="docs_sites_ytdlp">Сайты, которые поддерживает yt-dlp</string>
+    <string name="docs_sites_gallery_dl">Сайты, которые поддерживает gallery-dl</string>
     <string name="docs_open_in_browser">Открыть в браузере</string>
     <string name="docs_error_title">Не удалось загрузить страницу</string>
     <string name="docs_error_body">Проверьте подключение и попробуйте снова.</string>
@@ -326,6 +328,13 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Назад</string>
     <string name="sponsor_title">Поддержать Hazel</string>
+    <string name="github_open_desc">Hazel на GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">Hazel на GitHub, %d звезда</item>
+        <item quantity="few">Hazel на GitHub, %d звезды</item>
+        <item quantity="many">Hazel на GitHub, %d звёзд</item>
+        <item quantity="other">Hazel на GitHub, %d звезды</item>
+    </plurals>
     <string name="sponsor_hero_title">Нравится Hazel? Поддержите его</string>
     <string name="sponsor_hero_body">Если Hazel вам пригодился, поддержите его разработку. Ваша поддержка помогает мне улучшать Hazel и добавлять новые функции. Любая поддержка очень много значит. 💚</string>
     <string name="sponsor_section_ways">Способы поддержки</string>

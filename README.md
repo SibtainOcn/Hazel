@@ -49,7 +49,7 @@ English
 ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-0374ff?style=for-the-badge&logo=python&logoColor=white)
 
-[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square&color=FFC107)](https://github.com/SibtainOcn/Hazel/stargazers)
+[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square&color=FFC107)](https://github.com/SibtainOcn/Hazel)
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
@@ -120,21 +120,21 @@ If a link fails in one place, try the other before opening an issue.
 <table>
   <tr>
     <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>Search & Play</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>All Downloads</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>Gallery Search</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Offline Player</b></td>
     <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>Download Options</b></td>
+  </tr>
+  <tr>
     <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>Format Picker</b></td>
-  </tr>
-  <tr>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>Download Queue</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>Audio Tracks</b></td>
     <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>Audio Language</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Smart Search</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Playlist Batch</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Download Queue</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>App Languages</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Glass Home</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>More Settings</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Appearance</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Multiple Links</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>Expanded Player</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Gallery Profiles</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Gallery Viewer</b></td>
   </tr>
 </table>
 
@@ -187,7 +187,7 @@ SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
 SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
 MD5:        3bcce9e14c616a9087766563875978e6
 ```
-[![Star History Chart](https://raw.githubusercontent.com/SibtainOcn/Hazel/star-history/star-history.svg)](https://github.com/SibtainOcn/Hazel/stargazers)
+[![Star History Chart](https://raw.githubusercontent.com/SibtainOcn/Hazel/star-history/star-history.svg)](https://github.com/SibtainOcn/Hazel)
 ## 🤝 Contributing
 
 We welcome contributions! See our [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) for guidelines.

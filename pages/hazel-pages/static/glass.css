@@ -14,9 +14,6 @@
 }
 .hero h1 .soft { color: inherit; }
 :root[data-theme="light"] .hero h1 { background-image: linear-gradient(95deg, #0b0c12 20%, #0b4a6e 60%, #0891b2 90%); }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .hero h1 { background-image: linear-gradient(95deg, #0b0c12 20%, #0b4a6e 60%, #0891b2 90%); }
-}
 .hero .lede { max-width: 760px; font-size: clamp(19px, 1.55vw, 22px); line-height: 1.6; }
 .hero .cta { margin-top: 44px; }
 .hero .cta .btn-lg { height: 60px; padding: 0 34px; font-size: 17px; font-weight: 600; }
@@ -32,18 +29,6 @@
   --blur: blur(24px) saturate(1.5);
   --a1: #16b8e6; --a2: #3d5bff; --a3: #ff4fa8; --a4: #ffae2c; --ao: .42;
   --thumb: rgba(255, 255, 255, .16); --thumb-2: rgba(255, 255, 255, .3);
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #f6f5f2; --bg-2: rgba(255, 255, 255, .4);
-    --surface: rgba(255, 255, 255, .56); --surface-2: rgba(255, 255, 255, .76); --surface-3: rgba(255, 255, 255, .9);
-    --line: rgba(31, 29, 26, .08); --line-2: rgba(31, 29, 26, .13);
-    --inset: rgba(31, 29, 26, .05);
-    --edge: rgba(255, 255, 255, .95);
-    --glass-shadow: 0 24px 60px -32px rgba(60, 50, 30, .22);
-    --a1: #7fdcff; --a2: #9db0ff; --a3: #ffb3d6; --a4: #ffd59a; --ao: .55;
-  --thumb: rgba(31, 29, 26, .18); --thumb-2: rgba(31, 29, 26, .32);
-  }
 }
 :root[data-theme="light"] {
   --bg: #f6f5f2; --bg-2: rgba(255, 255, 255, .4);
@@ -106,9 +91,6 @@ details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a
 /* A touch firmer fill on every screen, standing in for the blur the cards no longer take. */
 :root { --surface: rgba(255, 255, 255, .06); }
 :root[data-theme="light"] { --surface: rgba(255, 255, 255, .64); }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --surface: rgba(255, 255, 255, .64); }
-}
 @media (max-width: 1260px) and (min-width: 1081px), (max-width: 640px) {
   .search-btn { box-shadow: none; }
 }
@@ -119,9 +101,6 @@ details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a
   .aurora i { filter: blur(90px); }
   .aurora i:nth-child(n) { animation: none; }
   .gallery-nav button, .viewer button { backdrop-filter: none; -webkit-backdrop-filter: none; }
-}
-@media (max-width: 640px) and (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --surface: rgba(255, 255, 255, .7); --glass-shadow: 0 10px 24px -18px rgba(60, 50, 30, .18); }
 }
 @media (prefers-reduced-motion: reduce) {
   .aurora i:nth-child(n) { animation: none; }

@@ -17,12 +17,25 @@
       </div>
       <div class="meta mono reveal">Version {{version}}<span class="dot"></span>Android 7 and newer<span class="dot"></span>Free forever</div>
     </div>
-    <div class="stage reveal" aria-hidden="true">
-      <div class="device side far"><img src="assets/screens/11.jpg" alt=""></div>
-      <div class="device side"><img src="assets/screens/02.jpg" alt=""></div>
-      <div class="device"><img src="assets/screens/01.jpg" alt=""></div>
-      <div class="device side"><img src="assets/screens/09.jpg" alt=""></div>
-      <div class="device side far"><img src="assets/screens/03.jpg" alt=""></div>
+    <div class="gallery hero-shots reveal" id="screens" data-gallery>
+      <div class="track">
+        <figure><div class="device"><img src="assets/screens/01.jpg" alt=""></div><figcaption><b>Search and play</b>Watch before you save</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/10.jpg" alt=""></div><figcaption><b>Expanded player</b>Download, minimize or close</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/04.jpg" alt=""></div><figcaption><b>One simple sheet</b>Quality, folder and extras</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/05.jpg" alt=""></div><figcaption><b>Every quality</b>Size shown up front</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/06.jpg" alt="" loading="lazy"></div><figcaption><b>Audio tracks</b>Each language, size and bitrate</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/07.jpg" alt="" loading="lazy"></div><figcaption><b>Audio language</b>Pick the soundtrack</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/09.jpg" alt="" loading="lazy"></div><figcaption><b>Many links</b>Paste a few, save them together</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/08.jpg" alt="" loading="lazy"></div><figcaption><b>The queue</b>Every step, as it happens</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/03.jpg" alt="" loading="lazy"></div><figcaption><b>Your library</b>Plays right in Hazel</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/02.jpg" alt="" loading="lazy"></div><figcaption><b>Gallery search</b>Images from across the web</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/11.jpg" alt="" loading="lazy"></div><figcaption><b>Whole profiles</b>Posts and stories, Download all</figcaption></figure>
+        <figure><div class="device"><img src="assets/screens/12.jpg" alt="" loading="lazy"></div><figcaption><b>Gallery viewer</b>Swipe, play and save</figcaption></figure>
+      </div>
+      <div class="gallery-nav">
+        <button type="button" data-dir="-1" aria-label="Previous screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <button type="button" data-dir="1" aria-label="Next screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
     </div>
   </div>
 
@@ -37,8 +50,17 @@
         <ul>
           <li>YouTube</li><li>YouTube Music</li><li>Instagram</li><li>TikTok</li><li>X</li>
           <li>Pinterest</li><li>SoundCloud</li><li>Bandcamp</li><li>Vimeo</li><li>Twitch</li><li>Bilibili</li>
-          <li class="more"><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">See all sites<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></li>
         </ul>
+        <div class="engines">
+          <div class="engine">
+            <div class="txt"><a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a><span>Videos, music, playlists and live streams</span></div>
+            <a class="go" href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">Supported sites<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+          <div class="engine">
+            <div class="txt"><a href="https://github.com/mikf/gallery-dl">gallery-dl</a><span>Images, posts, stories and whole profiles</span></div>
+            <a class="go" href="https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md">Supported sites<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -98,9 +120,9 @@
       <div class="bento">
         <div class="tile split c-7 reveal">
           <div class="copy">
-            <div class="eyebrow">Playlists</div>
-            <h3>A whole playlist, in one go</h3>
-            <p>Set the quality, format and folder once for the whole list, and change any single video if you want something different. Big lists keep going in the background.</p>
+            <div class="eyebrow">Playlists and many links</div>
+            <h3>A whole playlist or many links, in one go</h3>
+            <p>Paste several links or a playlist and set the quality, format and folder once for all of them, with the total size shown. Change any single video if you want something different. Big lists keep going in the background.</p>
             <ul class="points">
               <li>Save every video, or only the ones you tick</li>
               <li>Music only or full video, per list or per item</li>
@@ -108,7 +130,7 @@
             </ul>
             <div class="chips"><span class="on">Best quality</span><span>Cover art</span><span>Chapters</span><span>Subtitles</span></div>
           </div>
-          <div class="device"><img src="assets/screens/09.jpg" alt="Saving a playlist of 574 videos" loading="lazy"></div>
+          <div class="device"><img src="assets/screens/09.jpg" alt="Saving three links at once" loading="lazy"></div>
         </div>
 
         <div class="tile c-5 reveal">
@@ -165,18 +187,18 @@
           </div>
         </div>
 
-        <div class="tile c-6 reveal">
-          <div class="eyebrow">Gallery</div>
-          <h3>Stories, highlights, posts and galleries</h3>
-          <p>Save the images, posts, carousels, stories and highlights of a link or a whole profile from Instagram, X, Pinterest and more, with their captions. Open the Gallery tab, or share to Hazel Gallery or Instant Gallery.</p>
-          <div class="chips"><span>Instagram</span><span>X</span><span class="on">Pinterest</span><span>Bluesky</span><span>Tumblr</span></div>
-        </div>
-
-        <div class="tile c-6 reveal">
-          <div class="eyebrow">Sign-in</div>
-          <h3>Private posts, with your own sign-in</h3>
-          <p>Sign in to Instagram, YouTube, X and more in one tap. Hazel shows whether each account is still active, and uses it only for that site.</p>
-          <div class="chips"><span class="on">Active</span><span>Expired</span><span>Signed out</span></div>
+        <div class="tile split c-6 reveal">
+          <div class="copy">
+            <div class="eyebrow">Gallery</div>
+            <h3>Stories, highlights, posts and galleries</h3>
+            <p>Save the images, posts, carousels, stories and highlights of a link or a whole profile from Instagram, X, Pinterest and more, with their captions. Open the Gallery tab, or share to Hazel Gallery or Instant Gallery.</p>
+            <ul class="points">
+              <li>Search image sites right from the Gallery tab</li>
+              <li>Swipe through files and play videos before you save</li>
+              <li>Save one file, or a whole profile with Download all</li>
+            </ul>
+          </div>
+          <div class="device"><img src="assets/screens/11.jpg" alt="An Instagram profile on the Gallery tab" loading="lazy"></div>
         </div>
 
         <div class="tile split c-6 reveal">
@@ -190,7 +212,7 @@
               <li>Retry anything that failed in one tap</li>
             </ul>
           </div>
-          <div class="device"><img src="assets/screens/06.jpg" alt="The download queue with progress" loading="lazy"></div>
+          <div class="device"><img src="assets/screens/08.jpg" alt="The download queue showing each step" loading="lazy"></div>
         </div>
 
         <div class="tile split c-6 reveal">
@@ -207,64 +229,38 @@
           <div class="copy">
             <div class="eyebrow">Library</div>
             <h3>Everything you saved, in one place</h3>
-            <p>Sort and filter by music or video, search your downloads, and open any of them in the player you already use.</p>
+            <p>Sort and filter by music or video, search your downloads, and play them right in Hazel: music in its own player with 10-second skips, video full screen or in a sheet.</p>
+            <ul class="points">
+              <li>Open with, Show file, Share and Properties at hand</li>
+              <li>Or open them in the player you already use</li>
+            </ul>
           </div>
-          <div class="device"><img src="assets/screens/02.jpg" alt="Your downloads library" loading="lazy"></div>
+          <div class="device"><img src="assets/screens/03.jpg" alt="A song playing in Hazel's player" loading="lazy"></div>
         </div>
 
-        <div class="tile split c-6 reveal">
-          <div class="copy">
-            <div class="eyebrow">Your way</div>
-            <h3>Settings in one place</h3>
-            <p>Appearance, downloads, language, cookies, backups and more, all tucked into one clean menu so you can set Hazel up exactly how you like it.</p>
-          </div>
-          <div class="device"><img src="assets/screens/11.jpg" alt="The More settings menu" loading="lazy"></div>
+        <div class="tile c-6 reveal">
+          <div class="eyebrow">Your way</div>
+          <h3>Settings in one place</h3>
+          <p>Appearance, downloads, language, cookies, backups and more, all tucked into one clean menu so you can set Hazel up exactly how you like it.</p>
+          <div class="chips"><span class="on">Appearance</span><span>Downloads</span><span>Language</span><span>Backups</span></div>
+        </div>
+
+        <div class="tile c-6 reveal">
+          <div class="eyebrow">Sign-in</div>
+          <h3>Private posts, with your own sign-in</h3>
+          <p>Sign in to Instagram, YouTube, X and more in one tap. Hazel shows whether each account is still active, and uses it only for that site.</p>
+          <div class="chips"><span class="on">Active</span><span>Expired</span><span>Signed out</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 03 Screens -->
-  <section class="section" id="screens">
-    <div class="wrap">
-      <div class="head reveal">
-        <div class="eyebrow">03 / A closer look</div>
-        <div class="head-row">
-          <div>
-            <h2>Blends seamlessly with your device</h2>
-            <p>Glass or solid, dark or light, your choice of accent colour, and {{language_words}} languages.</p>
-          </div>
-          <div class="gallery-nav" data-gallery-nav>
-            <button type="button" data-dir="-1" aria-label="Previous screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
-            <button type="button" data-dir="1" aria-label="Next screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="gallery reveal" data-gallery>
-      <div class="track">
-        <figure><div class="device"><img src="assets/screens/01.jpg" alt="" loading="lazy"></div><figcaption><b>Search and play</b>Watch before you save</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/04.jpg" alt="" loading="lazy"></div><figcaption><b>One simple sheet</b>Quality, folder and extras</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/09.jpg" alt="" loading="lazy"></div><figcaption><b>Whole playlists</b>Hundreds of videos, one tap</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/05.jpg" alt="" loading="lazy"></div><figcaption><b>Every quality</b>Size shown up front</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/07.jpg" alt="" loading="lazy"></div><figcaption><b>Audio language</b>Pick the soundtrack</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/06.jpg" alt="" loading="lazy"></div><figcaption><b>The queue</b>Every step, as it happens</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/02.jpg" alt="" loading="lazy"></div><figcaption><b>Your library</b>Big, browsable cards</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/03.jpg" alt="" loading="lazy"></div><figcaption><b>Make it yours</b>Glass, theme and accent</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/08.jpg" alt="" loading="lazy"></div><figcaption><b>Recent searches</b>Pick up where you left off</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/12.jpg" alt="" loading="lazy"></div><figcaption><b>Calm home</b>Glass with drifting stars</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/10.jpg" alt="" loading="lazy"></div><figcaption><b>Your language</b>{{language_words_cap}} to choose from</figcaption></figure>
-        <figure><div class="device"><img src="assets/screens/11.jpg" alt="" loading="lazy"></div><figcaption><b>Settings</b>All in one place, searchable</figcaption></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- 04 Privacy -->
+  <!-- 03 Privacy -->
   <section class="section" id="privacy">
     <div class="wrap">
       <div class="privacy reveal">
         <div class="left">
-          <div class="eyebrow">04 / Privacy</div>
+          <div class="eyebrow">03 / Privacy</div>
           <h2>Your phone talks to the site you asked for. That's all.</h2>
           <p>Hazel has no servers of its own and nothing to report back to. What you save goes from the website straight to your phone.</p>
         </div>
@@ -292,11 +288,11 @@
     </div>
   </section>
 
-  <!-- 05 Install -->
+  <!-- 04 Install -->
   <section class="section" id="install">
     <div class="wrap">
       <div class="head reveal">
-        <div class="eyebrow">05 / Install</div>
+        <div class="eyebrow">04 / Install</div>
         <div>
           <h2>Up and running in a minute.</h2>
           <p>Hazel isn't on the Play Store. Get it from one of the two official places below, and nowhere else.</p>
@@ -321,7 +317,7 @@
     </div>
   </section>
 
-  <!-- 06 Languages and credits -->
+  <!-- 05 Languages and credits -->
   <section class="section" id="community">
     <div class="wrap">
       <div class="duo">
@@ -374,6 +370,9 @@
         </a>
       </div>
       <div class="fine">New here? <a href="guide.html">Read the guide</a> or <a href="faq.html">see common questions</a>.</div>
+      <a class="stars" href="https://github.com/SibtainOcn/Hazel" aria-label="Hazel's GitHub star history">
+        <img src="https://raw.githubusercontent.com/SibtainOcn/Hazel/star-history/star-history.svg" alt="GitHub star history chart" width="800" height="400" loading="lazy" decoding="async">
+      </a>
     </div>
   </div>
 

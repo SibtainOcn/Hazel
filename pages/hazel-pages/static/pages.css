@@ -53,7 +53,7 @@
 .figure-row figure { margin: 0; width: min(240px, 100%); }
 .figure-row figcaption { margin-top: 12px; font-size: 14px; color: var(--fg-3); }
 .device { border-radius: 32px; padding: 7px; background: var(--surface); border: 1px solid var(--line-2); }
-.device img { width: 100%; aspect-ratio: 1080 / 2302; object-fit: cover; border-radius: 26px; }
+.device img { width: 100%; aspect-ratio: 1080 / 2173; object-fit: cover; border-radius: 26px; }
 
 .next-up { margin-top: 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .next-up a { display: block; padding: 24px 26px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); transition: border-color .15s; }

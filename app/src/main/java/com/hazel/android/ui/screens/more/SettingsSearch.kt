@@ -194,7 +194,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.gallery_skip_reposts to null
     )
     on(R.string.cleanup_title, "storage_cleanup", R.string.cleanup_action_clear_everything to null)
-    DocPage.entries.forEach { page ->
+    DocPage.entries.filter { it != DocPage.GITHUB }.forEach { page ->
         add(SettingEntry(page.labelRes, null, R.string.more_documentation, "docs/${page.name}"))
     }
 }

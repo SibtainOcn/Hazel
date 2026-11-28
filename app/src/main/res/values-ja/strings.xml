@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">ホーム</string>
     <string name="nav_history">ダウンロード</string>
-    <string name="nav_more">その他</string>
+    <string name="nav_more">設定</string>
     <string name="nav_gallery">ギャラリー</string>
     <string name="gallery_image">画像</string>
     <string name="gallery_video">動画</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">貼り付けたリンク</string>
     <string name="search_guide_links_body">リンクはそのまま、オンになっている側に送られます。動画、リール、音声はメディア。画像、ストーリーズ、ハイライト、プロフィールはギャラリー。うまくいかないときはもう一方を試してください。リンクが入っている間、ソースとサイトは控えます。</string>
     <string name="search_guide_sign_in_title">ログイン</string>
-    <string name="search_guide_sign_in_body">非公開の投稿、ストーリーズ、ハイライト、いいねにはそのサイトへのログインが必要です。必要なときは Hazel が確認します。いつでも「その他」の Cookie からログインできます。</string>
+    <string name="search_guide_sign_in_body">非公開の投稿、ストーリーズ、ハイライト、いいねにはそのサイトへのログインが必要です。必要なときは Hazel が確認します。いつでも「設定」の Cookie からログインできます。</string>
     <string name="search_mode_media">メディア</string>
     <string name="profile_stories">ストーリーズ</string>
     <string name="profile_highlights">ハイライト</string>
@@ -278,7 +278,7 @@
     <string name="converter_heading_other">その他の形式</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">その他</string>
+    <string name="more_title">設定</string>
     <string name="settings_search">設定を検索</string>
     <string name="settings_search_hint">名前や働きから設定を探せます</string>
     <string name="settings_search_none">%1$s に一致する設定はありません</string>
@@ -303,6 +303,8 @@
     <string name="docs_changelog">変更履歴</string>
     <string name="docs_whats_new">新機能</string>
     <string name="docs_license">ライセンス</string>
+    <string name="docs_sites_ytdlp">yt-dlp の対応サイト</string>
+    <string name="docs_sites_gallery_dl">gallery-dl の対応サイト</string>
     <string name="docs_open_in_browser">ブラウザで開く</string>
     <string name="docs_error_title">このページを読み込めませんでした</string>
     <string name="docs_error_body">接続を確認して、もう一度お試しください。</string>
@@ -311,6 +313,10 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">戻る</string>
     <string name="sponsor_title">Hazel を支援</string>
+    <string name="github_open_desc">GitHub の Hazel</string>
+    <plurals name="github_stars_desc">
+        <item quantity="other">GitHub の Hazel、スター %d 個</item>
+    </plurals>
     <string name="sponsor_hero_title">Hazel が気に入りましたか？応援をお願いします</string>
     <string name="sponsor_hero_body">Hazel が役に立っているなら、開発の支援をご検討ください。皆さんの支援が Hazel の改善と新機能づくりを続ける力になります。どんな小さな応援もとても励みになります。💚</string>
     <string name="sponsor_section_ways">支援方法</string>

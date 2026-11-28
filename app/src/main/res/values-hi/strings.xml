@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">होम</string>
     <string name="nav_history">डाउनलोड</string>
-    <string name="nav_more">और</string>
+    <string name="nav_more">प्राथमिकताएँ</string>
     <string name="nav_gallery">गैलरी</string>
     <string name="gallery_image">इमेज</string>
     <string name="gallery_video">वीडियो</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">पेस्ट किए गए लिंक</string>
     <string name="search_guide_links_body">लिंक जैसा है वैसा ही चालू वाली तरफ़ जाता है। वीडियो, रील और ऑडियो: मीडिया। इमेज, स्टोरी, हाइलाइट और प्रोफ़ाइल: गैलरी। एक तरफ़ काम न करे तो दूसरी आज़माएँ। फ़ील्ड में लिंक रहते स्रोत और साइटें पीछे हट जाती हैं।</string>
     <string name="search_guide_sign_in_title">साइन इन</string>
-    <string name="search_guide_sign_in_body">निजी पोस्ट, स्टोरीज़, हाइलाइट्स और लाइक के लिए उस साइट पर साइन इन ज़रूरी है। ज़रूरत होने पर Hazel पूछता है, या कभी भी और में कुकीज़ से साइन इन करें।</string>
+    <string name="search_guide_sign_in_body">निजी पोस्ट, स्टोरीज़, हाइलाइट्स और लाइक के लिए उस साइट पर साइन इन ज़रूरी है। ज़रूरत होने पर Hazel पूछता है, या कभी भी प्राथमिकताएँ में कुकीज़ से साइन इन करें।</string>
     <string name="search_mode_media">मीडिया</string>
     <string name="profile_stories">स्टोरीज़</string>
     <string name="profile_highlights">हाइलाइट्स</string>
@@ -283,7 +283,7 @@
     <string name="converter_heading_other">बाकी सब</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">और</string>
+    <string name="more_title">प्राथमिकताएँ</string>
     <string name="settings_search">सेटिंग खोजें</string>
     <string name="settings_search_hint">किसी सेटिंग को उसके नाम या उसके काम से खोजें</string>
     <string name="settings_search_none">%1$s के लिए कोई सेटिंग नहीं मिली</string>
@@ -308,6 +308,8 @@
     <string name="docs_changelog">बदलाव</string>
     <string name="docs_whats_new">नया क्या है</string>
     <string name="docs_license">लाइसेंस</string>
+    <string name="docs_sites_ytdlp">yt-dlp की समर्थित साइटें</string>
+    <string name="docs_sites_gallery_dl">gallery-dl की समर्थित साइटें</string>
     <string name="docs_open_in_browser">ब्राउज़र में खोलें</string>
     <string name="docs_error_title">यह पेज लोड नहीं हो सका</string>
     <string name="docs_error_body">अपना कनेक्शन जांचें और फिर से कोशिश करें।</string>
@@ -316,6 +318,11 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">वापस</string>
     <string name="sponsor_title">Hazel का साथ दें</string>
+    <string name="github_open_desc">GitHub पर Hazel</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">GitHub पर Hazel, %d स्टार</item>
+        <item quantity="other">GitHub पर Hazel, %d स्टार</item>
+    </plurals>
     <string name="sponsor_hero_title">Hazel पसंद है? इसे थोड़ा प्यार दें</string>
     <string name="sponsor_hero_body">अगर Hazel आपके काम आया है, तो इसके विकास में साथ देने पर विचार करें। आपका साथ मुझे Hazel को बेहतर बनाते रहने और नई सुविधाएँ बनाने में मदद करता है। थोड़ा सा प्यार भी बहुत मायने रखता है। 💚</string>
     <string name="sponsor_section_ways">साथ देने के तरीके</string>

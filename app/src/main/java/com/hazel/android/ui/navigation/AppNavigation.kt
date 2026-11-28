@@ -531,7 +531,8 @@ fun AppNavigation(
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
                     onNavigateToUpdate = { navController.navigate("software_update") },
                     onNavigateToDocumentation = { navController.navigate("docs") },
-                    onNavigateToSettingsSearch = { navController.navigate("settings_search") }
+                    onNavigateToSettingsSearch = { navController.navigate("settings_search") },
+                    onOpenGitHub = { navController.navigate("docs/${com.hazel.android.ui.screens.more.DocPage.GITHUB.name}") }
                 )
             }
             screen("settings_search") {
@@ -567,7 +568,10 @@ fun AppNavigation(
                 FetchSettingsScreen(onBack = { navController.popBackStack() })
             }
             screen("sponsor") {
-                SponsorScreen(onBack = { navController.popBackStack() })
+                SponsorScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenGitHub = { navController.navigate("docs/${com.hazel.android.ui.screens.more.DocPage.GITHUB.name}") }
+                )
             }
 
             screen("processing") {

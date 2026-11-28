@@ -99,7 +99,8 @@ fun MoreScreen(
     onNavigateToAdvanced: () -> Unit = {},
     onNavigateToBackup: () -> Unit = {},
     onNavigateToDocumentation: () -> Unit = {},
-    onNavigateToSettingsSearch: () -> Unit = {}
+    onNavigateToSettingsSearch: () -> Unit = {},
+    onOpenGitHub: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
@@ -183,36 +184,38 @@ fun MoreScreen(
             .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp, top = 16.dp)
     ) {
-        // The screen names itself, the way the downloads list does, and stays pinned with
-        // its search while the settings below it scroll.
-        Row(
+        // GitHub on the left, the screen's name centred, search on the right; pinned while the
+        // settings below scroll.
+        com.hazel.android.ui.components.CenteredTitleBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                stringResource(R.string.more_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-            // Every setting, found by name, from its own screen. Drawn the way the home
-            // search bar draws its icon: a seven-sided cookie in the solid accent. The
-            // padding keeps the row exactly as tall as the 48dp button it replaces.
-            ShapeIconButton(
-                onClick = onNavigateToSettingsSearch,
-                modifier = Modifier.padding(4.dp),
-                filled = true,
-                shape = MaterialShapes.Cookie7Sided.toShape()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
-                    contentDescription = stringResource(R.string.settings_search),
-                    modifier = Modifier.size(19.dp)
+            start = { com.hazel.android.ui.components.GitHubStarButton(onClick = onOpenGitHub) },
+            title = {
+                Text(
+                    stringResource(R.string.more_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
+            },
+            // Every setting, found by name, from its own screen. Same round tonal fill as the
+            // GitHub button opposite. The padding keeps the row exactly as tall as a 48dp button.
+            end = {
+                ShapeIconButton(
+                    onClick = onNavigateToSettingsSearch,
+                    modifier = Modifier.padding(4.dp),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = stringResource(R.string.settings_search),
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
             }
-        }
+        )
 
         Column(
             modifier = Modifier

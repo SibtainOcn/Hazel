@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">Inicio</string>
     <string name="nav_history">Descargas</string>
-    <string name="nav_more">Más</string>
+    <string name="nav_more">Preferencias</string>
     <string name="nav_gallery">Galería</string>
     <string name="gallery_image">Imagen</string>
     <string name="gallery_video">Vídeo</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">Enlaces pegados</string>
     <string name="search_guide_links_body">Un enlace va tal cual al lado que está activo. Videos, reels y audio: Multimedia. Imágenes, historias, destacadas y perfiles: Galería. Si un lado falla, prueba el otro. Fuentes y sitios se apartan mientras haya un enlace en el campo.</string>
     <string name="search_guide_sign_in_title">Iniciar sesión</string>
-    <string name="search_guide_sign_in_body">Las publicaciones privadas, historias, destacadas y me gusta necesitan que inicies sesión en ese sitio. Hazel lo pide cuando hace falta, o inicia sesión cuando quieras desde Cookies en Más.</string>
+    <string name="search_guide_sign_in_body">Las publicaciones privadas, historias, destacadas y me gusta necesitan que inicies sesión en ese sitio. Hazel lo pide cuando hace falta, o inicia sesión cuando quieras desde Cookies en Preferencias.</string>
     <string name="search_mode_media">Multimedia</string>
     <string name="profile_stories">Historias</string>
     <string name="profile_highlights">Destacadas</string>
@@ -288,7 +288,7 @@
     <string name="converter_heading_other">Todo lo demás</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">Más</string>
+    <string name="more_title">Preferencias</string>
     <string name="settings_search">Buscar ajustes</string>
     <string name="settings_search_hint">Encuentra un ajuste por su nombre o por lo que hace</string>
     <string name="settings_search_none">No hay ajustes para %1$s</string>
@@ -313,6 +313,8 @@
     <string name="docs_changelog">Cambios</string>
     <string name="docs_whats_new">Novedades</string>
     <string name="docs_license">Licencia</string>
+    <string name="docs_sites_ytdlp">Sitios compatibles con yt-dlp</string>
+    <string name="docs_sites_gallery_dl">Sitios compatibles con gallery-dl</string>
     <string name="docs_open_in_browser">Abrir en el navegador</string>
     <string name="docs_error_title">No se pudo cargar esta página</string>
     <string name="docs_error_body">Revisa tu conexión e inténtalo de nuevo.</string>
@@ -321,6 +323,12 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Atrás</string>
     <string name="sponsor_title">Apoyar a Hazel</string>
+    <string name="github_open_desc">Hazel en GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">Hazel en GitHub, %d estrella</item>
+        <item quantity="many">Hazel en GitHub, %d estrellas</item>
+        <item quantity="other">Hazel en GitHub, %d estrellas</item>
+    </plurals>
     <string name="sponsor_hero_title">¿Te gusta Hazel? Dale un poco de cariño</string>
     <string name="sponsor_hero_body">Si Hazel te ha sido útil, considera apoyar su desarrollo. Tu apoyo me ayuda a seguir mejorando Hazel y a crear nuevas funciones. Cada muestra de cariño significa mucho. 💚</string>
     <string name="sponsor_section_ways">Formas de apoyar</string>

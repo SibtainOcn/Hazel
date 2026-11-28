@@ -13,7 +13,7 @@ Hazel has two places for links. Use the one that fits what you want to save.
 
 - A profile link on the Gallery tab asks which sections to fetch (for example stories, highlights, posts, reels or tagged on Instagram; media or likes on X).
 - Videos found in a gallery post open the video download sheet, so you can save them as video or audio.
-- Stories, highlights and private posts need you signed in to that site (More → Cookies).
+- Stories, highlights and private posts need you signed in to that site (Preferences → Cookies).
 - If a link fails in one place, try the other before [opening an issue](https://github.com/SibtainOcn/Hazel/issues/new/choose).
 
 ## 📚 Quick Links

@@ -21,14 +21,6 @@
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   color-scheme: dark;
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #f7f5f1; --bg-2: #f1eee9; --surface: #fdfcfa; --surface-2: #efebe5;
-    --line: #e4e0d8; --line-2: #d4cfc5; --fg: #1f1d1a; --fg-2: #5e5a53; --fg-3: #8d8880;
-    --accent: #00838f; --accent-ink: #ffffff; --accent-soft: rgba(0, 131, 143, .09);
-    color-scheme: light;
-  }
-}
 :root[data-theme="light"] {
   --bg: #f7f5f1; --bg-2: #f1eee9; --surface: #fdfcfa; --surface-2: #efebe5;
   --line: #e4e0d8; --line-2: #d4cfc5; --fg: #1f1d1a; --fg-2: #5e5a53; --fg-3: #8d8880;
@@ -97,7 +89,6 @@ button { font: inherit; color: inherit; }
 .nav-end .btn { margin-left: 8px; }
 .menu-btn { display: none; }
 .theme-icon { display: none; }
-:root:not([data-theme]) .theme-icon.auto,
 :root[data-theme="light"] .theme-icon.light,
 :root[data-theme="dark"] .theme-icon.dark { display: block; }
 .mobile-menu { display: none; }
@@ -157,9 +148,6 @@ footer ul a:hover { color: var(--fg); }
    No outlines anywhere: every card, button, chip and frame is told apart by its fill alone.
    Things that sit on a card use the page tone, so they read as set into it. */
 :root { --surface: #151515; --surface-2: #1d1d1d; --surface-3: #242424; --fg-3: #8e8e8e; --fg-2: #b4b4b4; }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --surface: #efebe4; --surface-2: #e6e1d8; --surface-3: #ddd7cc; }
-}
 :root[data-theme="light"] { --surface: #efebe4; --surface-2: #e6e1d8; --surface-3: #ddd7cc; }
 
 .btn-ghost { border: 0; background: var(--surface); }
