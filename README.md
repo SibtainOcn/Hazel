@@ -117,17 +117,17 @@ Hazel is a free, open-source downloader for Android built on **yt-dlp** and **ga
   <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
   <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
   <tr><td><b>Batch:</b> one link, many at once, or a whole playlist / channel.</td><td><b>Play first:</b> stream any result on its card with seek, double tap skip and full screen.</td></tr>
-  <tr><td><b>Share to Hazel:</b> from any app. Videos, reels and audio go to <b>Hazel Video</b> or <b>Instant Video</b>; images, stories, highlights and profiles go to <b>Hazel Gallery</b> or <b>Instant Gallery</b>. Instant saves at once with your saved settings.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. Quick, precise, or trim after download: the whole file at full speed, cut on your phone.</td></tr>
-  <tr><td><b>Your format:</b> pick quality, container, audio track, and edit title / metadata.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
-  <tr><td><b>Gallery:</b> stories, highlights, posts, reels and carousels from Instagram, X, Pinterest and more. A profile link asks which sections to save; image search and captions too.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
+  <tr><td><b>Share to Hazel:</b> from any app. Videos, reels and audio go to <b>Hazel Video</b> or <b>Instant Video</b>; images, stories, highlights and profiles go to <b>Hazel Gallery</b> or <b>Instant Gallery</b>. Instant saves at once with your saved settings.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. <a href="#video-audio-downloads">Quick, precise, or trim after download</a>.</td></tr>
+  <tr><td><b>Your format:</b> pick quality, container, audio track and bitrate. Edit title, metadata and filename.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
+  <tr><td><b>Gallery:</b> stories, highlights, posts, reels and carousels from Instagram, X, Pinterest and more. <a href="#gallery-downloads">Pick files, sizes and captions</a>.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
 </table>
 
 <table>
   <tr><th width="50%" align="left">⚙️ Processing & Downloads</th><th width="50%" align="left">🔒 Privacy & Customisation</th></tr>
   <tr><td><b>SponsorBlock:</b> cut sponsors, intros and other segments.</td><td><b>No tracking:</b> no accounts, no analytics. Incognito and HTTP / SOCKS5 proxy built in.</td></tr>
-  <tr><td><b>Chapters & subtitles:</b> embed, split per chapter, pick subtitle and audio languages.</td><td><b>Glass look:</b> 8 see-through styles, dark and light themes, 20+ accent colours.</td></tr>
+  <tr><td><b>Chapters, subtitles & covers:</b> keep or split chapters, add subtitles, pick languages, add cover art to music.</td><td><b>Glass look:</b> 8 see-through styles, dark and light themes, 20+ accent colours.</td></tr>
   <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Updates:</b> Hazel on Stable, Beta or Nightly, with an optional notice and background download. yt-dlp updates on its own.</td></tr>
-  <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, backup & restore, settings search.</td></tr>
+  <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, scheduled backups, settings search.</td></tr>
 </table>
 
 ## 🧭 Where each link goes
@@ -138,6 +138,42 @@ Hazel is a free, open-source downloader for Android built on **yt-dlp** and **ga
 | Images, posts, stories, highlights and profiles | **Gallery** tab | **Hazel Gallery** (choose what to save) · **Instant Gallery** (saves at once) |
 
 If a link fails in one place, try the other before opening an issue.
+
+---
+<a id="video-audio-downloads"></a>
+## 🎬 Video & audio downloads
+
+Paste a link on **Home**, or share it to **Hazel Video**. The download sheet offers:
+
+| Option | What it does |
+|---|---|
+| Quality & format | Small file up to 4K, with the size shown first. For music, pick the audio format and bitrate. |
+| Audio language | Choose a soundtrack when a video has several. |
+| Subtitles | Add to the video or save beside it, in the languages you pick. |
+| Chapters | Keep inside the file, or split into one file per chapter. |
+| Cover art | Add the thumbnail to music files, cropped square if you like. |
+| SponsorBlock | Skip sponsors, intros and other segments marked by the community. |
+| Filename template | Presets and tap-to-insert fields. |
+| Extra arguments | Add yt-dlp arguments to a single download. |
+| Live streams | Record from the start, or wait for a premiere. |
+| Quick cut | Downloads only the selected part. Cuts at the nearest keyframe. |
+| Trim after download | Downloads the whole file at full speed, then cuts it on your phone. |
+
+---
+<a id="gallery-downloads"></a>
+## 🖼️ Gallery downloads
+
+Paste a post, story or profile link on the **Gallery** tab, or share it to **Hazel Gallery**.
+
+| Feature | What it does |
+|---|---|
+| Choose files | Pick which files to save, their size, the folder and per-file options. |
+| Full screen | Swipe through the files and save the ones you want. Long press a file to play it or download it. |
+| Download all | Save every file in a post. |
+| Captions | Copy them, save them as text, or write them into the image. |
+| Profiles | Pick what to save: stories, highlights, posts, carousels, reels, tagged posts, and X media or likes. |
+| Image search | Pinterest, Bluesky, Tumblr and DeviantArt. |
+
 
 ---
 ## ⬇️ Download & Install
@@ -221,3 +257,13 @@ We welcome contributions! See our [CONTRIBUTING.md](https://github.com/SibtainOc
 <p align="center">© 2026 SibtainOcn. Licensed under GPL-3.0-or-later.</p>
 
 <h3 align="center">⭐ If Hazel made your downloads easier, don't forget to star the repository! ⭐</h3>
+
+---
+
+## 🪶Alternatives
+
+If you're exploring Android alternatives to [Seal](https://github.com/JunkFood02/Seal), [YTDLnis](https://github.com/deniscerri/ytdlnis) or [Seal Plus](https://github.com/MaheshTechnicals/Sealplus), Hazel is another option worth considering.
+
+Hazel takes a different approach: a modern **Material 3** interface that brings **yt-dlp, Newpipe and gallery-dl together in a single Android application**, with an integrated experience for conventional media downloads and gallery-based content collection.
+
+Each project has its own design philosophy and feature set. See the feature overview and screenshots above to explore Hazel's approach.
