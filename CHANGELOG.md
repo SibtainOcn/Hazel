@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Documentation pages draw italics, tables (swipe sideways when wide), numbered lists and plain web addresses as links.
 - GitHub button with the star count in the Preferences and Support headers.
+- Preferences header: a Support heart beside Search, in a pill that matches the GitHub button.
 
 ### Fixed
 - Tapping a failed link no longer stacks an old failure, the sheet and two sign-in dialogs on top of each other.

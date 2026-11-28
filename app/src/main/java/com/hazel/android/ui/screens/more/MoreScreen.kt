@@ -68,7 +68,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
-import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.LifecycleEventObserver
@@ -184,8 +183,8 @@ fun MoreScreen(
             .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp, top = 16.dp)
     ) {
-        // GitHub on the left, the screen's name centred, search on the right; pinned while the
-        // settings below scroll.
+        // GitHub on the left, the screen's name centred, Support and search on the right; pinned
+        // while the settings below scroll.
         com.hazel.android.ui.components.CenteredTitleBar(
             modifier = Modifier
                 .fillMaxWidth()
@@ -200,20 +199,14 @@ fun MoreScreen(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             },
-            // Every setting, found by name, from its own screen. Same round tonal fill as the
-            // GitHub button opposite. The padding keeps the row exactly as tall as a 48dp button.
+            // Support (the heart) and every setting found by name, from its own screen: one round
+            // tonal pill, the same fill and height as the GitHub button opposite.
             end = {
-                ShapeIconButton(
-                    onClick = onNavigateToSettingsSearch,
-                    modifier = Modifier.padding(4.dp),
-                    shape = androidx.compose.foundation.shape.CircleShape
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = stringResource(R.string.settings_search),
-                        modifier = Modifier.size(19.dp)
-                    )
-                }
+                com.hazel.android.ui.components.HeaderActionsPill(
+                    onSupport = onNavigateToSponsor,
+                    onSearch = onNavigateToSettingsSearch,
+                    searchDescription = stringResource(R.string.settings_search)
+                )
             }
         )
 
