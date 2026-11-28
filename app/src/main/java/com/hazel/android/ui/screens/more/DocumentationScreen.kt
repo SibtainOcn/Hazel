@@ -28,7 +28,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
@@ -95,6 +94,18 @@ enum class DocPage(
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
     LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true),
 
+    /** The engines' own lists of the sites they read, drawn here from their Markdown files. */
+    SITES_YTDLP(
+        R.string.docs_sites_ytdlp, Icons.Filled.VideoLibrary,
+        "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md",
+        "https://raw.githubusercontent.com/yt-dlp/yt-dlp/master/supportedsites.md"
+    ),
+    SITES_GALLERY_DL(
+        R.string.docs_sites_gallery_dl, Icons.Filled.PhotoLibrary,
+        "https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md",
+        "https://raw.githubusercontent.com/mikf/gallery-dl/master/docs/supportedsites.md"
+    ),
+
     /** The repository's home page, opened only by the GitHub button; not listed or searched. */
     GITHUB(R.string.github_open_desc, Icons.Filled.Language, REPO);
 
@@ -144,7 +155,6 @@ fun DocumentationScreen(
     onOpen: (DocPage) -> Unit
 ) {
     var whatsNewVisible by rememberSaveable { mutableStateOf(false) }
-    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             DocsHeader(title = stringResource(R.string.docs_title), onBack = onBack)
@@ -160,10 +170,7 @@ fun DocumentationScreen(
                 val row: @Composable () -> Unit = { DocRow(page.labelRes, page.icon) { onOpen(page) } }
                 if (page != DocPage.CHANGELOG) listOf(row)
                 else listOf(row, { DocRow(R.string.docs_whats_new, Icons.Filled.NewReleases) { whatsNewVisible = true } })
-            } + listOf<@Composable () -> Unit>(
-                { DocRow(R.string.docs_sites_ytdlp, Icons.Filled.VideoLibrary, external = true) { openOutside(context, YTDLP_SITES) } },
-                { DocRow(R.string.docs_sites_gallery_dl, Icons.Filled.PhotoLibrary, external = true) { openOutside(context, GALLERY_DL_SITES) } }
-            ))
+            })
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -175,7 +182,6 @@ fun DocumentationScreen(
 private fun DocRow(
     @androidx.annotation.StringRes label: Int,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    external: Boolean = false,
     onClick: () -> Unit
 ) {
     ListItem(
@@ -183,7 +189,7 @@ private fun DocRow(
         leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
         trailingContent = {
             Icon(
-                if (external) Icons.AutoMirrored.Filled.OpenInNew else Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                Icons.AutoMirrored.Filled.ArrowForwardIos, null,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 modifier = Modifier.size(16.dp)
             )
@@ -232,10 +238,13 @@ fun DocumentationPageScreen(
             if (text == null) {
                 view.loadUrl(url)
             } else {
-                val html = MarkdownLite.page(
-                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), dark,
-                    plain = page.plain
-                )
+                val bg = css(background)
+                val ink = css(scheme.onBackground)
+                val muted = css(scheme.onSurfaceVariant)
+                // Long files (the supported-site lists) take a moment to turn into HTML: off the main thread.
+                val html = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                    MarkdownLite.page(text, bg, ink, muted, dark, plain = page.plain)
+                }
                 view.loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
             }
         }
@@ -447,7 +456,3 @@ private fun openOutside(context: android.content.Context, url: String) {
         android.widget.Toast.makeText(context, R.string.sheet_link_open_failed, android.widget.Toast.LENGTH_SHORT).show()
     }
 }
-
-/** The engines' own lists of the sites they read; other projects' pages, so they open in the browser. */
-private const val YTDLP_SITES = "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
-private const val GALLERY_DL_SITES = "https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md"

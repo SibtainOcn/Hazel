@@ -200,15 +200,13 @@ fun MoreScreen(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             },
-            // Every setting, found by name, from its own screen. Drawn the way the home
-            // search bar draws its icon: a seven-sided cookie in the solid accent. The
-            // padding keeps the row exactly as tall as the 48dp button it replaces.
+            // Every setting, found by name, from its own screen. Same round tonal fill as the
+            // GitHub button opposite. The padding keeps the row exactly as tall as a 48dp button.
             end = {
                 ShapeIconButton(
                     onClick = onNavigateToSettingsSearch,
                     modifier = Modifier.padding(4.dp),
-                    filled = true,
-                    shape = MaterialShapes.Cookie7Sided.toShape()
+                    shape = androidx.compose.foundation.shape.CircleShape
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
