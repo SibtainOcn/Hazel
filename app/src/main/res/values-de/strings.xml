@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">Start</string>
     <string name="nav_history">Downloads</string>
-    <string name="nav_more">Mehr</string>
+    <string name="nav_more">Einstellungen</string>
     <string name="nav_gallery">Galerie</string>
     <string name="gallery_image">Bild</string>
     <string name="gallery_video">Video</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">Eingefügte Links</string>
     <string name="search_guide_links_body">Ein Link geht so, wie er ist, an die aktive Seite. Videos, Reels und Audio: Medien. Bilder, Storys, Highlights und Profile: Galerie. Klappt eine Seite nicht, probiere die andere. Quellen und Seiten treten zurück, solange ein Link im Feld steht.</string>
     <string name="search_guide_sign_in_title">Anmelden</string>
-    <string name="search_guide_sign_in_body">Private Beiträge, Storys, Highlights und Gefällt mir brauchen eine Anmeldung bei der Seite. Hazel fragt, wenn es nötig ist, oder melde dich jederzeit über Cookies unter Mehr an.</string>
+    <string name="search_guide_sign_in_body">Private Beiträge, Storys, Highlights und Gefällt mir brauchen eine Anmeldung bei der Seite. Hazel fragt, wenn es nötig ist, oder melde dich jederzeit über Cookies unter Einstellungen an.</string>
     <string name="search_mode_media">Medien</string>
     <string name="profile_stories">Storys</string>
     <string name="profile_highlights">Highlights</string>
@@ -283,7 +283,7 @@
     <string name="converter_heading_other">Alles andere</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">Mehr</string>
+    <string name="more_title">Einstellungen</string>
     <string name="settings_search">Einstellungen durchsuchen</string>
     <string name="settings_search_hint">Finde eine Einstellung über ihren Namen oder das, was sie tut</string>
     <string name="settings_search_none">Keine Einstellungen für %1$s gefunden</string>
@@ -318,6 +318,11 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Zurück</string>
     <string name="sponsor_title">Hazel unterstützen</string>
+    <string name="github_open_desc">Hazel auf GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">Hazel auf GitHub, %d Stern</item>
+        <item quantity="other">Hazel auf GitHub, %d Sterne</item>
+    </plurals>
     <string name="sponsor_hero_title">Magst du Hazel? Zeig ein bisschen Liebe</string>
     <string name="sponsor_hero_body">Wenn Hazel dir nützlich war, unterstütze gern die Entwicklung. Deine Unterstützung hilft mir, Hazel weiter zu verbessern und neue Funktionen zu bauen. Jedes bisschen Liebe bedeutet viel. 💚</string>
     <string name="sponsor_section_ways">Möglichkeiten zu unterstützen</string>

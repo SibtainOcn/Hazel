@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">Início</string>
     <string name="nav_history">Downloads</string>
-    <string name="nav_more">Mais</string>
+    <string name="nav_more">Preferências</string>
     <string name="nav_gallery">Galeria</string>
     <string name="gallery_image">Imagem</string>
     <string name="gallery_video">Vídeo</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">Links colados</string>
     <string name="search_guide_links_body">O link vai como está para o lado ativo. Vídeos, reels e áudio: Mídia. Imagens, stories, destaques e perfis: Galeria. Se um lado falhar, tente o outro. Fontes e sites saem de cena enquanto há um link no campo.</string>
     <string name="search_guide_sign_in_title">Entrar</string>
-    <string name="search_guide_sign_in_body">Publicações privadas, stories, destaques e curtidas exigem que você esteja conectado ao site. O Hazel pede quando for preciso, ou entre quando quiser pelos Cookies em Mais.</string>
+    <string name="search_guide_sign_in_body">Publicações privadas, stories, destaques e curtidas exigem que você esteja conectado ao site. O Hazel pede quando for preciso, ou entre quando quiser pelos Cookies em Preferências.</string>
     <string name="search_mode_media">Mídia</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Destaques</string>
@@ -288,7 +288,7 @@
     <string name="converter_heading_other">Todo o resto</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">Mais</string>
+    <string name="more_title">Preferências</string>
     <string name="settings_search">Pesquisar configurações</string>
     <string name="settings_search_hint">Encontre uma configuração pelo nome ou pelo que ela faz</string>
     <string name="settings_search_none">Nenhuma configuração encontrada para %1$s</string>
@@ -323,6 +323,12 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Voltar</string>
     <string name="sponsor_title">Apoiar o Hazel</string>
+    <string name="github_open_desc">Hazel no GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">Hazel no GitHub, %d estrela</item>
+        <item quantity="many">Hazel no GitHub, %d estrelas</item>
+        <item quantity="other">Hazel no GitHub, %d estrelas</item>
+    </plurals>
     <string name="sponsor_hero_title">Gosta do Hazel? Dê um pouco de carinho</string>
     <string name="sponsor_hero_body">Se o Hazel tem sido útil para você, considere apoiar o desenvolvimento. Seu apoio me ajuda a continuar melhorando o Hazel e criando novos recursos. Todo carinho conta muito. 💚</string>
     <string name="sponsor_section_ways">Formas de apoiar</string>

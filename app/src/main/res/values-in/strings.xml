@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">Beranda</string>
     <string name="nav_history">Unduhan</string>
-    <string name="nav_more">Lainnya</string>
+    <string name="nav_more">Preferensi</string>
     <string name="nav_gallery">Galeri</string>
     <string name="gallery_image">Gambar</string>
     <string name="gallery_video">Video</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">Tautan yang ditempel</string>
     <string name="search_guide_links_body">Tautan dikirim apa adanya ke sisi yang aktif. Video, reel, dan audio: Media. Gambar, story, sorotan, dan profil: Galeri. Jika satu sisi gagal, coba sisi lain. Sumber dan situs mundur selama ada tautan di kolom.</string>
     <string name="search_guide_sign_in_title">Masuk</string>
-    <string name="search_guide_sign_in_body">Postingan pribadi, cerita, sorotan, dan suka memerlukan kamu masuk ke situs itu. Hazel akan menanyakan saat diperlukan, atau masuk kapan saja dari Cookie di Lainnya.</string>
+    <string name="search_guide_sign_in_body">Postingan pribadi, cerita, sorotan, dan suka memerlukan kamu masuk ke situs itu. Hazel akan menanyakan saat diperlukan, atau masuk kapan saja dari Cookie di Preferensi.</string>
     <string name="search_mode_media">Media</string>
     <string name="profile_stories">Cerita</string>
     <string name="profile_highlights">Sorotan</string>
@@ -278,7 +278,7 @@
     <string name="converter_heading_other">Format lainnya</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">Lainnya</string>
+    <string name="more_title">Preferensi</string>
     <string name="settings_search">Cari pengaturan</string>
     <string name="settings_search_hint">Temukan pengaturan dari namanya atau dari fungsinya</string>
     <string name="settings_search_none">Tidak ada pengaturan untuk %1$s</string>
@@ -313,6 +313,10 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Kembali</string>
     <string name="sponsor_title">Dukung Hazel</string>
+    <string name="github_open_desc">Hazel di GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="other">Hazel di GitHub, %d bintang</item>
+    </plurals>
     <string name="sponsor_hero_title">Suka Hazel? Beri sedikit cinta</string>
     <string name="sponsor_hero_body">Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Dukunganmu membantuku terus menyempurnakan Hazel dan membuat fitur baru. Sekecil apa pun cinta darimu sangat berarti. 💚</string>
     <string name="sponsor_section_ways">Cara mendukung</string>

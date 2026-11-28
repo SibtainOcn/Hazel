@@ -161,7 +161,7 @@ jobs:
           {
             echo "Daily build of the \`nightly\` branch at \`${SHA:0:7}\`, ${{ steps.plan.outputs.date }}. Not tested on devices; it can break."
             echo
-            echo "Switch channels in Hazel: More > Software update > Hazel. A nightly installs over a stable or beta build and keeps your data. Going back to Stable happens with the next stable release."
+            echo "Switch channels in Hazel: Preferences > Software update > Hazel. A nightly installs over a stable or beta build and keeps your data. Going back to Stable happens with the next stable release."
             echo
             echo "### Changes"
             if [ -n "$LAST" ] && git cat-file -e "$LAST^{commit}" 2>/dev/null; then

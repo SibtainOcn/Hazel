@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Documentation: yt-dlp and gallery-dl supported sites rows.
+- GitHub button with the star count in the Preferences and Support headers.
 
 ### Fixed
 - Tapping a failed link no longer stacks an old failure, the sheet and two sign-in dialogs on top of each other.
@@ -15,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A gallery download that succeeds on retry now leaves the Failed tab.
 - Gallery retries show as Retrying and are not queued twice by Retry all.
 ### Changed
+- More is now called Preferences, with its title centred.
 - Failed log sheet offers Sign in and Cookies when the site asked for an account.
 - Failed cards show a video, audio or gallery icon and connected action buttons; removing one asks first.
 - A sheet opened from a failed item has an error button that shows its log.

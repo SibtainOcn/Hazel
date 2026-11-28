@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <string name="nav_home">首页</string>
     <string name="nav_history">下载</string>
-    <string name="nav_more">更多</string>
+    <string name="nav_more">偏好设置</string>
     <string name="nav_gallery">图库</string>
     <string name="gallery_image">图片</string>
     <string name="gallery_video">视频</string>
@@ -28,7 +28,7 @@
     <string name="search_guide_links_title">粘贴的链接</string>
     <string name="search_guide_links_body">链接会原样发送到当前开启的一侧。视频、短视频和音频：媒体。图片、快拍、精选和主页：图库。一侧失败时，试试另一侧。输入框里有链接时，来源和站点会暂时让开。</string>
     <string name="search_guide_sign_in_title">登录</string>
-    <string name="search_guide_sign_in_body">私密帖子、快拍、精选和喜欢需要先登录该网站。需要时 Hazel 会提示，你也可以随时在“更多”的 Cookie 中登录。</string>
+    <string name="search_guide_sign_in_body">私密帖子、快拍、精选和喜欢需要先登录该网站。需要时 Hazel 会提示，你也可以随时在“偏好设置”的 Cookie 中登录。</string>
     <string name="search_mode_media">媒体</string>
     <string name="profile_stories">快拍</string>
     <string name="profile_highlights">精选</string>
@@ -278,7 +278,7 @@
     <string name="converter_heading_other">其余全部</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">更多</string>
+    <string name="more_title">偏好设置</string>
     <string name="settings_search">搜索设置</string>
     <string name="settings_search_hint">按名称或用途查找设置</string>
     <string name="settings_search_none">没有找到与 %1$s 相关的设置</string>
@@ -313,6 +313,10 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">返回</string>
     <string name="sponsor_title">支持 Hazel</string>
+    <string name="github_open_desc">GitHub 上的 Hazel</string>
+    <plurals name="github_stars_desc">
+        <item quantity="other">GitHub 上的 Hazel，%d 颗星</item>
+    </plurals>
     <string name="sponsor_hero_title">喜欢 Hazel？给它一点爱</string>
     <string name="sponsor_hero_body">如果 Hazel 对你有帮助，欢迎支持它的开发。你的支持能让我持续改进 Hazel 并开发新功能。每一份爱都意义非凡。💚</string>
     <string name="sponsor_section_ways">支持的方式</string>

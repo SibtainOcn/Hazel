@@ -258,7 +258,7 @@ def md_html(name):
 def text_of(fragment):
     """The words a reader sees in a piece of a page, on one line."""
     fragment = re.sub(r'<(svg|script|style)\b.*?</\1>', ' ', fragment, flags=re.S)
-    # Steps of a path ("More", "Advanced") and chips read as a list.
+    # Steps of a path ("Preferences", "Advanced") and chips read as a list.
     fragment = re.sub(r'</span>\s*<span>', ', ', fragment)
     text = _html.unescape(re.sub(r'<[^>]+>', ' ', fragment))
     return re.sub(r'\s+([.,;:!?)])', r'\1', re.sub(r'\s+', ' ', text)).strip()

@@ -15,7 +15,7 @@
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_history">Downloads</string>
-    <string name="nav_more">More</string>
+    <string name="nav_more">Preferences</string>
     <string name="nav_gallery">Gallery</string>
     <string name="gallery_image">Image</string>
     <string name="gallery_video">Video</string>
@@ -41,7 +41,7 @@
     <string name="search_guide_links_title">Pasted links</string>
     <string name="search_guide_links_body">A link goes to the side that is on, as it is. Videos, reels and audio: Media. Images, stories, highlights and profiles: Gallery. If one side fails, try the other. Sources and sites step back while a link is in the field.</string>
     <string name="search_guide_sign_in_title">Signing in</string>
-    <string name="search_guide_sign_in_body">Private posts, stories, highlights and likes need you signed in to that site. Hazel asks when it is needed, or sign in any time from Cookies in More.</string>
+    <string name="search_guide_sign_in_body">Private posts, stories, highlights and likes need you signed in to that site. Hazel asks when it is needed, or sign in any time from Cookies in Preferences.</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Posts</string>
@@ -295,7 +295,7 @@
     <string name="converter_heading_other">Everything else</string>
 
     <!-- MoreScreen -->
-    <string name="more_title">More</string>
+    <string name="more_title">Preferences</string>
     <string name="settings_search">Search settings</string>
     <string name="settings_search_hint">Find a setting by its name or by what it does</string>
     <string name="settings_search_none">No settings found for %1$s</string>
@@ -330,6 +330,11 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Back</string>
     <string name="sponsor_title">Support Hazel</string>
+    <string name="github_open_desc">Hazel on GitHub</string>
+    <plurals name="github_stars_desc">
+        <item quantity="one">Hazel on GitHub, %d star</item>
+        <item quantity="other">Hazel on GitHub, %d stars</item>
+    </plurals>
     <string name="sponsor_hero_title">Like Hazel? Give it some love</string>
     <string name="sponsor_hero_body">If Hazel has been useful to you, consider supporting its development. Your support helps me keep improving Hazel and building new features. Every bit of love means a lot. 💚</string>
     <string name="sponsor_section_ways">Ways to support</string>
