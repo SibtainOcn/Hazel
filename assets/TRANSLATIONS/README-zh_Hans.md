@@ -85,27 +85,6 @@
 </div>
 
 ---
-## ✨ 为什么选择 Hazel？
-
-Hazel 是一款基于 **yt-dlp** 和 **gallery-dl** 的免费开源 Android 下载器。从 **1500+ 个网站** 保存**快拍、精选、帖子、Reels**、视频、音乐、播放列表和图片，无广告、无追踪、无需账号。
-
-<table>
-  <tr><th width="50%" align="left">📥 下载</th><th width="50%" align="left">🔍 搜索与播放</th></tr>
-  <tr><td><b>1500+ 个网站：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud 及<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">更多</a>。</td><td><b>搜索：</b>YouTube、YouTube Music、SoundCloud 或 Bandcamp，可选搜索建议。</td></tr>
-  <tr><td><b>批量：</b>一个链接、多个链接或整个播放列表 / 频道。</td><td><b>先播放：</b>在卡片上直接播放任意结果，支持拖动进度、双击快进和全屏。</td></tr>
-  <tr><td><b>Hazel Instant：</b>从任意应用分享链接，即按已保存的画质开始下载。</td><td><b>剪辑：</b>在实时预览中选择，只保存你想要的部分。可选快速、精确，或下载后裁剪：全速下载整个文件，再在手机上剪出片段。</td></tr>
-  <tr><td><b>你的格式：</b>选择画质、容器、音轨，并编辑标题 / 元数据。</td><td><b>直播：</b>从头录制，或等待首映。</td></tr>
-  <tr><td><b>图片：</b>Instagram、X、Pinterest、Reddit 等网站的帖子、主页和图片搜索，并保留说明文字。</td><td><b>登录：</b>一键登录 Instagram、YouTube、X 等网站，并显示每个账号的状态。</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ 处理与下载</th><th width="50%" align="left">🔒 隐私与个性化</th></tr>
-  <tr><td><b>SponsorBlock：</b>去除赞助、片头等片段。</td><td><b>无追踪：</b>无账号、无统计。内置无痕模式和 HTTP / SOCKS5 代理。</td></tr>
-  <tr><td><b>章节与字幕：</b>嵌入、按章节拆分，选择字幕和音频语言。</td><td><b>玻璃外观：</b>8 种通透样式，深色和浅色主题，20+ 种强调色。</td></tr>
-  <tr><td><b>后台：</b>长时间下载，可在通知中暂停、继续和取消。</td><td><b>引擎更新：</b>单独更新 yt-dlp，可选 Stable、Nightly 或 Master 通道。</td></tr>
-  <tr><td><b>速度：</b>默认不限速，并行分片，可选限速和仅 Wi-Fi 模式。</td><td><b>更多：</b>10+ 种应用语言、离线音频转换、备份与恢复、设置搜索。</td></tr>
-</table>
-
 ## 📲 截图
 
 <table>
@@ -127,6 +106,28 @@ Hazel 是一款基于 **yt-dlp** 和 **gallery-dl** 的免费开源 Android 下�
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>图库中的主页</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>图库查看器</b></td>
   </tr>
+</table>
+
+---
+## ✨ 为什么选择 Hazel？
+
+Hazel 是一款基于 **yt-dlp** 和 **gallery-dl** 的免费开源 Android 下载器。从 **1500+ 个网站** 保存**快拍、精选、帖子、Reels**、视频、音乐、播放列表和图片，无广告、无追踪、无需账号。
+
+<table>
+  <tr><th width="50%" align="left">📥 下载</th><th width="50%" align="left">🔍 搜索与播放</th></tr>
+  <tr><td><b>1500+ 个网站：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud 及<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">更多</a>。</td><td><b>搜索：</b>YouTube、YouTube Music、SoundCloud 或 Bandcamp，可选搜索建议。</td></tr>
+  <tr><td><b>批量：</b>一个链接、多个链接或整个播放列表 / 频道。</td><td><b>先播放：</b>在卡片上直接播放任意结果，支持拖动进度、双击快进和全屏。</td></tr>
+  <tr><td><b>Hazel Instant：</b>从任意应用分享链接，即按已保存的画质开始下载。</td><td><b>剪辑：</b>在实时预览中选择，只保存你想要的部分。可选快速、精确，或下载后裁剪：全速下载整个文件，再在手机上剪出片段。</td></tr>
+  <tr><td><b>你的格式：</b>选择画质、容器、音轨，并编辑标题 / 元数据。</td><td><b>直播：</b>从头录制，或等待首映。</td></tr>
+  <tr><td><b>图片：</b>Instagram、X、Pinterest、Reddit 等网站的帖子、主页和图片搜索，并保留说明文字。</td><td><b>登录：</b>一键登录 Instagram、YouTube、X 等网站，并显示每个账号的状态。</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ 处理与下载</th><th width="50%" align="left">🔒 隐私与个性化</th></tr>
+  <tr><td><b>SponsorBlock：</b>去除赞助、片头等片段。</td><td><b>无追踪：</b>无账号、无统计。内置无痕模式和 HTTP / SOCKS5 代理。</td></tr>
+  <tr><td><b>章节与字幕：</b>嵌入、按章节拆分，选择字幕和音频语言。</td><td><b>玻璃外观：</b>8 种通透样式，深色和浅色主题，20+ 种强调色。</td></tr>
+  <tr><td><b>后台：</b>长时间下载，可在通知中暂停、继续和取消。</td><td><b>引擎更新：</b>单独更新 yt-dlp，可选 Stable、Nightly 或 Master 通道。</td></tr>
+  <tr><td><b>速度：</b>默认不限速，并行分片，可选限速和仅 Wi-Fi 模式。</td><td><b>更多：</b>10+ 种应用语言、离线音频转换、备份与恢复、设置搜索。</td></tr>
 </table>
 
 ---

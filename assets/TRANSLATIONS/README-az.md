@@ -85,27 +85,6 @@ Hazel sizə faydalı olubsa, onun inkişafını dəstəkləməyi düşünün. D�
 </div>
 
 ---
-## ✨ Niyə Hazel?
-
-Hazel **yt-dlp** & **gallery-dl** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1500+ saytdan** video, musiqi və pleylistləri reklamsız, izləmə olmadan və hesabsız saxlayın.
-
-<table>
-  <tr><th width="50%" align="left">📥 Yükləmə</th><th width="50%" align="left">🔍 Axtarış və oxutma</th></tr>
-  <tr><td><b>1500+ sayt:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud və <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">daha çoxu</a>.</td><td><b>Axtarış:</b> YouTube, YouTube Music, SoundCloud və ya Bandcamp, istəyə bağlı təkliflərlə.</td></tr>
-  <tr><td><b>Toplu:</b> bir keçid, eyni anda bir neçəsi və ya bütöv pleylist / kanal.</td><td><b>Əvvəlcə oxut:</b> istənilən nəticəni öz kartında irəli-geri çəkmə, iki toxunuşla keçmə və tam ekranla oxudun.</td></tr>
-  <tr><td><b>Hazel Instant:</b> istənilən tətbiqdən keçid paylaşın, yükləmə saxlanmış keyfiyyətdə başlayır.</td><td><b>Kəsmə:</b> canlı önizləmədə seçdiyiniz hissəni saxlayın. Sürətli, dəqiq və ya endirmədən sonra kəsmə: bütün fayl tam sürətlə yüklənir, sonra telefonunuzda kəsilir.</td></tr>
-  <tr><td><b>Öz formatınız:</b> keyfiyyət, konteyner, audio trek seçin, başlıq / metadatanı redaktə edin.</td><td><b>Canlı yayımlar:</b> əvvəldən yazın və ya premyeranı gözləyin.</td></tr>
-  <tr><td><b>Şəkillər:</b> Instagram, X, Pinterest, Reddit və digərlərində paylaşımlar, profillər və şəkil axtarışı, başlıqlarla birlikdə.</td><td><b>Giriş:</b> Instagram, YouTube, X və digərlərinə bir toxunuşla giriş, hər hesabın vəziyyəti ilə.</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ Emal və yükləmələr</th><th width="50%" align="left">🔒 Məxfilik və fərdiləşdirmə</th></tr>
-  <tr><td><b>SponsorBlock:</b> sponsorları, girişləri və digər seqmentləri kəsin.</td><td><b>İzləmə yoxdur:</b> hesab yoxdur, analitika yoxdur. Gizli rejim və HTTP / SOCKS5 proksi daxildir.</td></tr>
-  <tr><td><b>Fəsillər və altyazılar:</b> daxil edin, fəsillərə bölün, altyazı və audio dillərini seçin.</td><td><b>Şüşə görünüş:</b> 8 şəffaf üslub, qaranlıq və işıqlı temalar, 20+ vurğu rəngi.</td></tr>
-  <tr><td><b>Arxa fon:</b> bildirişdən fasilə, davam və ləğvetmə ilə uzun yükləmələr.</td><td><b>Mühərrik yeniləmələri:</b> yt-dlp-ni ayrıca yeniləyin, Stable, Nightly və ya Master kanalı.</td></tr>
-  <tr><td><b>Sürət:</b> standart olaraq limitsiz, paralel fraqmentlər, istəyə bağlı limit və yalnız Wi-Fi rejimi.</td><td><b>Əlavələr:</b> 10+ tətbiq dili, oflayn audio çevirici, ehtiyat nüsxə və bərpa, ayarlarda axtarış.</td></tr>
-</table>
-
 ## 📲 Ekran görüntüləri
 
 <table>
@@ -127,6 +106,28 @@ Hazel **yt-dlp** & **gallery-dl** əsaslı pulsuz, açıq mənbəli Android yük
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Qalereya profilləri</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Qalereya baxışı</b></td>
   </tr>
+</table>
+
+---
+## ✨ Niyə Hazel?
+
+Hazel **yt-dlp** & **gallery-dl** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1500+ saytdan** video, musiqi və pleylistləri reklamsız, izləmə olmadan və hesabsız saxlayın.
+
+<table>
+  <tr><th width="50%" align="left">📥 Yükləmə</th><th width="50%" align="left">🔍 Axtarış və oxutma</th></tr>
+  <tr><td><b>1500+ sayt:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud və <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">daha çoxu</a>.</td><td><b>Axtarış:</b> YouTube, YouTube Music, SoundCloud və ya Bandcamp, istəyə bağlı təkliflərlə.</td></tr>
+  <tr><td><b>Toplu:</b> bir keçid, eyni anda bir neçəsi və ya bütöv pleylist / kanal.</td><td><b>Əvvəlcə oxut:</b> istənilən nəticəni öz kartında irəli-geri çəkmə, iki toxunuşla keçmə və tam ekranla oxudun.</td></tr>
+  <tr><td><b>Hazel Instant:</b> istənilən tətbiqdən keçid paylaşın, yükləmə saxlanmış keyfiyyətdə başlayır.</td><td><b>Kəsmə:</b> canlı önizləmədə seçdiyiniz hissəni saxlayın. Sürətli, dəqiq və ya endirmədən sonra kəsmə: bütün fayl tam sürətlə yüklənir, sonra telefonunuzda kəsilir.</td></tr>
+  <tr><td><b>Öz formatınız:</b> keyfiyyət, konteyner, audio trek seçin, başlıq / metadatanı redaktə edin.</td><td><b>Canlı yayımlar:</b> əvvəldən yazın və ya premyeranı gözləyin.</td></tr>
+  <tr><td><b>Şəkillər:</b> Instagram, X, Pinterest, Reddit və digərlərində paylaşımlar, profillər və şəkil axtarışı, başlıqlarla birlikdə.</td><td><b>Giriş:</b> Instagram, YouTube, X və digərlərinə bir toxunuşla giriş, hər hesabın vəziyyəti ilə.</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ Emal və yükləmələr</th><th width="50%" align="left">🔒 Məxfilik və fərdiləşdirmə</th></tr>
+  <tr><td><b>SponsorBlock:</b> sponsorları, girişləri və digər seqmentləri kəsin.</td><td><b>İzləmə yoxdur:</b> hesab yoxdur, analitika yoxdur. Gizli rejim və HTTP / SOCKS5 proksi daxildir.</td></tr>
+  <tr><td><b>Fəsillər və altyazılar:</b> daxil edin, fəsillərə bölün, altyazı və audio dillərini seçin.</td><td><b>Şüşə görünüş:</b> 8 şəffaf üslub, qaranlıq və işıqlı temalar, 20+ vurğu rəngi.</td></tr>
+  <tr><td><b>Arxa fon:</b> bildirişdən fasilə, davam və ləğvetmə ilə uzun yükləmələr.</td><td><b>Mühərrik yeniləmələri:</b> yt-dlp-ni ayrıca yeniləyin, Stable, Nightly və ya Master kanalı.</td></tr>
+  <tr><td><b>Sürət:</b> standart olaraq limitsiz, paralel fraqmentlər, istəyə bağlı limit və yalnız Wi-Fi rejimi.</td><td><b>Əlavələr:</b> 10+ tətbiq dili, oflayn audio çevirici, ehtiyat nüsxə və bərpa, ayarlarda axtarış.</td></tr>
 </table>
 
 ---

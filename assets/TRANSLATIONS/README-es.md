@@ -85,27 +85,6 @@ Si Hazel te ha resultado útil, considera apoyar su desarrollo. Tu apoyo me ayud
 </div>
 
 ---
-## ✨ ¿Por qué elegir Hazel?
-
-Hazel es un descargador gratuito y de código abierto para Android basado en **yt-dlp** y **gallery-dl**. Guarda **historias, destacadas, publicaciones, reels**, vídeos, música, listas de reproducción e imágenes de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
-
-<table>
-  <tr><th width="50%" align="left">📥 Descargas</th><th width="50%" align="left">🔍 Buscar y reproducir</th></tr>
-  <tr><td><b>Más de 1500 sitios:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud y <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">más</a>.</td><td><b>Búsqueda:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con sugerencias opcionales.</td></tr>
-  <tr><td><b>Por lotes:</b> un enlace, varios a la vez o una lista de reproducción / canal completo.</td><td><b>Reproduce primero:</b> reproduce cualquier resultado en su tarjeta con barra de progreso, doble toque para saltar y pantalla completa.</td></tr>
-  <tr><td><b>Hazel Instant:</b> comparte un enlace desde cualquier app y empieza con tu calidad guardada.</td><td><b>Recortar:</b> guarda solo la parte que quieras, elegida sobre una vista previa en directo. Rápido, preciso o recortar tras descargar: el archivo completo a toda velocidad, cortado en tu teléfono.</td></tr>
-  <tr><td><b>Tu formato:</b> elige calidad, contenedor y pista de audio, y edita título / metadatos.</td><td><b>Directos:</b> graba desde el inicio o espera a un estreno.</td></tr>
-  <tr><td><b>Imágenes:</b> publicaciones, perfiles y búsqueda de imágenes en Instagram, X, Pinterest, Reddit y más, con descripciones.</td><td><b>Inicio de sesión:</b> inicia sesión con un toque en Instagram, YouTube, X y más, con el estado de cada cuenta.</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ Procesamiento y descargas</th><th width="50%" align="left">🔒 Privacidad y personalización</th></tr>
-  <tr><td><b>SponsorBlock:</b> elimina patrocinios, intros y otros segmentos.</td><td><b>Sin rastreo:</b> sin cuentas ni analíticas. Incógnito y proxy HTTP / SOCKS5 integrados.</td></tr>
-  <tr><td><b>Capítulos y subtítulos:</b> incrusta, divide por capítulo, elige idiomas de subtítulos y audio.</td><td><b>Aspecto cristal:</b> 8 estilos translúcidos, temas oscuro y claro, más de 20 colores de acento.</td></tr>
-  <tr><td><b>Segundo plano:</b> descargas largas con pausa, reanudación y cancelación desde la notificación.</td><td><b>Actualizaciones del motor:</b> actualiza yt-dlp por separado, canal Stable, Nightly o Master.</td></tr>
-  <tr><td><b>Velocidad:</b> sin límite por defecto, fragmentos en paralelo, límite opcional y modo solo Wi-Fi.</td><td><b>Extras:</b> más de 10 idiomas, conversor de audio sin conexión, copia de seguridad y restauración, búsqueda en ajustes.</td></tr>
-</table>
-
 ## 📲 Capturas de pantalla
 
 <table>
@@ -127,6 +106,28 @@ Hazel es un descargador gratuito y de código abierto para Android basado en **y
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Perfiles en galería</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Visor de galería</b></td>
   </tr>
+</table>
+
+---
+## ✨ ¿Por qué elegir Hazel?
+
+Hazel es un descargador gratuito y de código abierto para Android basado en **yt-dlp** y **gallery-dl**. Guarda **historias, destacadas, publicaciones, reels**, vídeos, música, listas de reproducción e imágenes de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
+
+<table>
+  <tr><th width="50%" align="left">📥 Descargas</th><th width="50%" align="left">🔍 Buscar y reproducir</th></tr>
+  <tr><td><b>Más de 1500 sitios:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud y <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">más</a>.</td><td><b>Búsqueda:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con sugerencias opcionales.</td></tr>
+  <tr><td><b>Por lotes:</b> un enlace, varios a la vez o una lista de reproducción / canal completo.</td><td><b>Reproduce primero:</b> reproduce cualquier resultado en su tarjeta con barra de progreso, doble toque para saltar y pantalla completa.</td></tr>
+  <tr><td><b>Hazel Instant:</b> comparte un enlace desde cualquier app y empieza con tu calidad guardada.</td><td><b>Recortar:</b> guarda solo la parte que quieras, elegida sobre una vista previa en directo. Rápido, preciso o recortar tras descargar: el archivo completo a toda velocidad, cortado en tu teléfono.</td></tr>
+  <tr><td><b>Tu formato:</b> elige calidad, contenedor y pista de audio, y edita título / metadatos.</td><td><b>Directos:</b> graba desde el inicio o espera a un estreno.</td></tr>
+  <tr><td><b>Imágenes:</b> publicaciones, perfiles y búsqueda de imágenes en Instagram, X, Pinterest, Reddit y más, con descripciones.</td><td><b>Inicio de sesión:</b> inicia sesión con un toque en Instagram, YouTube, X y más, con el estado de cada cuenta.</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ Procesamiento y descargas</th><th width="50%" align="left">🔒 Privacidad y personalización</th></tr>
+  <tr><td><b>SponsorBlock:</b> elimina patrocinios, intros y otros segmentos.</td><td><b>Sin rastreo:</b> sin cuentas ni analíticas. Incógnito y proxy HTTP / SOCKS5 integrados.</td></tr>
+  <tr><td><b>Capítulos y subtítulos:</b> incrusta, divide por capítulo, elige idiomas de subtítulos y audio.</td><td><b>Aspecto cristal:</b> 8 estilos translúcidos, temas oscuro y claro, más de 20 colores de acento.</td></tr>
+  <tr><td><b>Segundo plano:</b> descargas largas con pausa, reanudación y cancelación desde la notificación.</td><td><b>Actualizaciones del motor:</b> actualiza yt-dlp por separado, canal Stable, Nightly o Master.</td></tr>
+  <tr><td><b>Velocidad:</b> sin límite por defecto, fragmentos en paralelo, límite opcional y modo solo Wi-Fi.</td><td><b>Extras:</b> más de 10 idiomas, conversor de audio sin conexión, copia de seguridad y restauración, búsqueda en ajustes.</td></tr>
 </table>
 
 ---

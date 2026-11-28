@@ -85,27 +85,6 @@ Hazel が役に立ったら、開発の支援をご検討ください。皆さ�
 </div>
 
 ---
-## ✨ Hazel を選ぶ理由
-
-Hazel は **yt-dlp** & **gallery-dl** を搭載した無料・オープンソースの Android 向けダウンローダーです。**1500 以上のサイト**から動画、音楽、プレイリストを、広告なし・追跡なし・アカウント不要で保存できます。
-
-<table>
-  <tr><th width="50%" align="left">📥 ダウンロード</th><th width="50%" align="left">🔍 検索と再生</th></tr>
-  <tr><td><b>1500 以上のサイト：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud など<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">多数</a>。</td><td><b>検索：</b>YouTube、YouTube Music、SoundCloud、Bandcamp に対応。候補表示も任意で利用可能。</td></tr>
-  <tr><td><b>一括：</b>リンク 1 つ、複数同時、またはプレイリスト / チャンネル全体。</td><td><b>まず再生：</b>どの結果もカード上でシーク、ダブルタップでスキップ、全画面で再生。</td></tr>
-  <tr><td><b>Hazel Instant：</b>任意のアプリからリンクを共有すると、保存した画質ですぐ開始。</td><td><b>切り抜き：</b>ライブプレビューで選んだ部分だけを保存。クイック、正確、またはダウンロード後にトリミング：ファイル全体を全速で取得し、端末上で切り出します。</td></tr>
-  <tr><td><b>好きな形式：</b>画質、コンテナ、音声トラックを選び、タイトル / メタデータを編集。</td><td><b>ライブ配信：</b>最初から録画、またはプレミア公開を待機。</td></tr>
-  <tr><td><b>画像：</b>Instagram、X、Pinterest、Reddit などの投稿、プロフィール、画像検索。キャプションにも対応。</td><td><b>ログイン：</b>Instagram、YouTube、X などにワンタップでログイン。各アカウントの状態も表示。</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ 処理とダウンロード</th><th width="50%" align="left">🔒 プライバシーとカスタマイズ</th></tr>
-  <tr><td><b>SponsorBlock：</b>スポンサー、イントロなどの区間をカット。</td><td><b>追跡なし：</b>アカウントも解析もなし。シークレットモードと HTTP / SOCKS5 プロキシを内蔵。</td></tr>
-  <tr><td><b>チャプターと字幕：</b>埋め込み、チャプターごとに分割、字幕と音声の言語を選択。</td><td><b>ガラスの見た目：</b>8 種類の透過スタイル、ダーク / ライトテーマ、20 色以上のアクセントカラー。</td></tr>
-  <tr><td><b>バックグラウンド：</b>長時間のダウンロードも通知から一時停止・再開・キャンセル。</td><td><b>エンジン更新：</b>yt-dlp を単独で更新。Stable、Nightly、Master チャンネル。</td></tr>
-  <tr><td><b>速度：</b>デフォルトで無制限、並列フラグメント、任意の上限と Wi-Fi のみモード。</td><td><b>その他：</b>10 以上のアプリ言語、オフライン音声変換、バックアップと復元、設定内検索。</td></tr>
-</table>
-
 ## 📲 スクリーンショット
 
 <table>
@@ -127,6 +106,28 @@ Hazel は **yt-dlp** & **gallery-dl** を搭載した無料・オープンソー
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>ギャラリーのプロフィール</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>ギャラリービューア</b></td>
   </tr>
+</table>
+
+---
+## ✨ Hazel を選ぶ理由
+
+Hazel は **yt-dlp** & **gallery-dl** を搭載した無料・オープンソースの Android 向けダウンローダーです。**1500 以上のサイト**から動画、音楽、プレイリストを、広告なし・追跡なし・アカウント不要で保存できます。
+
+<table>
+  <tr><th width="50%" align="left">📥 ダウンロード</th><th width="50%" align="left">🔍 検索と再生</th></tr>
+  <tr><td><b>1500 以上のサイト：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud など<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">多数</a>。</td><td><b>検索：</b>YouTube、YouTube Music、SoundCloud、Bandcamp に対応。候補表示も任意で利用可能。</td></tr>
+  <tr><td><b>一括：</b>リンク 1 つ、複数同時、またはプレイリスト / チャンネル全体。</td><td><b>まず再生：</b>どの結果もカード上でシーク、ダブルタップでスキップ、全画面で再生。</td></tr>
+  <tr><td><b>Hazel Instant：</b>任意のアプリからリンクを共有すると、保存した画質ですぐ開始。</td><td><b>切り抜き：</b>ライブプレビューで選んだ部分だけを保存。クイック、正確、またはダウンロード後にトリミング：ファイル全体を全速で取得し、端末上で切り出します。</td></tr>
+  <tr><td><b>好きな形式：</b>画質、コンテナ、音声トラックを選び、タイトル / メタデータを編集。</td><td><b>ライブ配信：</b>最初から録画、またはプレミア公開を待機。</td></tr>
+  <tr><td><b>画像：</b>Instagram、X、Pinterest、Reddit などの投稿、プロフィール、画像検索。キャプションにも対応。</td><td><b>ログイン：</b>Instagram、YouTube、X などにワンタップでログイン。各アカウントの状態も表示。</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ 処理とダウンロード</th><th width="50%" align="left">🔒 プライバシーとカスタマイズ</th></tr>
+  <tr><td><b>SponsorBlock：</b>スポンサー、イントロなどの区間をカット。</td><td><b>追跡なし：</b>アカウントも解析もなし。シークレットモードと HTTP / SOCKS5 プロキシを内蔵。</td></tr>
+  <tr><td><b>チャプターと字幕：</b>埋め込み、チャプターごとに分割、字幕と音声の言語を選択。</td><td><b>ガラスの見た目：</b>8 種類の透過スタイル、ダーク / ライトテーマ、20 色以上のアクセントカラー。</td></tr>
+  <tr><td><b>バックグラウンド：</b>長時間のダウンロードも通知から一時停止・再開・キャンセル。</td><td><b>エンジン更新：</b>yt-dlp を単独で更新。Stable、Nightly、Master チャンネル。</td></tr>
+  <tr><td><b>速度：</b>デフォルトで無制限、並列フラグメント、任意の上限と Wi-Fi のみモード。</td><td><b>その他：</b>10 以上のアプリ言語、オフライン音声変換、バックアップと復元、設定内検索。</td></tr>
 </table>
 
 ---

@@ -85,27 +85,6 @@ Si Hazel vous a été utile, pensez à soutenir son développement. Votre soutie
 </div>
 
 ---
-## ✨ Pourquoi choisir Hazel ?
-
-Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dlp** & **gallery-dl**. Enregistrez vidéos, musique et playlists depuis **plus de 1500 sites**, sans publicité, sans pistage et sans compte.
-
-<table>
-  <tr><th width="50%" align="left">📥 Téléchargement</th><th width="50%" align="left">🔍 Recherche et lecture</th></tr>
-  <tr><td><b>Plus de 1500 sites :</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud et <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">plus</a>.</td><td><b>Recherche :</b> YouTube, YouTube Music, SoundCloud ou Bandcamp, avec suggestions facultatives.</td></tr>
-  <tr><td><b>Par lots :</b> un lien, plusieurs à la fois, ou une playlist / chaîne entière.</td><td><b>Lire d'abord :</b> lisez n'importe quel résultat sur sa carte avec barre de progression, double appui pour sauter et plein écran.</td></tr>
-  <tr><td><b>Hazel Instant :</b> partagez un lien depuis n'importe quelle app et le téléchargement démarre à votre qualité enregistrée.</td><td><b>Découper :</b> enregistrez seulement la partie voulue, choisie sur un aperçu en direct. Rapide, précis, ou couper après le téléchargement : le fichier entier à pleine vitesse, coupé sur votre téléphone.</td></tr>
-  <tr><td><b>Votre format :</b> choisissez qualité, conteneur, piste audio, et modifiez titre / métadonnées.</td><td><b>Directs :</b> enregistrez depuis le début, ou attendez une première.</td></tr>
-  <tr><td><b>Images :</b> publications, profils et recherche d’images sur Instagram, X, Pinterest, Reddit et plus, avec les légendes.</td><td><b>Connexion :</b> connexion en un geste à Instagram, YouTube, X et plus, avec l’état de chaque compte.</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ Traitement et téléchargements</th><th width="50%" align="left">🔒 Confidentialité et personnalisation</th></tr>
-  <tr><td><b>SponsorBlock :</b> supprimez sponsors, intros et autres segments.</td><td><b>Aucun pistage :</b> pas de comptes, pas d'analytique. Mode incognito et proxy HTTP / SOCKS5 intégrés.</td></tr>
-  <tr><td><b>Chapitres et sous-titres :</b> intégrez, découpez par chapitre, choisissez les langues de sous-titres et d'audio.</td><td><b>Style verre :</b> 8 styles translucides, thèmes sombre et clair, plus de 20 couleurs d'accent.</td></tr>
-  <tr><td><b>Arrière-plan :</b> longs téléchargements avec pause, reprise et annulation depuis la notification.</td><td><b>Mises à jour du moteur :</b> mettez à jour yt-dlp séparément, canal Stable, Nightly ou Master.</td></tr>
-  <tr><td><b>Vitesse :</b> aucune limite par défaut, fragments parallèles, plafond facultatif et mode Wi-Fi uniquement.</td><td><b>Extras :</b> plus de 10 langues, convertisseur audio hors ligne, sauvegarde et restauration, recherche dans les paramètres.</td></tr>
-</table>
-
 ## 📲 Captures d'écran
 
 <table>
@@ -127,6 +106,28 @@ Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dl
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Profils galerie</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Visionneuse galerie</b></td>
   </tr>
+</table>
+
+---
+## ✨ Pourquoi choisir Hazel ?
+
+Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dlp** & **gallery-dl**. Enregistrez vidéos, musique et playlists depuis **plus de 1500 sites**, sans publicité, sans pistage et sans compte.
+
+<table>
+  <tr><th width="50%" align="left">📥 Téléchargement</th><th width="50%" align="left">🔍 Recherche et lecture</th></tr>
+  <tr><td><b>Plus de 1500 sites :</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud et <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">plus</a>.</td><td><b>Recherche :</b> YouTube, YouTube Music, SoundCloud ou Bandcamp, avec suggestions facultatives.</td></tr>
+  <tr><td><b>Par lots :</b> un lien, plusieurs à la fois, ou une playlist / chaîne entière.</td><td><b>Lire d'abord :</b> lisez n'importe quel résultat sur sa carte avec barre de progression, double appui pour sauter et plein écran.</td></tr>
+  <tr><td><b>Hazel Instant :</b> partagez un lien depuis n'importe quelle app et le téléchargement démarre à votre qualité enregistrée.</td><td><b>Découper :</b> enregistrez seulement la partie voulue, choisie sur un aperçu en direct. Rapide, précis, ou couper après le téléchargement : le fichier entier à pleine vitesse, coupé sur votre téléphone.</td></tr>
+  <tr><td><b>Votre format :</b> choisissez qualité, conteneur, piste audio, et modifiez titre / métadonnées.</td><td><b>Directs :</b> enregistrez depuis le début, ou attendez une première.</td></tr>
+  <tr><td><b>Images :</b> publications, profils et recherche d’images sur Instagram, X, Pinterest, Reddit et plus, avec les légendes.</td><td><b>Connexion :</b> connexion en un geste à Instagram, YouTube, X et plus, avec l’état de chaque compte.</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ Traitement et téléchargements</th><th width="50%" align="left">🔒 Confidentialité et personnalisation</th></tr>
+  <tr><td><b>SponsorBlock :</b> supprimez sponsors, intros et autres segments.</td><td><b>Aucun pistage :</b> pas de comptes, pas d'analytique. Mode incognito et proxy HTTP / SOCKS5 intégrés.</td></tr>
+  <tr><td><b>Chapitres et sous-titres :</b> intégrez, découpez par chapitre, choisissez les langues de sous-titres et d'audio.</td><td><b>Style verre :</b> 8 styles translucides, thèmes sombre et clair, plus de 20 couleurs d'accent.</td></tr>
+  <tr><td><b>Arrière-plan :</b> longs téléchargements avec pause, reprise et annulation depuis la notification.</td><td><b>Mises à jour du moteur :</b> mettez à jour yt-dlp séparément, canal Stable, Nightly ou Master.</td></tr>
+  <tr><td><b>Vitesse :</b> aucune limite par défaut, fragments parallèles, plafond facultatif et mode Wi-Fi uniquement.</td><td><b>Extras :</b> plus de 10 langues, convertisseur audio hors ligne, sauvegarde et restauration, recherche dans les paramètres.</td></tr>
 </table>
 
 ---

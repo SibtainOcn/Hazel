@@ -85,27 +85,6 @@ Se Hazel ti è stato utile, valuta di sostenerne lo sviluppo. Il tuo supporto mi
 </div>
 
 ---
-## ✨ Perché scegliere Hazel?
-
-Hazel è un downloader gratuito e open source per Android basato su **yt-dlp** & **gallery-dl**. Salva video, musica e playlist da **oltre 1500 siti** senza pubblicità, senza tracciamento e senza account.
-
-<table>
-  <tr><th width="50%" align="left">📥 Download</th><th width="50%" align="left">🔍 Cerca e riproduci</th></tr>
-  <tr><td><b>Oltre 1500 siti:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud e <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">altri</a>.</td><td><b>Ricerca:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con suggerimenti facoltativi.</td></tr>
-  <tr><td><b>In blocco:</b> un link, molti insieme o un'intera playlist / canale.</td><td><b>Prima riproduci:</b> guarda qualsiasi risultato sulla sua scheda con barra di avanzamento, doppio tocco per saltare e schermo intero.</td></tr>
-  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo. Veloce, preciso o taglia dopo il download: l'intero file alla massima velocità, tagliato sul telefono.</td></tr>
-  <tr><td><b>Il tuo formato:</b> scegli qualità, contenitore, traccia audio e modifica titolo / metadati.</td><td><b>Dirette:</b> registra dall'inizio o attendi una premiere.</td></tr>
-  <tr><td><b>Immagini:</b> post, profili e ricerca di immagini su Instagram, X, Pinterest, Reddit e altri, con le didascalie.</td><td><b>Accesso:</b> accesso con un tocco a Instagram, YouTube, X e altri, con lo stato di ogni account.</td></tr>
-</table>
-
-<table>
-  <tr><th width="50%" align="left">⚙️ Elaborazione e download</th><th width="50%" align="left">🔒 Privacy e personalizzazione</th></tr>
-  <tr><td><b>SponsorBlock:</b> rimuovi sponsor, intro e altri segmenti.</td><td><b>Nessun tracciamento:</b> niente account, niente analisi. Incognito e proxy HTTP / SOCKS5 integrati.</td></tr>
-  <tr><td><b>Capitoli e sottotitoli:</b> incorpora, dividi per capitolo, scegli le lingue di sottotitoli e audio.</td><td><b>Stile vetro:</b> 8 stili traslucidi, temi scuro e chiaro, oltre 20 colori d'accento.</td></tr>
-  <tr><td><b>In background:</b> download lunghi con pausa, ripresa e annullamento dalla notifica.</td><td><b>Aggiornamenti del motore:</b> aggiorna yt-dlp separatamente, canale Stable, Nightly o Master.</td></tr>
-  <tr><td><b>Velocità:</b> nessun limite predefinito, frammenti paralleli, limite facoltativo e modalità solo Wi-Fi.</td><td><b>Extra:</b> oltre 10 lingue, convertitore audio offline, backup e ripristino, ricerca nelle impostazioni.</td></tr>
-</table>
-
 ## 📲 Screenshot
 
 <table>
@@ -127,6 +106,28 @@ Hazel è un downloader gratuito e open source per Android basato su **yt-dlp** &
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Profili galleria</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Visualizzatore galleria</b></td>
   </tr>
+</table>
+
+---
+## ✨ Perché scegliere Hazel?
+
+Hazel è un downloader gratuito e open source per Android basato su **yt-dlp** & **gallery-dl**. Salva video, musica e playlist da **oltre 1500 siti** senza pubblicità, senza tracciamento e senza account.
+
+<table>
+  <tr><th width="50%" align="left">📥 Download</th><th width="50%" align="left">🔍 Cerca e riproduci</th></tr>
+  <tr><td><b>Oltre 1500 siti:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud e <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">altri</a>.</td><td><b>Ricerca:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con suggerimenti facoltativi.</td></tr>
+  <tr><td><b>In blocco:</b> un link, molti insieme o un'intera playlist / canale.</td><td><b>Prima riproduci:</b> guarda qualsiasi risultato sulla sua scheda con barra di avanzamento, doppio tocco per saltare e schermo intero.</td></tr>
+  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo. Veloce, preciso o taglia dopo il download: l'intero file alla massima velocità, tagliato sul telefono.</td></tr>
+  <tr><td><b>Il tuo formato:</b> scegli qualità, contenitore, traccia audio e modifica titolo / metadati.</td><td><b>Dirette:</b> registra dall'inizio o attendi una premiere.</td></tr>
+  <tr><td><b>Immagini:</b> post, profili e ricerca di immagini su Instagram, X, Pinterest, Reddit e altri, con le didascalie.</td><td><b>Accesso:</b> accesso con un tocco a Instagram, YouTube, X e altri, con lo stato di ogni account.</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ Elaborazione e download</th><th width="50%" align="left">🔒 Privacy e personalizzazione</th></tr>
+  <tr><td><b>SponsorBlock:</b> rimuovi sponsor, intro e altri segmenti.</td><td><b>Nessun tracciamento:</b> niente account, niente analisi. Incognito e proxy HTTP / SOCKS5 integrati.</td></tr>
+  <tr><td><b>Capitoli e sottotitoli:</b> incorpora, dividi per capitolo, scegli le lingue di sottotitoli e audio.</td><td><b>Stile vetro:</b> 8 stili traslucidi, temi scuro e chiaro, oltre 20 colori d'accento.</td></tr>
+  <tr><td><b>In background:</b> download lunghi con pausa, ripresa e annullamento dalla notifica.</td><td><b>Aggiornamenti del motore:</b> aggiorna yt-dlp separatamente, canale Stable, Nightly o Master.</td></tr>
+  <tr><td><b>Velocità:</b> nessun limite predefinito, frammenti paralleli, limite facoltativo e modalità solo Wi-Fi.</td><td><b>Extra:</b> oltre 10 lingue, convertitore audio offline, backup e ripristino, ricerca nelle impostazioni.</td></tr>
 </table>
 
 ---
