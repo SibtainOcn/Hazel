@@ -3,14 +3,11 @@
 (function () {
   var root = document.documentElement;
 
-  // ── Theme: auto, light, dark. Remembered on this device when storage allows. ──
-  var order = ['light', 'dark', 'auto'];
-  var labels = { auto: 'Theme: match system', light: 'Theme: light', dark: 'Theme: dark' };
-  function current() { return root.getAttribute('data-theme') || 'auto'; }
-  // Dark unless the visitor picked something else.
-  if (!root.hasAttribute('data-theme') && !root.hasAttribute('data-theme-auto')) root.setAttribute('data-theme', 'dark');
+  // ── Theme: dark or light, dark by default. Remembered on this device when storage allows. ──
+  var labels = { light: 'Theme: light', dark: 'Theme: dark' };
+  function current() { return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
   function apply(t) {
-    if (t === 'auto') { root.removeAttribute('data-theme'); root.setAttribute('data-theme-auto', ''); } else { root.removeAttribute('data-theme-auto'); root.setAttribute('data-theme', t); }
+    root.setAttribute('data-theme', t);
     document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
       b.setAttribute('aria-label', labels[t]); b.title = labels[t];
     });
@@ -18,7 +15,7 @@
   apply(current());
   document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var next = order[(order.indexOf(current()) + 1) % order.length];
+      var next = current() === 'dark' ? 'light' : 'dark';
       apply(next);
       try { localStorage.setItem('hazel-theme', next); } catch (e) {}
     });
@@ -343,8 +340,6 @@
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
     });
   });
-  // The hero's phones are decoration to screen readers until now; they open the viewer too.
-  document.querySelectorAll('.stage[aria-hidden]').forEach(function (s) { s.removeAttribute('aria-hidden'); });
 
   box.querySelector('.v-close').addEventListener('click', close);
   box.querySelector('.v-prev').addEventListener('click', function () { show(index - 1); });

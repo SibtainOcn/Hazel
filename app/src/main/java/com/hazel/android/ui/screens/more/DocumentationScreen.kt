@@ -28,12 +28,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -138,6 +141,7 @@ fun DocumentationScreen(
     onOpen: (DocPage) -> Unit
 ) {
     var whatsNewVisible by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             DocsHeader(title = stringResource(R.string.docs_title), onBack = onBack)
@@ -153,7 +157,10 @@ fun DocumentationScreen(
                 val row: @Composable () -> Unit = { DocRow(page.labelRes, page.icon) { onOpen(page) } }
                 if (page != DocPage.CHANGELOG) listOf(row)
                 else listOf(row, { DocRow(R.string.docs_whats_new, Icons.Filled.NewReleases) { whatsNewVisible = true } })
-            })
+            } + listOf<@Composable () -> Unit>(
+                { DocRow(R.string.docs_sites_ytdlp, Icons.Filled.VideoLibrary, external = true) { openOutside(context, YTDLP_SITES) } },
+                { DocRow(R.string.docs_sites_gallery_dl, Icons.Filled.PhotoLibrary, external = true) { openOutside(context, GALLERY_DL_SITES) } }
+            ))
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -162,13 +169,18 @@ fun DocumentationScreen(
 }
 
 @Composable
-private fun DocRow(@androidx.annotation.StringRes label: Int, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+private fun DocRow(
+    @androidx.annotation.StringRes label: Int,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    external: Boolean = false,
+    onClick: () -> Unit
+) {
     ListItem(
         headlineContent = { Text(stringResource(label)) },
         leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
         trailingContent = {
             Icon(
-                Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                if (external) Icons.AutoMirrored.Filled.OpenInNew else Icons.AutoMirrored.Filled.ArrowForwardIos, null,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 modifier = Modifier.size(16.dp)
             )
@@ -428,5 +440,11 @@ private fun isOurs(url: String): Boolean =
 private fun openOutside(context: android.content.Context, url: String) {
     runCatching {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }.onFailure {
+        android.widget.Toast.makeText(context, R.string.sheet_link_open_failed, android.widget.Toast.LENGTH_SHORT).show()
     }
 }
+
+/** The engines' own lists of the sites they read; other projects' pages, so they open in the browser. */
+private const val YTDLP_SITES = "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+private const val GALLERY_DL_SITES = "https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md"

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Documentation: yt-dlp and gallery-dl supported sites rows.
+
 ### Fixed
 - Tapping a failed link no longer stacks an old failure, the sheet and two sign-in dialogs on top of each other.
 - Queue tabs use the same badge shape for their counts.

@@ -40,8 +40,6 @@ GITHUB = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path
           '5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>')
 
 THEME = ('<button class="icon-btn" type="button" data-theme-toggle aria-label="Theme">'
-         '<svg class="theme-icon auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
-         '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none"/></svg>'
          '<svg class="theme-icon light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">'
          '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>'
          '<svg class="theme-icon dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">'
@@ -349,7 +347,7 @@ def page(name, title, description, active, extra_css, facts):
 <meta name="description" content="{description}">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="assets/Haze.svg">
-<script>try{{var t=localStorage.getItem('hazel-theme'),r=document.documentElement;if(t==='light')r.setAttribute('data-theme','light');else if(t==='auto'){{r.removeAttribute('data-theme');r.setAttribute('data-theme-auto','')}}}}catch(e){{}}</script>
+<script>try{{var t=localStorage.getItem('hazel-theme'),r=document.documentElement;if(t==='light')r.setAttribute('data-theme','light')}}catch(e){{}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

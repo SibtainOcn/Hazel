@@ -303,6 +303,8 @@
     <string name="docs_changelog">Perubahan</string>
     <string name="docs_whats_new">Yang baru</string>
     <string name="docs_license">Lisensi</string>
+    <string name="docs_sites_ytdlp">Situs yang didukung yt-dlp</string>
+    <string name="docs_sites_gallery_dl">Situs yang didukung gallery-dl</string>
     <string name="docs_open_in_browser">Buka di browser</string>
     <string name="docs_error_title">Halaman ini tidak dapat dimuat</string>
     <string name="docs_error_body">Periksa koneksi lalu coba lagi.</string>
